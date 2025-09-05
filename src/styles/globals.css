@@ -1,0 +1,762 @@
+@config "../../tailwind.config.ts";
+@import "tailwindcss";
+
+/* =========================
+   PERFORMANCE OPTIMIZATIONS
+   ========================= */
+
+/* Hardware acceleration for smooth animations */
+* {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+/* Smooth scrolling with performance optimization */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
+/* GPU acceleration for transforms */
+.transform,
+.transition-transform,
+.hover\\:scale-105:hover,
+.hover\\:scale-110:hover,
+.group:hover .group-hover\\:scale-105,
+[class*="scale-"],
+[class*="rotate-"],
+[class*="translate-"] {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimized touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================
+   THEME TOKENS (Enhanced)
+   ========================= */
+:root {
+  /* Panels (left/right cards) */
+  --panel-bg: #ffffff;
+  --panel-fg: #0f172a;
+  --panel-muted: #64748b;
+  --panel-border: #e5e7eb;
+
+  --chip-bg: rgba(255, 255, 255, 0.9);
+  --chip-fg: #111827;
+
+  /* Code/pseudocode highlight */
+  --code-active-bg: #fff7cc;
+  --code-active-border: #fde68a;
+
+  /* Canvas (center visualizer) */
+  --canvas-bg: #ffffff;
+  --canvas-fg: #0f172a; /* axis/label text */
+  --canvas-grid: rgba(0, 0, 0, 0.06);
+  --canvas-axis: rgba(0, 0, 0, 0.9);
+  --canvas-border: rgba(0, 0, 0, 0.12);
+  --canvas-chip-bg: rgba(255, 255, 255, 0.9);
+  --canvas-chip-fg: #111827;
+  --canvas-status-bg: rgba(255, 255, 255, 0.85);
+
+  /* Enhanced animations with 60fps target */
+  --spring-easing: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --bounce-easing: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --fast-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Autofill fix */
+  --input-bg: #ffffff;
+  --input-fg: #0f172a;
+}
+
+.dark {
+  --panel-bg: #0b1220;
+  --panel-fg: #e5e7eb;
+  --panel-muted: #cbd5e1;
+  --panel-border: #334155;
+
+  --chip-bg: rgba(2, 6, 23, 0.85);
+  --chip-fg: #e5e7eb;
+
+  --code-active-bg: rgba(250, 204, 21, 0.12);
+  --code-active-border: rgba(250, 204, 21, 0.35);
+
+  --canvas-bg: #0b1220;
+  --canvas-fg: #e5e7eb;
+  --canvas-grid: rgba(255, 255, 255, 0.1);
+  --canvas-axis: rgba(255, 255, 255, 0.9);
+  --canvas-border: rgba(255, 255, 255, 0.14);
+  --canvas-chip-bg: rgba(2, 6, 23, 0.85);
+  --canvas-chip-fg: #e5e7eb;
+  --canvas-status-bg: rgba(2, 6, 23, 0.75);
+
+  --input-bg: #0b1220;
+  --input-fg: #e5e7eb;
+}
+
+/* Chrome/Safari autofill theme parity */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--input-fg) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* =========================
+   ENHANCED GLOBAL HELPERS
+   ========================= */
+.no-select,
+.no-select * {
+  user-select: none;
+}
+
+/* Enhanced scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced body setup - Fixed for proper scrolling */
+html,
+body {
+  min-height: 100dvh; /* Changed from height to min-height */
+}
+
+#root {
+  min-height: 100dvh; /* Changed from height to min-height */
+  overflow-y: auto; /* Allow vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+body {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Enhanced typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply text-gray-800 dark:text-slate-100;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+/* Enhanced transitions for better UX */
+* {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke,
+    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: var(--smooth-easing);
+  transition-duration: 200ms;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Enhanced focus styles */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Hide scrollbars in the canvas unless truly overflowing */
+.viz-canvas {
+  overflow: hidden;
+}
+
+.viz-surface:fullscreen,
+.viz-shell:fullscreen,
+.viz-surface:-webkit-full-screen,
+.viz-shell:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--canvas-bg);
+  color: var(--canvas-fg);
+}
+.viz-canvas,
+.viz-canvas * {
+  cursor: inherit;
+}
+/* Optional: make the fullscreen backdrop match too */
+.viz-surface:fullscreen::backdrop,
+.viz-shell:fullscreen::backdrop,
+.viz-surface:-webkit-full-screen::backdrop,
+.viz-shell:-webkit-full-screen::backdrop {
+  background-color: var(--canvas-bg);
+}
+
+/* =========================
+   ENHANCED CODE BLOCKS
+   ========================= */
+.code {
+  @apply font-mono text-sm;
+}
+.codeblock {
+  font-family:
+    "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  color: var(--panel-fg);
+  background: transparent;
+  line-height: 1.6;
+}
+.code-nowrap .code {
+  white-space: pre;
+}
+.code-wrap .code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.code-row {
+  display: grid;
+  grid-template-columns: 3ch 1fr;
+  gap: 0.75rem;
+  padding: 2px 10px;
+  transition: all 0.2s var(--smooth-easing);
+}
+.code-row .ln {
+  color: var(--panel-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.code-row.active {
+  background: var(--code-active-bg);
+  outline: 1px solid var(--code-active-border);
+  border-radius: 0.25rem;
+  transform: translateX(4px);
+}
+
+/* =========================
+   ENHANCED PANELS & FORM CONTROLS
+   ========================= */
+.card {
+  @apply rounded-xl border p-3 shadow-sm;
+  background: var(--panel-bg);
+  color: var(--panel-fg);
+  border-color: var(--panel-border);
+  transition: all 0.3s var(--smooth-easing);
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+@layer components {
+  .ui-input {
+    @apply w-full rounded-xl border px-3 py-2 shadow-sm
+           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
+           transition-all duration-200;
+  }
+
+  .ui-input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  }
+
+  .ui-select {
+    @apply rounded-xl border px-3 py-2
+           bg-white text-slate-900 border-slate-300
+           focus:outline-none focus:ring-2 focus:ring-primary-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700
+           transition-all duration-200;
+  }
+
+  .ui-textarea {
+    @apply w-full rounded-xl border px-3 py-2 shadow-sm
+           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
+           min-h-[92px] transition-all duration-200;
+  }
+
+  /* Enhanced buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium text-white
+           bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500
+           transition-all duration-200 transform hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium
+           bg-white text-slate-900 border border-slate-300 hover:bg-slate-50
+           dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700
+           transition-all duration-200 transform hover:scale-105 active:scale-95;
+  }
+
+  /* Icon buttons (copy/paste etc.) */
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded border shadow-sm
+           w-8 h-8 text-slate-700 bg-white hover:bg-slate-50 border-slate-300
+           transition-all duration-200 transform hover:scale-110 active:scale-95;
+  }
+  .dark .icon-btn {
+    @apply text-slate-100 bg-slate-900 hover:bg-slate-800 border-slate-700;
+  }
+
+  /* Segmented choices (Bars/Dots/Table, Coloring modes) */
+  .seg-btn {
+    @apply px-2.5 py-1 rounded-lg border text-sm transition-all duration-200;
+    background: var(--panel-bg);
+    color: var(--panel-fg);
+    border-color: var(--panel-border);
+  }
+  .seg-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .seg-btn.on {
+    @apply font-semibold;
+    background: #eef2ff;
+    color: #3730a3;
+    border-color: #c7d2fe;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+  }
+  .dark .seg-btn.on {
+    background: rgba(99, 102, 241, 0.15);
+    color: #c7d2fe;
+    border-color: rgba(99, 102, 241, 0.35);
+  }
+}
+
+/* Enhanced resizers */
+.resizable-y {
+  resize: vertical;
+  overflow: auto;
+  min-height: 120px;
+  max-height: 50vh;
+  transition: all 0.3s var(--smooth-easing);
+}
+.resizable-x {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 280px;
+  transition: all 0.3s var(--smooth-easing);
+}
+
+/* Chips/badges inside panels */
+.chip {
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  border-color: var(--panel-border);
+  transition: all 0.2s var(--smooth-easing);
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced dark mode styles */
+.dark .card {
+  color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dark .panel-title {
+  color: #f8fafc;
+}
+.dark .panel-muted {
+  color: #cbd5e1;
+}
+
+/* Modal content helpers */
+.dark .modal-body h1,
+.dark .modal-body h2,
+.dark .modal-body h3 {
+  color: #f1f5f9;
+}
+.dark .modal-body p,
+.dark .modal-body li,
+.dark .modal-body span {
+  color: #e5e7eb;
+}
+.dark .modal-body small {
+  color: #cbd5e1;
+}
+.dark .modal-body a {
+  color: #93c5fd;
+  transition: color 0.2s var(--smooth-easing);
+}
+.dark .modal-body a:hover {
+  color: #dbeafe;
+}
+.dark .modal-body code {
+  color: #fde68a;
+}
+
+/* Enhanced markdown styles */
+.markdown a {
+  color: #2563eb;
+  text-decoration: underline;
+  transition: color 0.2s var(--smooth-easing);
+}
+.markdown a:hover {
+  color: #1d4ed8;
+}
+.dark .markdown a {
+  color: #93c5fd;
+}
+.dark .markdown a:hover {
+  color: #dbeafe;
+}
+.markdown .katex {
+  font-size: 1em;
+}
+
+/* =========================
+   RESPONSIVE UTILITIES
+   ========================= */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-full {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .mobile-px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .desktop-show {
+    display: block !important;
+  }
+}
+
+/* =========================
+   LOADING STATES & SKELETONS
+   ========================= */
+.skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+}
+
+/* =========================
+   ACCESSIBILITY ENHANCEMENTS
+   ========================= */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: 2px;
+  }
+
+  .ui-input,
+  .ui-select,
+  .ui-textarea {
+    border-width: 2px;
+  }
+}
+
+/* Chrome/Safari autofill theme parity */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--input-fg) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* =========================
+   GLOBAL HELPERS
+   ========================= */
+.no-select,
+.no-select * {
+  user-select: none;
+}
+
+h1,
+h2,
+h3 {
+  @apply text-gray-800 dark:text-slate-100;
+}
+
+/* Hide scrollbars in the canvas unless truly overflowing */
+.viz-canvas {
+  overflow: hidden;
+}
+
+.viz-surface:fullscreen,
+.viz-shell:fullscreen,
+.viz-surface:-webkit-full-screen,
+.viz-shell:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--canvas-bg);
+  color: var(--canvas-fg);
+}
+.viz-canvas,
+.viz-canvas * {
+  cursor: inherit;
+}
+/* Optional: make the fullscreen backdrop match too */
+.viz-surface:fullscreen::backdrop,
+.viz-shell:fullscreen::backdrop,
+.viz-surface:-webkit-full-screen::backdrop,
+.viz-shell:-webkit-full-screen::backdrop {
+  background-color: var(--canvas-bg);
+}
+
+/* =========================
+   CODE BLOCKS (one version)
+   ========================= */
+.code {
+  @apply font-mono text-sm;
+}
+.codeblock {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 13px;
+  color: var(--panel-fg);
+  background: transparent;
+}
+.code-nowrap .code {
+  white-space: pre;
+}
+.code-wrap .code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.code-row {
+  display: grid;
+  grid-template-columns: 3ch 1fr;
+  gap: 0.75rem;
+  padding: 2px 10px;
+}
+.code-row .ln {
+  color: var(--panel-muted);
+  text-align: right;
+}
+.code-row.active {
+  background: var(--code-active-bg);
+  outline: 1px solid var(--code-active-border);
+}
+
+/* =========================
+   PANELS & FORM CONTROLS
+   ========================= */
+.card {
+  @apply rounded-xl border p-3 shadow-sm;
+  background: var(--panel-bg);
+  color: var(--panel-fg);
+  border-color: var(--panel-border);
+}
+
+@layer components {
+  .ui-input {
+    @apply w-full rounded-xl border px-3 py-2 shadow-sm
+           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400;
+  }
+  .ui-select {
+    @apply rounded-xl border px-3 py-2
+           bg-white text-slate-900 border-slate-300
+           focus:outline-none focus:ring-2 focus:ring-indigo-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700;
+  }
+  /* NOTE: can't @apply .ui-input; @apply only accepts utilities */
+  .ui-textarea {
+    @apply w-full rounded-xl border px-3 py-2 shadow-sm
+           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
+           min-h-[92px];
+  }
+
+  /* Icon buttons (copy/paste etc.) */
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded border shadow-sm
+           w-8 h-8 text-slate-700 bg-white hover:bg-slate-50 border-slate-300;
+  }
+  .dark .icon-btn {
+    @apply text-slate-100 bg-slate-900 hover:bg-slate-800 border-slate-700;
+  }
+
+  /* Segmented choices (Bars/Dots/Table, Coloring modes) */
+  .seg-btn {
+    @apply px-2.5 py-1 rounded-lg border text-sm transition-colors;
+    background: var(--panel-bg);
+    color: var(--panel-fg);
+    border-color: var(--panel-border);
+  }
+  .seg-btn.on {
+    @apply font-semibold;
+    background: #eef2ff;
+    color: #3730a3;
+    border-color: #c7d2fe;
+  }
+  .dark .seg-btn.on {
+    background: rgba(99, 102, 241, 0.15);
+    color: #c7d2fe;
+    border-color: rgba(99, 102, 241, 0.35);
+  }
+}
+
+/* Resizers */
+.resizable-y {
+  resize: vertical;
+  overflow: auto;
+  min-height: 120px;
+  max-height: 50vh;
+}
+.resizable-x {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 280px;
+}
+
+/* Chips/badges inside panels */
+.chip {
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  border-color: var(--panel-border);
+}
+/* styles/typography-dark.css */
+
+/* Stronger defaults in dark mode */
+.dark .card {
+  color: #e5e7eb;
+} /* slate-200-ish */
+.dark .panel-title {
+  color: #f8fafc;
+} /* slate-50 */
+.dark .panel-muted {
+  color: #cbd5e1;
+} /* slate-300 */
+
+/* Modal content helpers (applies to children placed inside the modal) */
+.dark .modal-body h1,
+.dark .modal-body h2,
+.dark .modal-body h3 {
+  color: #f1f5f9;
+} /* slate-100/200 edge */
+.dark .modal-body p,
+.dark .modal-body li,
+.dark .modal-body span {
+  color: #e5e7eb;
+} /* slate-200 */
+.dark .modal-body small {
+  color: #cbd5e1;
+} /* slate-300 */
+.dark .modal-body a {
+  color: #93c5fd;
+} /* sky-300 */
+.dark .modal-body code {
+  color: #fde68a;
+} /* amber-200 for inline code */
+
+/* Markdown tweaks */
+.markdown a {
+  text-decoration: underline;
+}
+.dark .markdown a {
+  color: #93c5fd;
+} /* sky-300 */
+.markdown .katex {
+  font-size: 1em;
+} /* keep math inline sized */
+
+/* =========================
+   CANVAS SKIN
+   ========================= */
+/* Applied by the component inline, these tokens ensure dark/light parity: */
+/* Removed global overflow:hidden that was preventing scrolling
+html,
+body,
+#root {
+  height: 100dvh;
+  overflow: hidden; 
+}
+*/

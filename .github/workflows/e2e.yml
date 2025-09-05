@@ -1,0 +1,64 @@
+name: E2E
+
+on:
+  push:
+    branches: ["**"] # run on every branch
+    tags: ["*"] # (optional) run on tags too
+  pull_request:
+    branches: ["**"] # run on PRs to any branch
+  workflow_dispatch: # manual run button
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version # falls back to latest LTS if file missing
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Installs Playwright browsers + required system deps on Linux
+      - name: Install Playwright
+        uses: microsoft/playwright-github-action@v1
+
+      # Runs tests; relies on your playwright.config.ts "webServer" to build+preview
+      - name: Run Playwright tests
+        env:
+          CI: true
+        run: npm run test:e2e
+
+      # Always upload the HTML report (and any traces/videos on failure)
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+      # (Optional) also upload raw test results & caches for debugging
+      - name: Upload extra artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-extras
+          path: |
+            test-results/**
+            **/playwright/.cache/**
+          if-no-files-found: ignore

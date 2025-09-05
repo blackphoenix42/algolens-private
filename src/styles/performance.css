@@ -1,0 +1,131 @@
+/* Custom styles for AlgoLens components */
+
+/* Progress bar animation */
+.progress-bar {
+  width: 0%;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-bar[data-progress] {
+  animation: progressFill 0.3s ease-out forwards;
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: attr(data-progress 0%);
+  }
+}
+
+/* Performance monitor specific styles */
+.performance-progress-fps-excellent {
+  width: 85%;
+}
+
+.performance-progress-fps-good {
+  width: 50%;
+}
+
+.performance-progress-fps-poor {
+  width: 20%;
+}
+
+.performance-progress-lcp-excellent {
+  width: 20%;
+}
+
+.performance-progress-lcp-good {
+  width: 50%;
+}
+
+.performance-progress-lcp-poor {
+  width: 80%;
+}
+
+.performance-progress-cls-excellent {
+  width: 20%;
+}
+
+.performance-progress-cls-good {
+  width: 50%;
+}
+
+.performance-progress-cls-poor {
+  width: 80%;
+}
+
+.performance-progress-memory-excellent {
+  width: 30%;
+}
+
+.performance-progress-memory-good {
+  width: 60%;
+}
+
+.performance-progress-memory-poor {
+  width: 90%;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus management */
+.focus-ring {
+  @apply ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800;
+}
+
+/* Animation performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* GPU acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Performance-optimized animations */
+.animate-optimized {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar,
+  .animate-optimized,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .progress-bar {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .performance-monitor {
+    color-scheme: dark;
+  }
+}
