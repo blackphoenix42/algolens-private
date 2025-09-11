@@ -1,0 +1,113 @@
+name: "📚 Documentation Issue"
+description: Report an issue with documentation, examples, or guides
+title: "[docs]: <short summary>"
+labels: ["documentation", "needs triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve AlgoLens documentation!
+
+        This includes:
+        - README files
+        - Code comments
+        - API documentation
+        - Examples
+        - Architecture docs
+        - Contributing guidelines
+
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Have you checked for existing issues?
+      options:
+        - label: I searched existing **issues** and **discussions** and this is not a duplicate.
+          required: true
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation type
+      options:
+        - README.md
+        - API documentation
+        - Code comments
+        - Examples/demos
+        - Contributing guide
+        - Architecture docs (ADR)
+        - Setup/installation guide
+        - Changelog
+        - JSDoc/TypeScript definitions
+        - Website content
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue type
+      options:
+        - Missing information
+        - Incorrect/outdated information
+        - Confusing/unclear explanation
+        - Broken links
+        - Formatting issues
+        - Typos/grammar
+        - Missing examples
+        - Code examples don't work
+        - Translation issues
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link or file path to the problematic documentation
+      placeholder: "https://github.com/blackphoenix42/AlgoLens/blob/master/README.md#installation or src/components/README.md"
+    validations:
+      required: false
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current content (if applicable)
+      description: Copy the problematic text or describe what's currently there
+      render: markdown
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: What's the problem?
+      description: Describe what's wrong, missing, or confusing about the current documentation
+      placeholder: |
+        Example: "The installation section doesn't mention that Node.js 18+ is required, and the npm install command fails on older versions."
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested improvement
+      description: How should this be fixed or improved? Provide specific suggestions if possible.
+      placeholder: |
+        Example: "Add a prerequisites section mentioning Node.js 18+ requirement, and include troubleshooting steps for common installation issues."
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Screenshots, examples, or any other relevant information
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to help fix this documentation issue if guidance is provided.
+          required: false

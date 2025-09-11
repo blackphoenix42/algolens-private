@@ -1,0 +1,87 @@
+name: "❓ Question"
+description: Ask a question about using AlgoLens or need help with implementation
+title: "[question]: <short summary>"
+labels: ["question", "help wanted"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in AlgoLens!
+
+        Before asking a question, please:
+        - Check the [documentation](https://github.com/blackphoenix42/AlgoLens/blob/master/README.md)
+        - Search existing issues and discussions
+        - Look at the [examples](https://algolens.app)
+
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Have you checked existing resources?
+      options:
+        - label: I searched existing **issues** and **discussions** for similar questions.
+          required: true
+        - label: I checked the documentation and examples.
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question category
+      options:
+        - General usage
+        - Algorithm implementation
+        - Canvas rendering
+        - UI/UX customization
+        - Performance optimization
+        - Integration with other tools
+        - Contributing to the project
+        - Build/deployment issues
+        - Accessibility features
+        - Internationalization (i18n)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: Please be as specific as possible. Include context about what you're trying to achieve.
+      placeholder: |
+        Example: "I'm trying to add a custom sorting algorithm to AlgoLens. I've looked at the existing sorting algorithms in src/algorithms/sorting/, but I'm not sure how to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted-solutions
+    attributes:
+      label: What have you tried?
+      description: Describe any approaches you've attempted or research you've done.
+      placeholder: |
+        Example: "I tried copying the bubble sort implementation and modifying it, but..."
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Include version info, browser, OS, etc. if your question is environment-specific.
+      placeholder: |
+        - AlgoLens version:
+        - Browser:
+        - OS:
+        - Node.js version:
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Any other information that might be helpful.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to help implement this feature or fix if guidance is provided.
+          required: false

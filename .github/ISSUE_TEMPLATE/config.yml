@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🗣️ Discussions
+    url: https://github.com/blackphoenix42/AlgoLens/discussions
+    about: Ask questions, share ideas, and discuss AlgoLens with the community
+  - name: 📖 Documentation
+    url: https://github.com/blackphoenix42/AlgoLens#readme
+    about: Read the project documentation and setup guide
+  - name: 🔒 Security Issues
+    url: https://github.com/blackphoenix42/AlgoLens/security/advisories/new
+    about: Report security vulnerabilities privately

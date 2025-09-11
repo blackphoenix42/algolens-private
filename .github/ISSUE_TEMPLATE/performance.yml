@@ -1,0 +1,133 @@
+name: "🐌 Performance Issue"
+description: Report performance problems with AlgoLens
+title: "[perf]: <short summary>"
+labels: ["performance", "needs triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us optimize AlgoLens performance!
+
+        Please provide detailed information about the performance issue you're experiencing.
+
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Have you checked for existing issues?
+      options:
+        - label: I searched existing **issues** and **discussions** and this is not a duplicate.
+          required: true
+
+  - type: dropdown
+    id: performance-area
+    attributes:
+      label: Performance area
+      multiple: true
+      options:
+        - Initial load time
+        - Canvas rendering
+        - Algorithm execution
+        - UI responsiveness
+        - Memory usage
+        - Animation smoothness
+        - Large dataset handling
+        - Export functionality
+        - Bundle size
+        - Network requests
+        - Worker thread performance
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low - Minor inconvenience
+        - Medium - Noticeable impact on user experience
+        - High - Significantly impacts usability
+        - Critical - Makes the application unusable
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance-description
+    attributes:
+      label: Describe the performance issue
+      description: What specific performance problem are you experiencing?
+      placeholder: |
+        Example: "When running bubble sort on an array of 10,000 elements, the animation becomes extremely choppy and the browser becomes unresponsive for several seconds."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Detailed steps to reproduce the performance issue
+      placeholder: |
+        1. Go to AlgoLens
+        2. Select Bubble Sort algorithm
+        3. Generate dataset with 10,000 elements
+        4. Click play
+        5. Observe choppy animation and browser freezing
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-performance
+    attributes:
+      label: Expected performance
+      description: What performance would you expect instead?
+      placeholder: |
+        Example: "Smooth animation even with large datasets, or graceful degradation with a warning for very large datasets."
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please provide details about your environment
+      value: |
+        - **Browser**: (e.g., Chrome 118, Firefox 119, Safari 17)
+        - **OS**: (e.g., Windows 11, macOS 14, Ubuntu 22.04)
+        - **Device**: (e.g., Desktop, MacBook Pro M2, iPhone 15)
+        - **RAM**: (e.g., 8GB, 16GB, 32GB)
+        - **AlgoLens URL/Version**: (e.g., https://algolens.app, local dev build)
+        - **Dataset size tested**: (e.g., 1000, 10000, 50000 elements)
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance-metrics
+    attributes:
+      label: Performance metrics (if available)
+      description: Any specific timing, memory usage, or other performance measurements
+      placeholder: |
+        Example:
+        - Load time: 5+ seconds
+        - Memory usage: 2GB+ after running algorithm
+        - FPS drops to <10 during animation
+        - Browser DevTools Performance tab results
+
+  - type: textarea
+    id: browser-console
+    attributes:
+      label: Browser console output
+      description: Any warnings, errors, or performance-related messages in the browser console
+      render: text
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Screenshots, recordings, profiler outputs, or any other relevant information
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to help investigate or fix this performance issue if guidance is provided.
+          required: false
