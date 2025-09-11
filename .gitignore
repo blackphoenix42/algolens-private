@@ -122,7 +122,6 @@ pids/
 
 # Gatsby files
 .cache/
-public/
 
 # Serverless directories
 .serverless/
