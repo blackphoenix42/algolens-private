@@ -6,6 +6,8 @@ import { initReactI18next } from "react-i18next";
 // Import translation files
 import enTranslations from "./en/common.json";
 import hiTranslations from "./hi/common.json";
+import jaTranslations from "./ja/common.json";
+import ruTranslations from "./ru/common.json";
 
 const resources = {
   en: {
@@ -13,6 +15,12 @@ const resources = {
   },
   hi: {
     common: hiTranslations,
+  },
+  ru: {
+    common: ruTranslations,
+  },
+  ja: {
+    common: jaTranslations,
   },
 } as const;
 

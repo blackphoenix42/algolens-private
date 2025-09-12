@@ -71,6 +71,8 @@ export const useLanguages = () => {
   }> = [
     { code: "en", name: "English", nativeName: "English" },
     { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
+    { code: "ru", name: "Russian", nativeName: "Русский" },
+    { code: "ja", name: "Japanese", nativeName: "日本語" },
   ];
 
   return languages;
