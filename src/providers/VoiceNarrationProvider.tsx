@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 
-import { VoiceNarrator } from "@/core/audio";
+import { VoiceNarrator } from "@/core/audio/narration";
 
 interface VoiceNarrationContextType {
   isNarrationEnabled: boolean;

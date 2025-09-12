@@ -14,7 +14,7 @@ import HomeButton from "@/components/ui/HomeButton";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
-import { LanguageSwitcher } from "@/i18n/exports";
+import { LanguageSwitcher } from "@/i18n";
 import { useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
@@ -132,7 +132,7 @@ export default function SearchingVisualizerPage({
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <KeyboardShortcutsButton />
-            <DebugToggle />
+            {import.meta.env.DEV && <DebugToggle />}
             <ThemeToggle />
           </div>
         </div>

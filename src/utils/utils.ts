@@ -9,6 +9,26 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Clamp a number between two values
+ */
+export function clamp(x: number, lo: number, hi: number) {
+  return Math.min(hi, Math.max(lo, x));
+}
+
+/**
+ * Mulberry32 deterministic PRNG
+ */
+export function mulberry32(seed: number) {
+  let t = seed >>> 0;
+  return function () {
+    t += 0x6d2b79f5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
  * Debounce function for search and input optimization
  * Generic parameters preserve the original function's argument list precisely.
  */
@@ -69,13 +89,18 @@ export function isTouchDevice(): boolean {
 }
 
 /**
- * Smooth scroll to element
+ * Smooth scroll to element with flexible target selection
+ * Supports both HTMLElement objects and CSS selectors
  */
 export function scrollToElement(
-  element: HTMLElement,
+  element: HTMLElement | Element | string,
   offset: number = 0
 ): void {
-  const elementPosition = element.getBoundingClientRect().top;
+  const target =
+    typeof element === "string" ? document.querySelector(element) : element;
+  if (!target) return;
+
+  const elementPosition = target.getBoundingClientRect().top;
   const offsetPosition = elementPosition + window.pageYOffset - offset;
 
   window.scrollTo({
@@ -215,3 +240,28 @@ export function generateRandomColor(): string {
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
+
+/**
+ * Centralized z-index management to prevent conflicts
+ */
+export const Z_INDEX = {
+  // Background layers
+  BASE: 1,
+  STICKY_HEADER: 30,
+  DROPDOWN: 40,
+
+  // Overlay layers
+  TOOLTIP: 50,
+  MODAL_BACKDROP: 60,
+  MODAL: 70,
+
+  // Notification layers
+  TOAST: 80,
+  NOTIFICATION: 90,
+
+  // Highest priority
+  MODAL_KEYBOARD_HINTS: 100,
+  DEBUG_OVERLAY: 999,
+} as const;
+
+export type ZIndexKey = keyof typeof Z_INDEX;

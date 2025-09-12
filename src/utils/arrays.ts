@@ -1,15 +1,5 @@
 // src/lib/arrays.ts
-
-// Deterministic PRNG (mulberry32)
-function rng(seed: number) {
-  let t = seed >>> 0;
-  return () => {
-    t += 0x6d2b79f5;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-  };
-}
+import { mulberry32 } from "./utils";
 
 export function makeRandomArray(
   n: number,
@@ -17,7 +7,7 @@ export function makeRandomArray(
   max = 99,
   seed = Date.now()
 ) {
-  const R = rng(seed);
+  const R = mulberry32(seed);
   return Array.from({ length: n }, () =>
     Math.floor(min + R() * (max - min + 1))
   );
@@ -29,7 +19,7 @@ export function makeGaussianArray(
   max = 99,
   seed = Date.now()
 ) {
-  const R = rng(seed);
+  const R = mulberry32(seed);
   const out: number[] = [];
   for (let i = 0; i < n; i++) {
     const u = 1 - R();
@@ -71,7 +61,7 @@ export function makeNearlySortedArrayDir(
   dir: "inc" | "dec" = "inc"
 ) {
   const base = makeSortedArray(n, min, max, seed, dir);
-  const R = rng(seed ^ 1337);
+  const R = mulberry32(seed ^ 1337);
   const swaps = Math.max(1, Math.floor(n * 0.1)); // 10% adjacent randomness
   for (let s = 0; s < swaps; s++) {
     const i = Math.floor(R() * (n - 1));
@@ -97,7 +87,7 @@ export function makeFewUniqueArray(
   seed = Date.now(),
   uniques = 5
 ) {
-  const R = rng(seed);
+  const R = mulberry32(seed);
   const pool = Array.from({ length: uniques }, () =>
     Math.floor(min + R() * (max - min + 1))
   );

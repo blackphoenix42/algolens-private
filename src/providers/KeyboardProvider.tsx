@@ -13,7 +13,7 @@ import React, {
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { getShortcutHints } from "@/core/input";
+import { getShortcutHints } from "@/core/input/keyboard";
 
 interface KeyboardContextType {
   isEnabled: boolean;

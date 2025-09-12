@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-interface AlgoFrame {
-  array: number[];
-  highlights?: {
-    compared?: [number, number];
-    swapped?: [number, number];
-    pivot?: number;
-    indices?: number[];
-  };
-  explain?: string;
-  pcLine?: number;
-}
+import type { Frame as AlgoFrame } from "@/types";
 
 interface UseWebWorkerResult {
   computeFrames: (algorithm: string, input: number[]) => Promise<AlgoFrame[]>;

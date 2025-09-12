@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { useI18n } from "../../i18n/hooks";
 
-import ExpandIcon from "@/components/ui/ExpandIcon";
+import { ExpandIcon } from "@/components/ui/Icons";
 import Markdown from "@/components/ui/Markdown";
 import Modal from "@/components/ui/Modal";
 import type { AlgoMeta } from "@/types/algorithms";

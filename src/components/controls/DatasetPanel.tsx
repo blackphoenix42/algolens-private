@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useI18n } from "@/i18n/exports";
+import { useI18n } from "@/i18n";
 import {
   makeRandomArray,
   makeGaussianArray,

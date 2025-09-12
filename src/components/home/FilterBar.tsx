@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
-import { useI18n } from "@/i18n/exports";
+import { useI18n } from "@/i18n";
 import { cn } from "@/utils";
 
 export type SortKey =

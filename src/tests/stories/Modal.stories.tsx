@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import Modal from "../../components/ui/Modal";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import { ThemeProvider } from "../../providers/ThemeProvider";
 
 const meta: Meta<typeof Modal> = {
   component: Modal,

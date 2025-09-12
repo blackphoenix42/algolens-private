@@ -7,7 +7,7 @@ import { log } from "@/services/monitoring";
 
 type ExportFormat = "png" | "svg" | "gif" | "mp4";
 
-interface AnimationFrame {
+interface ExportAnimationFrame {
   canvas?: HTMLCanvasElement;
   timestamp?: number;
   data?: unknown;
@@ -15,7 +15,7 @@ interface AnimationFrame {
 
 interface ExportControlsProps {
   canvasRef: React.RefObject<HTMLCanvasElement | SVGSVGElement>;
-  animationFrames?: AnimationFrame[]; // For GIF/MP4 export
+  animationFrames?: ExportAnimationFrame[]; // For GIF/MP4 export
   algorithmName: string;
   className?: string;
 }

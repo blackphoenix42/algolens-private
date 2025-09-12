@@ -1,7 +1,7 @@
 import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
 
-import ExpandIcon from "../../components/ui/ExpandIcon";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import { ExpandIcon } from "../../components/ui/Icons";
+import { ThemeProvider } from "../../providers/ThemeProvider";
 
 const meta: Meta<typeof ExpandIcon> = {
   title: "UI/ExpandIcon",

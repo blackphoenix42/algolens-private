@@ -45,6 +45,8 @@ export default defineConfig({
       util: "util",
       buffer: "buffer",
     },
+    // Ensure React is properly resolved
+    dedupe: ["react", "react-dom"],
   },
 
   define: {
@@ -54,40 +56,28 @@ export default defineConfig({
   build: {
     // Only generate sourcemaps if we'll upload them
     sourcemap: enableSentry,
-    chunkSizeWarningLimit: 1200,
+    // Increased limit to accommodate our consolidated bundle strategy
+    // This prevents warnings for our intentionally large vendor bundle
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
-      external: (id) => {
-        // Don't externalize these modules, let them be bundled with polyfills
-        if (
-          id === "stream" ||
-          id === "events" ||
-          id === "util" ||
-          id === "buffer"
-        ) {
-          return false;
-        }
-        return false;
-      },
+      // Don't externalize anything - keep everything bundled
+      external: () => false,
       output: {
         // Replace splitVendorChunkPlugin with manualChunks
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("react-router")) return "router";
-            if (id.includes("@sentry")) return "sentry";
+            // Keep only the heaviest libraries separate to avoid TDZ issues
             if (id.includes("katex")) return "katex";
             if (id.includes("monaco-editor")) return "monaco";
             if (id.includes("prismjs")) return "prism";
             if (id.match(/d3|three/)) return "viz";
-            if (
-              id.includes("stream-browserify") ||
-              id.includes("events") ||
-              id.includes("util") ||
-              id.includes("buffer")
-            )
-              return "polyfills";
+            // Bundle React, Sentry, polyfills, and everything else together to avoid dependency issues
             return "vendor";
           }
         },
+        // Ensure proper module initialization order
+        entryFileNames: "assets/[name]-[hash].js",
+        chunkFileNames: "assets/[name]-[hash].js",
       },
     },
     // Image optimization
@@ -95,6 +85,10 @@ export default defineConfig({
     cssCodeSplit: true,
     target: "esnext",
     minify: "esbuild",
+    // Help resolve module order issues
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
 
   // Performance optimization
@@ -102,13 +96,17 @@ export default defineConfig({
     include: [
       "react",
       "react-dom",
+      "react-dom/client",
       "react-router-dom",
+      "react/jsx-runtime",
       "stream-browserify",
       "events",
       "util",
       "buffer",
     ],
     exclude: ["@sentry/vite-plugin"],
+    // Force dependency pre-bundling to avoid temporal dead zone issues
+    force: true,
   },
 
   // Development server settings

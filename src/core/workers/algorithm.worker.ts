@@ -1,16 +1,5 @@
 // Web Worker for algorithm computation
-
-interface AlgoFrame {
-  array: number[];
-  highlights?: {
-    compared?: [number, number];
-    swapped?: [number, number];
-    pivot?: number;
-    indices?: number[];
-  };
-  explain?: string;
-  pcLine?: number;
-}
+import type { Frame as AlgoFrame } from "@/types";
 
 interface WorkerMessage {
   type: "compute" | "cancel";

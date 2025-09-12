@@ -23,7 +23,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
-import { LanguageSwitcher, useI18n } from "@/i18n/exports";
+import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import { makeRandomArray, cn } from "@/utils";
 

@@ -52,3 +52,10 @@ i18n
 export default i18n;
 export type Languages = keyof typeof resources;
 export const supportedLanguages = Object.keys(resources) as Languages[];
+
+// Re-exports from other modules
+export { useI18n, useLanguages } from "./hooks";
+export { LanguageSwitcher } from "./LanguageSwitcher";
+export { I18nProvider } from "./I18nProvider";
+export { LanguageProvider, useLanguageContext } from "./LanguageContext";
+export { formatDifficultyI18n, formatAlgorithmCategory } from "./utils";

@@ -153,21 +153,6 @@ export function useIntersectionObserver(
   return { isIntersecting, hasIntersected };
 }
 
-// Smooth scroll utility
-export function smoothScrollTo(element: Element | string, offset = 0) {
-  const target =
-    typeof element === "string" ? document.querySelector(element) : element;
-  if (!target) return;
-
-  const targetPosition =
-    target.getBoundingClientRect().top + window.pageYOffset - offset;
-
-  window.scrollTo({
-    top: targetPosition,
-    behavior: "smooth",
-  });
-}
-
 // Performance-optimized image loading
 export function useImageLoader(src: string) {
   const [loaded, setLoaded] = useState(false);

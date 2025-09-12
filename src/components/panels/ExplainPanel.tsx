@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import ExpandIcon from "@/components/ui/ExpandIcon";
+import { ExpandIcon } from "@/components/ui/Icons";
 import Modal from "@/components/ui/Modal";
 import type { AlgoMeta } from "@/types/algorithms";
 

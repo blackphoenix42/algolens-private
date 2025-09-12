@@ -1,7 +1,8 @@
 import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
 
-import HomeButton, { HomeIcon } from "../../components/ui/HomeButton";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import HomeButton from "../../components/ui/HomeButton";
+import { HomeIcon } from "../../components/ui/Icons";
+import { ThemeProvider } from "../../providers/ThemeProvider";
 
 const meta: Meta<typeof HomeButton> = {
   title: "UI/HomeButton",

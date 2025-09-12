@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Card } from "@/components/ui/Card";
-import { useI18n } from "@/i18n/exports";
+import { useI18n } from "@/i18n";
 import { cn, getDifficultyColor, formatDifficulty } from "@/utils";
 
 export type AlgoItem = {

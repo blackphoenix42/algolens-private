@@ -6,14 +6,14 @@ import { initAnalytics } from "./services/analytics/analytics";
 import { initWebVitals } from "./services/analytics/webVitals";
 
 import AppRouter from "@/app/router";
-import { I18nProvider } from "@/i18n/exports";
+import { I18nProvider } from "@/i18n";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import { log, logger, LogCategory } from "@/services/monitoring";
 import {
   initSentry,
   MaybeSentryErrorBoundary,
 } from "@/services/monitoring/sentry.client.config";
 import "@/styles/globals.css";
-import { ThemeProvider } from "@/theme/ThemeProvider";
 
 // Remove lazy loading for now to debug the issue
 

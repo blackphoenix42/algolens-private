@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 
+import { useTheme } from "@/providers/ThemeProvider";
 import { log } from "@/services/monitoring";
-import { useTheme } from "@/theme/ThemeProvider";
 
 const ThemeToggle = React.memo(() => {
   const { theme, toggle } = useTheme();

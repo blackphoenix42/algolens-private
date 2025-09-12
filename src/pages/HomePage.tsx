@@ -11,10 +11,9 @@ import { Card } from "@/components/ui/Card";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { CATALOG } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
-import { LanguageSwitcher, useI18n } from "@/i18n/exports";
+import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
-import { smoothScrollTo } from "@/services/performance";
-import { cn, formatDifficulty } from "@/utils";
+import { cn, formatDifficulty, scrollToElement } from "@/utils";
 
 type SortKey = "relevance" | "title" | "difficulty" | "recent" | "popularity";
 
@@ -324,7 +323,7 @@ export default function HomePage() {
                     toggleHeroSection();
                     const mainElement = document.querySelector("main");
                     if (mainElement) {
-                      smoothScrollTo(mainElement, 100);
+                      scrollToElement(mainElement, 100);
                     }
                   }}
                   className="bg-white text-primary-600 hover:bg-slate-50 shadow-xl"
@@ -340,14 +339,14 @@ export default function HomePage() {
                       "[data-about-section]"
                     );
                     if (aboutSection) {
-                      smoothScrollTo(aboutSection as Element, 100);
+                      scrollToElement(aboutSection as Element, 100);
                     } else {
                       // Navigate to documentation or feature section
                       const featuresSection = document.querySelector(
                         ".grid.gap-6.sm\\:grid-cols-2.lg\\:grid-cols-4"
                       );
                       if (featuresSection) {
-                        smoothScrollTo(featuresSection as Element, 100);
+                        scrollToElement(featuresSection as Element, 100);
                       } else {
                         // Fallback - navigate to GitHub docs
                         window.open(

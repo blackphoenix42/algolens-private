@@ -42,7 +42,7 @@ interface PerformanceProviderProps {
 
 export function PerformanceProvider({ children }: PerformanceProviderProps) {
   const [isMonitoringEnabled, setIsMonitoringEnabled] = useState(
-    process.env.NODE_ENV === "development"
+    import.meta.env.DEV
   );
   const [isMonitorVisible, setIsMonitorVisible] = useState(false);
   const [performanceData, setPerformanceData] = useState<{
