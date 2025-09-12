@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { PerformanceMonitor } from "../components/ui/PerformanceMonitor";
+import { PerformanceMonitor } from "../components/debug/PerformanceMonitor";
 
 import { trackWebVitals, performanceMetrics } from "@/services/performance";
 

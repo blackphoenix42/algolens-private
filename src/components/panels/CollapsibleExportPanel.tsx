@@ -1,7 +1,7 @@
 // src/components/panels/CollapsibleExportPanel.tsx
 import { useState } from "react";
 
-import ExportPanel from "@/components/panels/ExportPanel";
+import ExportPanel from "@/components/export/ExportPanel";
 import type { View, ColorMode, Colors, DrawOptions } from "@/services/export";
 
 /** Simple chevron that rotates when collapsed/expanded */

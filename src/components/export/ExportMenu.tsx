@@ -6,9 +6,8 @@
 import { Download, Image, FileText, Film, Code, Settings } from "lucide-react";
 import React, { useState, useRef } from "react";
 
-import { Button } from "./Button";
-import { Card } from "./Card";
-
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { useExport } from "@/services/export";
 
 interface ExportMenuProps {

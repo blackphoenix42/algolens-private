@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from "react";
 
 import ArrayCanvas, {
   ArrayCanvasHandle,
-} from "@/components/canvas/ArrayCanvas";
+} from "@/components/canvas/Array/ArrayCanvas";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
 import DebugToggle from "@/components/debug/DebugToggle";
 import AboutPanel from "@/components/panels/AboutPanel";
 import CodePanel from "@/components/panels/CodePanel";
+import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
-import { KeyboardShortcutsButton } from "@/components/ui/KeyboardShortcutsPanel";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
@@ -161,8 +161,8 @@ export default function SearchingVisualizerPage({
                   type="number"
                   value={target}
                   onChange={(e) => handleTargetChange(Number(e.target.value))}
-                  className="w-full px-3 py-2 border rounded-md 
-                           bg-white dark:bg-slate-800 
+                  className="w-full px-3 py-2 border rounded-md
+                           bg-white dark:bg-slate-800
                            border-slate-300 dark:border-slate-600
                            text-slate-900 dark:text-slate-100"
                   min={MIN_VAL}

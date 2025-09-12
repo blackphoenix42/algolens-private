@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
 
-import ExpandIcon from "./ExpandIcon";
+import ExpandIcon from "../../components/ui/ExpandIcon";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 
 const meta: Meta<typeof ExpandIcon> = {
@@ -81,7 +81,7 @@ export const InDarkMode: Story = {
     backgrounds: { default: "dark" },
   },
   decorators: [
-    (Story) => (
+    (Story: StoryFn) => (
       <div className="dark">
         <ThemeProvider>
           <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">

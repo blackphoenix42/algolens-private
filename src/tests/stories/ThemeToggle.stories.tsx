@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
 
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle from "../../components/ui/ThemeToggle";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 
 const meta: Meta<typeof ThemeToggle> = {
@@ -17,7 +17,7 @@ const meta: Meta<typeof ThemeToggle> = {
   },
   tags: ["autodocs"],
   decorators: [
-    (Story) => (
+    (Story: StoryFn) => (
       <ThemeProvider>
         <div className="p-4">
           <Story />
@@ -40,7 +40,7 @@ export const InDarkMode: Story = {
     backgrounds: { default: "dark" },
   },
   decorators: [
-    (Story) => (
+    (Story: StoryFn) => (
       <div className="dark">
         <ThemeProvider>
           <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">
@@ -58,7 +58,7 @@ export const InLightMode: Story = {
     backgrounds: { default: "light" },
   },
   decorators: [
-    (Story) => (
+    (Story: StoryFn) => (
       <div className="light">
         <ThemeProvider>
           <div className="p-4 bg-white min-h-[100px] flex items-center justify-center">

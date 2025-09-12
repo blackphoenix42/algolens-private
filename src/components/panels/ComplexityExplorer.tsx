@@ -1,434 +1,631 @@
+import React, { useMemo, useState } from "react";
 import {
-  BarChart3,
-  TrendingUp,
-  Clock,
-  MemoryStick,
-  ToggleLeft,
-  ToggleRight,
-  Info,
-} from "lucide-react";
-import React, { useState, useMemo, useCallback } from "react";
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { cn } from "@/utils";
 
-interface ComplexityExplorerProps {
-  algorithmName: string;
-  theoreticalTimeComplexity: string; // e.g., "O(n log n)"
-  theoreticalSpaceComplexity: string; // e.g., "O(n)"
-  onArraySizeChange: (size: number) => void;
-  currentArraySize: number;
-  isRunning?: boolean;
-}
-
-const complexityFunctions = {
-  "O(1)": () => 1,
-  "O(log n)": (n: number) => Math.log2(n),
-  "O(n)": (n: number) => n,
-  "O(n log n)": (n: number) => n * Math.log2(n),
-  "O(n²)": (n: number) => n * n,
-  "O(n³)": (n: number) => n * n * n,
-  "O(2^n)": (n: number) => Math.pow(2, Math.min(n, 20)), // Cap for visualization
-  "O(n!)": (n: number) => {
-    if (n > 10) return Math.pow(10, 6); // Cap factorial for visualization
-    let result = 1;
-    for (let i = 2; i <= n; i++) result *= i;
-    return result;
-  },
+export type ComplexityData = {
+  time: { best: string; average: string; worst: string };
+  space: string;
+  stable?: boolean;
+  inPlace?: boolean;
 };
 
-export function ComplexityExplorer({
-  algorithmName,
-  theoreticalTimeComplexity,
-  theoreticalSpaceComplexity,
-  onArraySizeChange,
-  currentArraySize,
-  isRunning = false,
-}: ComplexityExplorerProps) {
-  const [selectedSizes, setSelectedSizes] = useState([10, 50, 100, 500, 1000]);
-  const [viewMode, setViewMode] = useState<"linear" | "log">("linear");
-  const [showEmpirical, setShowEmpirical] = useState(true);
-  const [showSpace, setShowSpace] = useState(false);
+type ComplexityExplorerProps = {
+  complexity: ComplexityData;
+  algorithmName: string;
+  className?: string;
+};
 
-  // Generate complexity data
-  const complexityData = useMemo(() => {
-    const timeFunc =
-      complexityFunctions[
-        theoreticalTimeComplexity as keyof typeof complexityFunctions
-      ] || complexityFunctions["O(n)"];
-    const spaceFunc =
-      complexityFunctions[
-        theoreticalSpaceComplexity as keyof typeof complexityFunctions
-      ] || complexityFunctions["O(1)"];
+// Convert Big O notation to mathematical functions for visualization
+const complexityToFunction = (notation: string) => {
+  const n = (x: number) => x;
+  const logN = (x: number) => Math.log2(Math.max(x, 1));
 
-    return selectedSizes.map((n) => {
-      // Add some noise to empirical data to simulate real-world performance
-      const timeNoise = 1 + (Math.random() - 0.5) * 0.3;
-      const spaceNoise = 1 + (Math.random() - 0.5) * 0.2;
-
-      return {
-        n,
-        timeComplexity: timeFunc(n),
-        spaceComplexity: spaceFunc(n),
-        empiricalTime: timeFunc(n) * timeNoise,
-        empiricalSpace: spaceFunc(n) * spaceNoise,
+  switch (notation.toLowerCase()) {
+    case "o(1)":
+      return () => 1;
+    case "o(log n)":
+      return logN;
+    case "o(n)":
+      return n;
+    case "o(n log n)":
+      return (x: number) => x * logN(x);
+    case "o(n²)":
+    case "o(n^2)":
+      return (x: number) => x * x;
+    case "o(n³)":
+    case "o(n^3)":
+      return (x: number) => x * x * x;
+    case "o(2^n)":
+      return (x: number) => Math.pow(2, Math.min(x, 20)); // Cap exponential for visualization
+    case "o(n!)":
+      return (x: number) => {
+        if (x <= 1) return 1;
+        if (x > 10) return Infinity; // Cap factorial for visualization
+        let result = 1;
+        for (let i = 2; i <= x; i++) result *= i;
+        return result;
       };
-    });
-  }, [selectedSizes, theoreticalTimeComplexity, theoreticalSpaceComplexity]);
+    default:
+      return n; // Default to linear
+  }
+};
 
-  const maxValue = useMemo(() => {
-    const values = complexityData.flatMap((d) => [
-      showSpace ? d.spaceComplexity : d.timeComplexity,
-      showEmpirical ? (showSpace ? d.empiricalSpace : d.empiricalTime) : 0,
-    ]);
-    return Math.max(...values);
-  }, [complexityData, showSpace, showEmpirical]);
+const getComplexityColor = (notation: string) => {
+  switch (notation.toLowerCase()) {
+    case "o(1)":
+      return "#10b981"; // green
+    case "o(log n)":
+      return "#06b6d4"; // cyan
+    case "o(n)":
+      return "#3b82f6"; // blue
+    case "o(n log n)":
+      return "#8b5cf6"; // purple
+    case "o(n²)":
+      return "#f59e0b"; // amber
+    case "o(n^2)":
+      return "#f59e0b"; // amber
+    case "o(n³)":
+      return "#ef4444"; // red
+    case "o(n^3)":
+      return "#ef4444"; // red
+    case "o(2^n)":
+      return "#dc2626"; // dark red
+    case "o(n!)":
+      return "#7f1d1d"; // very dark red
+    default:
+      return "#6b7280"; // gray
+  }
+};
 
-  const getYValue = useCallback(
-    (value: number) => {
-      if (viewMode === "log") {
-        return Math.log10(Math.max(value, 1));
-      }
-      return value;
-    },
-    [viewMode]
-  );
+const getComplexityDescription = (notation: string) => {
+  switch (notation.toLowerCase()) {
+    case "o(1)":
+      return "Constant - Excellent performance regardless of input size";
+    case "o(log n)":
+      return "Logarithmic - Very good performance, scales well";
+    case "o(n)":
+      return "Linear - Good performance, proportional to input size";
+    case "o(n log n)":
+      return "Linearithmic - Acceptable for most applications";
+    case "o(n²)":
+    case "o(n^2)":
+      return "Quadratic - Poor performance for large inputs";
+    case "o(n³)":
+    case "o(n^3)":
+      return "Cubic - Very poor performance, avoid for large inputs";
+    case "o(2^n)":
+      return "Exponential - Extremely poor performance";
+    case "o(n!)":
+      return "Factorial - Worst possible performance";
+    default:
+      return "Performance varies with implementation";
+  }
+};
 
-  const getDisplayValue = useCallback((value: number) => {
-    if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
-    if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
-    return value.toFixed(0);
-  }, []);
+// Mini sparkline component using SVG
+const MiniChart: React.FC<{
+  data: number[];
+  color: string;
+  width?: number;
+  height?: number;
+}> = ({ data, color, width = 100, height = 30 }) => {
+  const max = Math.max(...data.filter(isFinite));
+  const min = Math.min(...data.filter(isFinite));
+  const range = max - min || 1;
 
-  const addCustomSize = useCallback(() => {
-    const size = prompt("Enter array size (1-10000):");
-    if (size && !isNaN(Number(size))) {
-      const newSize = Math.max(1, Math.min(10000, Number(size)));
-      setSelectedSizes((prev) => [...prev, newSize].sort((a, b) => a - b));
-    }
-  }, []);
-
-  const removeSize = useCallback((size: number) => {
-    setSelectedSizes((prev) => prev.filter((s) => s !== size));
-  }, []);
+  const points = data
+    .map((value, index) => {
+      const x = (index / (data.length - 1)) * width;
+      const y = height - ((value - min) / range) * height;
+      return `${x},${isFinite(y) ? y : height}`;
+    })
+    .join(" ");
 
   return (
-    <Card className="w-full bg-white dark:bg-slate-900 shadow-lg">
-      <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BarChart3 className="w-6 h-6 text-primary-600" />
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Complexity Explorer
-            </h3>
-          </div>
+    <svg width={width} height={height} className="inline-block">
+      <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
+    </svg>
+  );
+};
+
+export default function ComplexityExplorer({
+  complexity,
+  algorithmName,
+  className = "",
+}: ComplexityExplorerProps) {
+  const [scale, setScale] = useState<"small" | "medium" | "large">("medium");
+  const [showComparison, setShowComparison] = useState(false);
+
+  const maxN = useMemo(() => {
+    switch (scale) {
+      case "small":
+        return 100;
+      case "medium":
+        return 1000;
+      case "large":
+        return 10000;
+      default:
+        return 1000;
+    }
+  }, [scale]);
+
+  const sampleData = useMemo(() => {
+    const points = [];
+    const step = Math.max(1, Math.floor(maxN / 20)); // Generate 20 data points
+
+    for (let i = 1; i <= maxN; i += step) {
+      points.push(i);
+    }
+
+    return points;
+  }, [maxN]);
+
+  const complexityData = useMemo(() => {
+    const bestFn = complexityToFunction(complexity.time.best);
+    const avgFn = complexityToFunction(complexity.time.average);
+    const worstFn = complexityToFunction(complexity.time.worst);
+
+    // Chart data for recharts
+    const chartData = sampleData
+      .map((n) => {
+        const best = bestFn(n);
+        const average = avgFn(n);
+        const worst = worstFn(n);
+
+        return {
+          n,
+          best: isFinite(best) ? best : null,
+          average: isFinite(average) ? average : null,
+          worst: isFinite(worst) ? worst : null,
+        };
+      })
+      .filter(
+        (point) =>
+          point.best !== null || point.average !== null || point.worst !== null
+      );
+
+    return {
+      best: sampleData.map(bestFn),
+      average: sampleData.map(avgFn),
+      worst: sampleData.map(worstFn),
+      chartData,
+    };
+  }, [complexity, sampleData]);
+
+  const commonComplexities = useMemo(() => {
+    const functions = {
+      // All functions share (n:number)=>number except constant which needs no arg
+      "O(1)": () => 1,
+      "O(log n)": (x: number) => Math.log2(Math.max(x, 1)),
+      "O(n)": (x: number) => x,
+      "O(n log n)": (x: number) => x * Math.log2(Math.max(x, 1)),
+      "O(n²)": (x: number) => x * x,
+    };
+
+    // For simple mini charts
+    const simple = Object.fromEntries(
+      Object.entries(functions).map(([name, fn]) => [name, sampleData.map(fn)])
+    );
+
+    // For recharts
+    const chartData = sampleData.map((n) => ({
+      n,
+      O1: functions["O(1)"](),
+      Ologn: functions["O(log n)"](n),
+      On: functions["O(n)"](n),
+      Onlogn: functions["O(n log n)"](n),
+      On2: functions["O(n²)"](n),
+    }));
+
+    return { simple, chartData };
+  }, [sampleData]);
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Complexity Analysis
+          </h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {algorithmName} performance characteristics
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={showComparison ? "primary" : "secondary"}
+            onClick={() => setShowComparison(!showComparison)}
+            className="text-xs"
+          >
+            {showComparison ? "Hide" : "Show"} Comparison
+          </Button>
+        </div>
+      </div>
+
+      {/* Scale Controls */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Input Scale (n):
+          </label>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                setViewMode(viewMode === "linear" ? "log" : "linear")
-              }
-              className="flex items-center gap-2"
-            >
-              {viewMode === "linear" ? <ToggleLeft /> : <ToggleRight />}
-              {viewMode === "linear" ? "Linear" : "Log"} Scale
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {/* Algorithm Info */}
-        <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-          <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
-            {algorithmName} Complexity
-          </h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-600" />
-              <span className="text-slate-600 dark:text-slate-400">Time:</span>
-              <code className="bg-white dark:bg-slate-900 px-2 py-1 rounded border text-slate-900 dark:text-slate-100">
-                {theoreticalTimeComplexity}
-              </code>
-            </div>
-            <div className="flex items-center gap-2">
-              <MemoryStick className="w-4 h-4 text-green-600" />
-              <span className="text-slate-600 dark:text-slate-400">Space:</span>
-              <code className="bg-white dark:bg-slate-900 px-2 py-1 rounded border text-slate-900 dark:text-slate-100">
-                {theoreticalSpaceComplexity}
-              </code>
-            </div>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant={showSpace ? "outline" : "primary"}
-              size="sm"
-              onClick={() => setShowSpace(false)}
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Time Complexity
-            </Button>
-            <Button
-              variant={showSpace ? "primary" : "outline"}
-              size="sm"
-              onClick={() => setShowSpace(true)}
-            >
-              <MemoryStick className="w-4 h-4 mr-2" />
-              Space Complexity
-            </Button>
-            <Button
-              variant={showEmpirical ? "primary" : "outline"}
-              size="sm"
-              onClick={() => setShowEmpirical(!showEmpirical)}
-            >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Show Empirical
-            </Button>
-          </div>
-
-          {/* Array Sizes */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Array Sizes to Compare
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {selectedSizes.map((size) => (
-                <div
-                  key={size}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1 rounded-lg border",
-                    size === currentArraySize
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                      : "border-slate-200 dark:border-slate-700"
-                  )}
-                >
-                  <button
-                    onClick={() => onArraySizeChange(size)}
-                    className="text-sm font-medium hover:text-primary-600"
-                    disabled={isRunning}
-                  >
-                    n={size}
-                  </button>
-                  {selectedSizes.length > 2 && (
-                    <button
-                      onClick={() => removeSize(size)}
-                      className="text-red-500 hover:text-red-700 ml-1"
-                      disabled={isRunning}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
+            {[
+              { key: "small", label: "Small (≤100)", value: "small" },
+              { key: "medium", label: "Medium (≤1K)", value: "medium" },
+              { key: "large", label: "Large (≤10K)", value: "large" },
+            ].map(({ key, label, value }) => (
               <Button
-                variant="outline"
+                key={key}
                 size="sm"
-                onClick={addCustomSize}
-                disabled={isRunning || selectedSizes.length >= 10}
+                variant={scale === value ? "primary" : "secondary"}
+                onClick={() => setScale(value as typeof scale)}
+                className="text-xs"
               >
-                + Add Size
+                {label}
               </Button>
-            </div>
+            ))}
           </div>
         </div>
+      </Card>
 
-        {/* Chart */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
-          <div className="relative h-64">
-            <svg className="w-full h-full" viewBox="0 0 400 200">
-              {/* Grid lines */}
-              {[0, 1, 2, 3, 4].map((i) => (
-                <g key={i}>
-                  <line
-                    x1="50"
-                    y1={40 + i * 30}
-                    x2="380"
-                    y2={40 + i * 30}
-                    stroke="rgb(226, 232, 240)"
-                    strokeWidth="1"
-                    opacity="0.5"
-                  />
-                  <line
-                    x1={50 + i * 82.5}
-                    y1="40"
-                    x2={50 + i * 82.5}
-                    y2="160"
-                    stroke="rgb(226, 232, 240)"
-                    strokeWidth="1"
-                    opacity="0.5"
-                  />
-                </g>
-              ))}
+      {/* Algorithm Complexity Visualization */}
+      <Card className="p-6">
+        <div className="mb-6">
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">
+            Time Complexity: {algorithmName}
+          </h4>
+        </div>
 
-              {/* Data points and lines */}
-              {complexityData.length > 1 && (
-                <>
-                  {/* Theoretical line */}
-                  <polyline
-                    fill="none"
-                    stroke="rgb(59, 130, 246)"
-                    strokeWidth="2"
-                    points={complexityData
-                      .map((d, i) => {
-                        const x = 50 + (i / (complexityData.length - 1)) * 330;
-                        const value = showSpace
-                          ? d.spaceComplexity
-                          : d.timeComplexity;
-                        const normalizedValue =
-                          getYValue(value) / getYValue(maxValue);
-                        const y = 160 - normalizedValue * 120;
-                        return `${x},${y}`;
-                      })
-                      .join(" ")}
-                  />
+        {/* Interactive Chart */}
+        <div className="h-64 w-full mb-6">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={complexityData.chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis
+                dataKey="n"
+                label={{
+                  value: "Input Size (n)",
+                  position: "insideBottom",
+                  offset: -5,
+                }}
+                stroke="#64748b"
+              />
+              <YAxis
+                label={{
+                  value: "Operations",
+                  angle: -90,
+                  position: "insideLeft",
+                }}
+                scale="log"
+                domain={["dataMin", "dataMax"]}
+                stroke="#64748b"
+              />
+              <Tooltip
+                formatter={(value: number, name: string) => [
+                  value?.toExponential(2) || "N/A",
+                  name,
+                ]}
+                labelStyle={{ color: "#1e293b" }}
+                contentStyle={{
+                  backgroundColor: "white",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                }}
+              />
+              <Legend />
 
-                  {/* Empirical line */}
-                  {showEmpirical && (
-                    <polyline
-                      fill="none"
-                      stroke="rgb(239, 68, 68)"
-                      strokeWidth="2"
-                      strokeDasharray="5,5"
-                      points={complexityData
-                        .map((d, i) => {
-                          const x =
-                            50 + (i / (complexityData.length - 1)) * 330;
-                          const value = showSpace
-                            ? d.empiricalSpace
-                            : d.empiricalTime;
-                          const normalizedValue =
-                            getYValue(value) / getYValue(maxValue);
-                          const y = 160 - normalizedValue * 120;
-                          return `${x},${y}`;
-                        })
-                        .join(" ")}
-                    />
-                  )}
-                </>
+              {complexity.time.best !== complexity.time.average && (
+                <Line
+                  type="monotone"
+                  dataKey="best"
+                  stroke={getComplexityColor(complexity.time.best)}
+                  strokeWidth={2}
+                  dot={false}
+                  name={`Best: ${complexity.time.best}`}
+                />
               )}
 
-              {/* Data points */}
-              {complexityData.map((d, i) => {
-                const x =
-                  50 + (i / Math.max(complexityData.length - 1, 1)) * 330;
-                const theoreticalValue = showSpace
-                  ? d.spaceComplexity
-                  : d.timeComplexity;
-                const empiricalValue = showSpace
-                  ? d.empiricalSpace
-                  : d.empiricalTime;
+              <Line
+                type="monotone"
+                dataKey="average"
+                stroke={getComplexityColor(complexity.time.average)}
+                strokeWidth={3}
+                dot={false}
+                name={`Average: ${complexity.time.average}`}
+              />
 
-                const theoreticalY =
-                  160 -
-                  (getYValue(theoreticalValue) / getYValue(maxValue)) * 120;
-                const empiricalY =
-                  160 - (getYValue(empiricalValue) / getYValue(maxValue)) * 120;
+              {complexity.time.worst !== complexity.time.average && (
+                <Line
+                  type="monotone"
+                  dataKey="worst"
+                  stroke={getComplexityColor(complexity.time.worst)}
+                  strokeWidth={2}
+                  dot={false}
+                  name={`Worst: ${complexity.time.worst}`}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
 
-                return (
-                  <g key={i}>
-                    {/* Theoretical point */}
-                    <circle
-                      cx={x}
-                      cy={theoreticalY}
-                      r="4"
-                      fill="rgb(59, 130, 246)"
-                      className={cn(
-                        "transition-all cursor-pointer",
-                        d.n === currentArraySize && "r-6 stroke-2 stroke-white"
-                      )}
-                      onClick={() => onArraySizeChange(d.n)}
-                    />
-
-                    {/* Empirical point */}
-                    {showEmpirical && (
-                      <circle
-                        cx={x}
-                        cy={empiricalY}
-                        r="4"
-                        fill="rgb(239, 68, 68)"
-                        className="transition-all cursor-pointer"
-                        onClick={() => onArraySizeChange(d.n)}
-                      />
-                    )}
-
-                    {/* X-axis labels */}
-                    <text
-                      x={x}
-                      y="180"
-                      textAnchor="middle"
-                      className="text-xs fill-slate-600 dark:fill-slate-400"
-                    >
-                      {d.n}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* Y-axis labels */}
-              {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
-                const y = 160 - ratio * 120;
-                const value = getYValue(maxValue) * ratio;
-                return (
-                  <text
-                    key={i}
-                    x="40"
-                    y={y + 4}
-                    textAnchor="end"
-                    className="text-xs fill-slate-600 dark:fill-slate-400"
-                  >
-                    {viewMode === "log"
-                      ? `10^${value.toFixed(1)}`
-                      : getDisplayValue(value)}
-                  </text>
-                );
-              })}
-            </svg>
-
-            {/* Legend */}
-            <div className="absolute bottom-2 right-2 bg-white dark:bg-slate-800 rounded border p-2 text-xs">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-0.5 bg-blue-500"></div>
-                <span>Theoretical</span>
+        <div className="space-y-4">
+          {/* Best Case */}
+          {complexity.time.best !== complexity.time.average && (
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{
+                    backgroundColor: getComplexityColor(complexity.time.best),
+                  }}
+                />
+                <div>
+                  <div className="font-medium text-slate-900 dark:text-slate-100">
+                    Best Case: {complexity.time.best}
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    {getComplexityDescription(complexity.time.best)}
+                  </div>
+                </div>
               </div>
-              {showEmpirical && (
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-0.5 bg-red-500 border-dashed border-t"></div>
-                  <span>Empirical</span>
+              <MiniChart
+                data={complexityData.best}
+                color={getComplexityColor(complexity.time.best)}
+              />
+            </div>
+          )}
+
+          {/* Average Case */}
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-4 h-4 rounded-full"
+                style={{
+                  backgroundColor: getComplexityColor(complexity.time.average),
+                }}
+              />
+              <div>
+                <div className="font-medium text-slate-900 dark:text-slate-100">
+                  Average Case: {complexity.time.average}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  {getComplexityDescription(complexity.time.average)}
+                </div>
+              </div>
+            </div>
+            <MiniChart
+              data={complexityData.average}
+              color={getComplexityColor(complexity.time.average)}
+            />
+          </div>
+
+          {/* Worst Case */}
+          {complexity.time.worst !== complexity.time.average && (
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{
+                    backgroundColor: getComplexityColor(complexity.time.worst),
+                  }}
+                />
+                <div>
+                  <div className="font-medium text-slate-900 dark:text-slate-100">
+                    Worst Case: {complexity.time.worst}
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    {getComplexityDescription(complexity.time.worst)}
+                  </div>
+                </div>
+              </div>
+              <MiniChart
+                data={complexityData.worst}
+                color={getComplexityColor(complexity.time.worst)}
+              />
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Comparison Chart */}
+      {showComparison && (
+        <Card className="p-6">
+          <div className="mb-4">
+            <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">
+              Common Complexity Comparison
+            </h4>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              See how different complexities scale with input size (n = 1 to{" "}
+              {maxN.toLocaleString()})
+            </p>
+          </div>
+
+          <div className="h-64 w-full mb-6">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={commonComplexities.chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="n"
+                  label={{
+                    value: "Input Size (n)",
+                    position: "insideBottom",
+                    offset: -5,
+                  }}
+                  stroke="#64748b"
+                />
+                <YAxis
+                  label={{
+                    value: "Operations",
+                    angle: -90,
+                    position: "insideLeft",
+                  }}
+                  scale="log"
+                  domain={["dataMin", "dataMax"]}
+                  stroke="#64748b"
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    value?.toExponential(2) || "N/A",
+                    name,
+                  ]}
+                  labelStyle={{ color: "#1e293b" }}
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Legend />
+
+                <Line
+                  type="monotone"
+                  dataKey="O1"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={false}
+                  name="O(1)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Ologn"
+                  stroke="#06b6d4"
+                  strokeWidth={2}
+                  dot={false}
+                  name="O(log n)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="On"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={false}
+                  name="O(n)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Onlogn"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={false}
+                  name="O(n log n)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="On2"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  dot={false}
+                  name="O(n²)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="space-y-3">
+            {Object.entries(commonComplexities.simple).map(([name, data]) => (
+              <div
+                key={name}
+                className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: getComplexityColor(name) }}
+                  />
+                  <div>
+                    <div className="font-medium text-slate-900 dark:text-slate-100">
+                      {name}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">
+                      {getComplexityDescription(name)}
+                    </div>
+                  </div>
+                </div>
+                <MiniChart
+                  data={data}
+                  color={getComplexityColor(name)}
+                  width={120}
+                />
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Additional Info */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card className="p-4">
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-3">
+            Space Complexity
+          </h4>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-4 h-4 rounded-full"
+              style={{ backgroundColor: getComplexityColor(complexity.space) }}
+            />
+            <div>
+              <div className="font-medium text-slate-900 dark:text-slate-100">
+                {complexity.space}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                {getComplexityDescription(complexity.space)}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-3">
+            Algorithm Properties
+          </h4>
+          <div className="space-y-2 text-sm">
+            {complexity.stable !== undefined && (
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 dark:text-slate-400">
+                  Stable:
+                </span>
+                <span
+                  className={`font-medium ${complexity.stable ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                >
+                  {complexity.stable ? "Yes" : "No"}
+                </span>
+              </div>
+            )}
+            {complexity.inPlace !== undefined && (
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 dark:text-slate-400">
+                  In-place:
+                </span>
+                <span
+                  className={`font-medium ${complexity.inPlace ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                >
+                  {complexity.inPlace ? "Yes" : "No"}
+                </span>
+              </div>
+            )}
+            {complexity.stable === undefined &&
+              complexity.inPlace === undefined && (
+                <div className="text-slate-500 dark:text-slate-400 italic">
+                  No additional properties defined
                 </div>
               )}
-            </div>
           </div>
-        </div>
-
-        {/* Insights */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                Performance Insights
-              </h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Click any point to set that array size</li>
-                <li>
-                  • Toggle between linear and logarithmic scale for better
-                  visibility
-                </li>
-                <li>• Compare theoretical vs empirical performance</li>
-                <li>• Add custom array sizes to test edge cases</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        </Card>
       </div>
-    </Card>
+    </div>
   );
 }
-
-export default ComplexityExplorer;

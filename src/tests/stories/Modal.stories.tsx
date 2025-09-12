@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
-import Modal from "./Modal";
+import Modal from "../../components/ui/Modal";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 
 const meta: Meta<typeof Modal> = {
-  title: "UI/Modal",
   component: Modal,
   parameters: {
     layout: "fullscreen",
@@ -53,7 +52,7 @@ const ModalWrapper = ({
 };
 
 export const Default: Story = {
-  render: (args) => (
+  render: (args: React.ComponentProps<typeof Modal>) => (
     <ModalWrapper {...args}>
       <p>This is the modal content. It can contain any React components.</p>
       <p>
@@ -67,7 +66,7 @@ export const Default: Story = {
 };
 
 export const LongContent: Story = {
-  render: (args) => (
+  render: (args: React.ComponentProps<typeof Modal>) => (
     <ModalWrapper {...args}>
       <h3 className="text-lg font-semibold mb-4">Lorem Ipsum</h3>
       <p>
@@ -110,7 +109,7 @@ export const LongContent: Story = {
 };
 
 export const WithForm: Story = {
-  render: (args) => (
+  render: (args: React.ComponentProps<typeof Modal>) => (
     <ModalWrapper {...args}>
       <form className="space-y-4">
         <div>

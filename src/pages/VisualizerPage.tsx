@@ -4,12 +4,11 @@ import { useParams } from "react-router-dom";
 
 import ArrayCanvas, {
   ArrayCanvasHandle,
-} from "@/components/canvas/ArrayCanvas";
-import CanvasToolbar from "@/components/canvas/CanvasToolbar";
+} from "@/components/canvas/Array/ArrayCanvas";
+import CanvasToolbar from "@/components/canvas/Array/CanvasToolbar";
 import EnhancedArrayVisualization, {
   EnhancedArrayVisualizationHandle,
-} from "@/components/canvas/EnhancedArrayVisualization";
-import ComplexityExplorer from "@/components/complexity/ComplexityExplorer";
+} from "@/components/canvas/Array/EnhancedArrayVisualization";
 import ArrayViewPanel from "@/components/controls/ArrayViewPanel";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
@@ -17,8 +16,9 @@ import DebugToggle from "@/components/debug/DebugToggle";
 import AboutPanel from "@/components/panels/AboutPanel";
 import CodePanel from "@/components/panels/CodePanel";
 import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
+import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
+import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
-import { KeyboardShortcutsButton } from "@/components/ui/KeyboardShortcutsPanel";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
@@ -258,8 +258,8 @@ export default function VisualizerPage() {
                       setSearchTarget(Number(e.target.value));
                       runner.toStart();
                     }}
-                    className="w-full px-3 py-2 border rounded-md 
-                             bg-white dark:bg-slate-800 
+                    className="w-full px-3 py-2 border rounded-md
+                             bg-white dark:bg-slate-800
                              border-slate-300 dark:border-slate-600
                              text-slate-900 dark:text-slate-100"
                     min={5}
@@ -401,7 +401,7 @@ export default function VisualizerPage() {
                       ref={canvasHandle}
                       array={frame.array ?? input}
                       highlights={frame.highlights}
-                      onReorder={(next) => {
+                      onReorder={(next: number[]) => {
                         setInput(next);
                         runner.toStart();
                       }}
@@ -409,7 +409,7 @@ export default function VisualizerPage() {
                       colors={colors}
                       panModeExternal={panMode}
                       dragEnabled={dragging}
-                      onViewChange={(s) => {
+                      onViewChange={(s: { grid: boolean; snap: boolean }) => {
                         setGridOn(s.grid);
                         setSnapOn(s.snap);
                       }}

@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 
-import { FeatureStatusPanel } from "./FeatureStatusPanel";
-
+import { FeatureStatusPanel } from "@/components/panels/FeatureStatusPanel";
 import { usePerformance } from "@/providers/PerformanceProvider";
 import { useVoiceNarration } from "@/providers/VoiceNarrationProvider";
 import { cn } from "@/utils";

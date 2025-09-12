@@ -8,7 +8,7 @@ import { useMemo, useState, useEffect } from "react";
 
 import "highlight.js/styles/github.css";
 import "@/styles/hljs-dark-overrides.css";
-import "@/styles/codepanel.css";
+import "./CodePanel.css";
 
 import type { AlgoMeta } from "@/types/algorithms";
 
@@ -132,8 +132,8 @@ export default function CodePanel({
 
   return (
     <div
-      className={`card overflow-hidden relative ${fillHeight ? "h-full" : ""} 
-        bg-white border border-slate-200 
+      className={`card overflow-hidden relative ${fillHeight ? "h-full" : ""}
+        bg-white border border-slate-200
         dark:bg-slate-900 dark:border-slate-700`}
     >
       {/* Header bar */}
@@ -157,7 +157,7 @@ export default function CodePanel({
 
           <div className="flex gap-2">
             <button
-              className={`px-2 py-1 rounded 
+              className={`px-2 py-1 rounded
                 ${
                   tab === "pseudocode"
                     ? "bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700"

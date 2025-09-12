@@ -1,6 +1,6 @@
 import type { Meta } from "@storybook/react-vite";
 
-import { ThemeProvider } from "../theme/ThemeProvider";
+import { ThemeProvider } from "../../theme/ThemeProvider";
 
 const meta: Meta = {
   title: "Introduction",
