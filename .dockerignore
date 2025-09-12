@@ -1,36 +1,104 @@
-# ---- Dependencies & package managers (reinstall inside image) ----
-node_modules
-**/node_modules
-.pnp.*
-.pnpm-store/
-.npm/
-.yarn/
-.yarn/cache/
-.turbo/
-.cache/
-.parcel-cache/
-.esbuild/
-.vite/
+# ---- Dependencies & package managers (reinstall inside image) ----# ---- Dependencies & package managers (reinstall inside image) ----
 
-# ---- Build outputs (don’t send artifacts as context) ----
-dist/
-build/
-.out/
-.next/
-storybook-static/
+node_modulesnode_modules
+
+**/node_modules**/node_modules
+
+.pnp.*.pnp.*
+
+.pnpm-store/.pnpm-store/
+
+.npm/.npm/
+
+.yarn/.yarn/
+
+.yarn/cache/.yarn/cache/
+
+.turbo/.turbo/
+
+.cache/.cache/
+
+.parcel-cache/.parcel-cache/
+
+.esbuild/.esbuild/
+
+.vite/.vite/
+
+
+
+# ---- Build outputs (don't send artifacts as context, except dist for production) ----# ---- Build outputs (don't send artifacts as context, except dist for production) ----
+
+build/build/
+
+.out/.out/
+
+.next/.next/
+
+storybook-static/storybook-static/& package managers (reinstall inside image) ----
+
+node_modules
+
+# ---- Tests & reports ----**/node_modules
+
+e2e/.pnp.*
+
+playwright-report/.pnpm-store/
+
+test-results/.npm/
+
+coverage/.yarn/
+
+*.spec.*.yarn/cache/
+
+.turbo/
+
+# ---- Local env & secrets (keep templates) ----.cache/
+
+.env.parcel-cache/
+
+.env.*.esbuild/
+
+!.env.example.vite/
+
+
+
+# ---- VCS & CI metadata ----# ---- Build outputs (don’t send artifacts as context) ----
+
+.git/dist/
+
+.gitignorebuild/
+
+.gitattributes.out/
+
+.github/.next/
+
+.gitlab/storybook-static/
+
+.gitlab-ci.yml
 
 # ---- Tests & reports ----
-e2e/
-playwright-report/
-test-results/
+
+# ---- Docs & misc (not needed to build the app) ----e2e/
+
+docs/playwright-report/
+
+CHANGELOG.mdtest-results/
+
 coverage/
-*.spec.*
 
+# ---- OS/editor cruft ----*.spec.*
 
-# ---- Local env & secrets (keep templates) ----
-.env
-.env.*
-!.env.example
+.DS_Store
+
+Thumbs.db
+
+.vscode/# ---- Local env & secrets (keep templates) ----
+
+.idea/.env
+
+*.swp.env.*
+
+*.swo!.env.example
 
 # ---- VCS & CI metadata ----
 .git/
