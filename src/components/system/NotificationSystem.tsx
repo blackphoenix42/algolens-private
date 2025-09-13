@@ -1,5 +1,5 @@
-import { Wifi, WifiOff, Download, X, RefreshCw } from "lucide-react";
-import React, { useState, useEffect, useCallback } from "react";
+import { Download, RefreshCw, Wifi, WifiOff, X } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { usePWA } from "@/services";
 import { cn } from "@/utils";
@@ -139,15 +139,15 @@ export function NotificationSystem({
   const getNotificationIcon = (type: NotificationProps["type"]) => {
     switch (type) {
       case "success":
-        return <Wifi className="w-5 h-5 text-green-500" />;
+        return <Wifi className="h-5 w-5 text-green-500" />;
       case "warning":
-        return <WifiOff className="w-5 h-5 text-yellow-500" />;
+        return <WifiOff className="h-5 w-5 text-yellow-500" />;
       case "error":
-        return <X className="w-5 h-5 text-red-500" />;
+        return <X className="h-5 w-5 text-red-500" />;
       case "info":
-        return <Download className="w-5 h-5 text-blue-500" />;
+        return <Download className="h-5 w-5 text-blue-500" />;
       default:
-        return <RefreshCw className="w-5 h-5 text-gray-500" />;
+        return <RefreshCw className="h-5 w-5 text-gray-500" />;
     }
   };
 
@@ -169,23 +169,23 @@ export function NotificationSystem({
   if (notifications.length === 0) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
+    <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 transform space-y-2">
       {notifications.map((notification) => (
         <div
           key={notification.id}
           className={cn(
-            "flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-md",
+            "flex max-w-md items-start gap-3 rounded-lg border p-4 shadow-lg",
             "animate-in slide-in-from-top-2 duration-300",
             getNotificationBg(notification.type)
           )}
         >
           {getNotificationIcon(notification.type)}
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {notification.title}
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
               {notification.message}
             </p>
 
@@ -193,9 +193,9 @@ export function NotificationSystem({
               <button
                 onClick={notification.action.onClick}
                 className={cn(
-                  "mt-2 px-3 py-1 text-xs font-medium rounded",
-                  "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600",
-                  "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  "mt-2 rounded px-3 py-1 text-xs font-medium",
+                  "border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800",
+                  "transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 )}
               >
                 {notification.action.label}
@@ -205,11 +205,11 @@ export function NotificationSystem({
 
           <button
             onClick={() => removeNotification(notification.id)}
-            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            className="rounded p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
             title="Close notification"
             aria-label="Close notification"
           >
-            <X className="w-4 h-4 text-gray-400" />
+            <X className="h-4 w-4 text-gray-400" />
           </button>
         </div>
       ))}

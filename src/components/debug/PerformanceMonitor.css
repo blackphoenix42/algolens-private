@@ -2,18 +2,19 @@
 
 /* Progress bar animation */
 .progress-bar {
-  width: 0%;
   transition: width 0.3s ease-in-out;
+  width: 0%;
 }
 
 .progress-bar[data-progress] {
-  animation: progressFill 0.3s ease-out forwards;
+  animation: progress-fill 0.3s ease-out forwards;
 }
 
-@keyframes progressFill {
+@keyframes progress-fill {
   from {
     width: 0%;
   }
+
   to {
     width: attr(data-progress 0%);
   }
@@ -93,9 +94,9 @@ html {
 
 /* GPU acceleration */
 .gpu-accelerated {
-  transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  transform: translateZ(0);
 }
 
 /* Performance-optimized animations */
@@ -116,10 +117,10 @@ html {
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
+/* High contrast mode support - using more support */
+@media (prefers-contrast: more) {
   .progress-bar {
-    border: 1px solid currentColor;
+    border: 1px solid currentcolor;
   }
 }
 

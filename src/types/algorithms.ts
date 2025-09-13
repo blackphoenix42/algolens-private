@@ -1,10 +1,10 @@
 // Re-export from consolidated types
 export type {
-  Algorithm,
   AlgoCode,
-  CodeLineMap,
   AlgoMeta,
+  Algorithm,
+  CodeLineMap,
+  Counters,
   Frame,
   Highlights,
-  Counters,
 } from "./index";

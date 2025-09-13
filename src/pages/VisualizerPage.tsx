@@ -25,7 +25,7 @@ import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
-import { makeRandomArray, cn } from "@/utils";
+import { cn, makeRandomArray } from "@/utils";
 
 export default function VisualizerPage() {
   const { t } = useI18n();
@@ -208,9 +208,9 @@ export default function VisualizerPage() {
     );
 
   return (
-    <div className="min-h-screen overflow-hidden grid grid-rows-[auto_1fr] gap-3 p-3 max-h-screen">
+    <div className="grid max-h-screen min-h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden p-3">
       {/* Top bar */}
-      <div className="flex items-center justify-between shrink-0">
+      <div className="flex shrink-0 items-center justify-between">
         <HomeButton />
         <h1 className="text-2xl font-bold tracking-tight">
           {meta.title ||
@@ -225,12 +225,12 @@ export default function VisualizerPage() {
       {/* 3-column surface. Single row; center stretches. */}
       <div
         ref={surfaceRef}
-        className="viz-surface min-h-0 grid grid-cols-[320px_minmax(0,1fr)_360px] items-stretch gap-3 overflow-hidden"
+        className="viz-surface grid min-h-0 grid-cols-[320px_minmax(0,1fr)_360px] items-stretch gap-3 overflow-hidden"
       >
         {/* LEFT COLUMN (panels scroll, player pinned bottom) */}
-        <div className="min-h-0 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
           {/* scrollable stack */}
-          <div className="min-h-0 overflow-auto grid content-start gap-3 pr-1">
+          <div className="grid min-h-0 content-start gap-3 overflow-auto pr-1">
             <DatasetPanel
               value={input}
               onChange={(a) => {
@@ -246,7 +246,7 @@ export default function VisualizerPage() {
                   <h3 className="font-medium text-slate-900 dark:text-slate-100">
                     Search Target
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                     Value to search for in the array
                   </p>
                 </div>
@@ -258,10 +258,7 @@ export default function VisualizerPage() {
                       setSearchTarget(Number(e.target.value));
                       runner.toStart();
                     }}
-                    className="w-full px-3 py-2 border rounded-md
-                             bg-white dark:bg-slate-800
-                             border-slate-300 dark:border-slate-600
-                             text-slate-900 dark:text-slate-100"
+                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                     min={5}
                     max={99}
                     placeholder="Enter target value"
@@ -300,7 +297,7 @@ export default function VisualizerPage() {
           </div>
 
           {/* player pinned at the very bottom of LEFT */}
-          <div className="pt-3 shrink-0">
+          <div className="shrink-0 pt-3">
             <Transport
               playing={runner.playing}
               direction={runner.direction}
@@ -321,16 +318,16 @@ export default function VisualizerPage() {
         </div>
 
         {/* CENTER (canvas/complexity with tabs) */}
-        <div className="min-h-0 flex flex-col">
+        <div className="flex min-h-0 flex-col">
           {/* Tab Navigation */}
-          <div className="flex bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 rounded-t-xl">
+          <div className="flex rounded-t-xl border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
             <button
               onClick={() => setActiveTab("canvas")}
               className={cn(
-                "flex-1 px-4 py-3 text-sm font-medium rounded-tl-xl transition-colors",
+                "flex-1 rounded-tl-xl px-4 py-3 text-sm font-medium transition-colors",
                 activeTab === "canvas"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-b-2 border-primary-500"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
               )}
             >
               🎨 Visualization
@@ -338,10 +335,10 @@ export default function VisualizerPage() {
             <button
               onClick={() => setActiveTab("complexity")}
               className={cn(
-                "flex-1 px-4 py-3 text-sm font-medium rounded-tr-xl transition-colors",
+                "flex-1 rounded-tr-xl px-4 py-3 text-sm font-medium transition-colors",
                 activeTab === "complexity"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-b-2 border-primary-500"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
+                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
               )}
             >
               📊 Complexity Analysis
@@ -349,21 +346,21 @@ export default function VisualizerPage() {
           </div>
 
           {/* Tab Content */}
-          <div className="min-h-0 flex-1 bg-white dark:bg-slate-900 rounded-b-xl flex flex-col">
+          <div className="flex min-h-0 flex-1 flex-col rounded-b-xl bg-white dark:bg-slate-900">
             {activeTab === "canvas" ? (
               <>
                 {/* Enhanced Visualization Toggle */}
-                <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-700">
                   <div className="text-sm text-slate-600 dark:text-slate-400">
                     Visualization Mode
                   </div>
                   <button
                     onClick={() => setEnhancedMode(!enhancedMode)}
                     className={cn(
-                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                      "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                       enhancedMode
                         ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                        : "bg-slate-100 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
                     )}
                   >
                     {enhancedMode ? "📊" : "🎨"}
@@ -372,7 +369,7 @@ export default function VisualizerPage() {
                 </div>
 
                 {/* Visualization Content */}
-                <div className="flex-1 min-h-0">
+                <div className="min-h-0 flex-1">
                   {enhancedMode ? (
                     <EnhancedArrayVisualization
                       ref={enhancedCanvasHandle}
@@ -422,7 +419,7 @@ export default function VisualizerPage() {
                 </div>
               </>
             ) : (
-              <div className="p-6 h-full overflow-auto">
+              <div className="h-full overflow-auto p-6">
                 <ComplexityExplorer
                   algorithmName={meta.title}
                   complexity={{
@@ -438,8 +435,8 @@ export default function VisualizerPage() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="min-h-0 flex flex-col gap-3 overflow-hidden">
-          <div className="shrink-0 max-h-[65vh] overflow-auto">
+        <div className="flex min-h-0 flex-col gap-3 overflow-hidden">
+          <div className="max-h-[65vh] shrink-0 overflow-auto">
             <CodePanel
               meta={meta}
               activePcLine={frame.pcLine}
@@ -448,7 +445,7 @@ export default function VisualizerPage() {
             />
           </div>
           {/* ExportPanel moved below AboutPanel and made collapsible */}
-          <div className="min-h-0 flex-1 overflow-auto grid gap-3 content-start">
+          <div className="grid min-h-0 flex-1 content-start gap-3 overflow-auto">
             <AboutPanel meta={meta} />
             <CollapsibleExportPanel
               array={frame.array ?? input}

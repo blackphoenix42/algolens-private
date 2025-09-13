@@ -1,4 +1,4 @@
-import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
+import type { Meta, StoryFn, StoryObj } from "@storybook/react-vite";
 
 import ThemeToggle from "../../components/ui/ThemeToggle";
 import { ThemeProvider } from "../../providers/ThemeProvider";
@@ -41,7 +41,7 @@ export const InDarkMode: Story = {
     (Story: StoryFn, context) => (
       <div className="dark">
         <ThemeProvider>
-          <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">
+          <div className="flex min-h-[100px] items-center justify-center bg-slate-900 p-4">
             {Story(context.args, context)}
           </div>
         </ThemeProvider>
@@ -59,7 +59,7 @@ export const InLightMode: Story = {
     (Story: StoryFn, context) => (
       <div className="light">
         <ThemeProvider>
-          <div className="p-4 bg-white min-h-[100px] flex items-center justify-center">
+          <div className="flex min-h-[100px] items-center justify-center bg-white p-4">
             {Story(context.args, context)}
           </div>
         </ThemeProvider>

@@ -115,8 +115,8 @@ export default function SearchingVisualizerPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <header className="border-b bg-white dark:bg-slate-900 dark:border-slate-800">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="border-b bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
             <HomeButton />
             <div>
@@ -140,15 +140,15 @@ export default function SearchingVisualizerPage({
 
       {/* Main Content */}
       <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-[calc(100vh-120px)]">
+        <div className="grid h-[calc(100vh-120px)] grid-cols-1 gap-4 xl:grid-cols-3">
           {/* Left Panel: Controls */}
-          <div className="xl:col-span-1 space-y-4 overflow-y-auto">
+          <div className="space-y-4 overflow-y-auto xl:col-span-1">
             {/* Dataset Controls */}
             <DatasetPanel value={input} onChange={setInput} />
 
             {/* Target Input for Searching */}
-            <div className="bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
+            <div className="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+              <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100">
                   Search Target
                 </h3>
@@ -161,10 +161,7 @@ export default function SearchingVisualizerPage({
                   type="number"
                   value={target}
                   onChange={(e) => handleTargetChange(Number(e.target.value))}
-                  className="w-full px-3 py-2 border rounded-md
-                           bg-white dark:bg-slate-800
-                           border-slate-300 dark:border-slate-600
-                           text-slate-900 dark:text-slate-100"
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                   min={MIN_VAL}
                   max={MAX_VAL}
                   placeholder="Enter target value"
@@ -183,10 +180,10 @@ export default function SearchingVisualizerPage({
           </div>
 
           {/* Center Panel: Visualization */}
-          <div className="xl:col-span-1 space-y-4">
+          <div className="space-y-4 xl:col-span-1">
             <div ref={exportTargetRef} className="space-y-4">
               {/* Canvas Toolbar - removed problematic props */}
-              <div className="bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg p-4">
+              <div className="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-slate-900 dark:text-slate-100">
                     Visualization Mode
@@ -194,7 +191,7 @@ export default function SearchingVisualizerPage({
                   <div className="flex gap-2">
                     <button
                       onClick={() => setVizMode("simple")}
-                      className={`px-3 py-1 rounded text-sm ${
+                      className={`rounded px-3 py-1 text-sm ${
                         vizMode === "simple"
                           ? "bg-blue-500 text-white"
                           : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200"
@@ -204,7 +201,7 @@ export default function SearchingVisualizerPage({
                     </button>
                     <button
                       onClick={() => setVizMode("enhanced")}
-                      className={`px-3 py-1 rounded text-sm ${
+                      className={`rounded px-3 py-1 text-sm ${
                         vizMode === "enhanced"
                           ? "bg-blue-500 text-white"
                           : "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200"
@@ -224,7 +221,7 @@ export default function SearchingVisualizerPage({
                   highlights={frame?.highlights || {}}
                 />
               ) : (
-                <div className="border dark:border-slate-700 rounded-lg p-4 bg-white dark:bg-slate-900">
+                <div className="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                   <p className="text-slate-600 dark:text-slate-400">
                     Enhanced visualization not available
                   </p>
@@ -232,22 +229,22 @@ export default function SearchingVisualizerPage({
               )}
 
               {/* Algorithm Status */}
-              <div className="bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg p-4">
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              <div className="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
                   Algorithm Status
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   {explain || "Ready to search"}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
                   Array size: {input.length} | Target: {target}
                 </p>
               </div>
 
               {/* Complexity Explorer - simplified */}
               {showComplexity && (
-                <div className="bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                <div className="rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                  <h3 className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
                     Complexity Analysis
                   </h3>
                   <div className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
@@ -267,7 +264,7 @@ export default function SearchingVisualizerPage({
             <div
               className={cn(
                 "sticky bottom-4 bg-white dark:bg-slate-900",
-                "border dark:border-slate-700 rounded-lg shadow-lg p-4"
+                "rounded-lg border p-4 shadow-lg dark:border-slate-700"
               )}
             >
               <Transport

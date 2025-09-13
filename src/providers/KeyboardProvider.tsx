@@ -5,10 +5,10 @@
 
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -357,17 +357,17 @@ function KeyboardHintsModal() {
       onClick={handleBackgroundClick}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+        className="mx-4 max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               ⌨️ Keyboard Shortcuts
             </h2>
             <button
               onClick={() => setShowHints(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl"
+              className="text-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               ✕
             </button>
@@ -376,7 +376,7 @@ function KeyboardHintsModal() {
           <div className="grid gap-6 md:grid-cols-2">
             {allShortcuts.map((section) => (
               <div key={section.category} className="space-y-3">
-                <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                   {section.category}
                 </h3>
                 <div className="space-y-2">
@@ -388,7 +388,7 @@ function KeyboardHintsModal() {
                       <span className="text-sm text-gray-600 dark:text-gray-400">
                         {shortcut.description}
                       </span>
-                      <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded border">
+                      <kbd className="rounded border bg-gray-100 px-2 py-1 font-mono text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                         {shortcut.key}
                       </kbd>
                     </div>
@@ -398,14 +398,14 @@ function KeyboardHintsModal() {
             ))}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+          <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
               Press{" "}
-              <kbd className="px-1 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+              <kbd className="rounded bg-gray-100 px-1 py-0.5 text-xs dark:bg-gray-700">
                 ?
               </kbd>{" "}
               or{" "}
-              <kbd className="px-1 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded">
+              <kbd className="rounded bg-gray-100 px-1 py-0.5 text-xs dark:bg-gray-700">
                 Esc
               </kbd>{" "}
               to close

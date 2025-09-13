@@ -5,9 +5,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { PerformanceMonitor } from "../components/debug/PerformanceMonitor";
+import {
+  performanceMetrics,
+  trackWebVitals,
+  useFPSMonitor,
+} from "@/services/performance";
 
-import { trackWebVitals, performanceMetrics } from "@/services/performance";
+import { PerformanceMonitor } from "../components/debug/PerformanceMonitor";
 
 interface PerformanceContextType {
   isMonitoringEnabled: boolean;
@@ -16,6 +20,7 @@ interface PerformanceContextType {
   toggleMonitorVisibility: () => void;
   performanceData: {
     fps: number;
+    fpsHistory: number[];
     lcp: number;
     cls: number;
     memory?: {
@@ -45,8 +50,10 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
     import.meta.env.DEV
   );
   const [isMonitorVisible, setIsMonitorVisible] = useState(false);
+  const { fps, fpsHistory } = useFPSMonitor();
   const [performanceData, setPerformanceData] = useState<{
     fps: number;
+    fpsHistory: number[];
     lcp: number;
     cls: number;
     memory?: {
@@ -56,6 +63,7 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
     };
   }>({
     fps: 60,
+    fpsHistory: [],
     lcp: 0,
     cls: 0,
     memory: undefined,
@@ -73,6 +81,8 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
       const interval = setInterval(() => {
         setPerformanceData((prev) => ({
           ...prev,
+          fps,
+          fpsHistory,
           lcp: performanceMetrics.lcp,
           cls: performanceMetrics.cls,
           memory: getMemoryInfo(),
@@ -81,7 +91,7 @@ export function PerformanceProvider({ children }: PerformanceProviderProps) {
 
       return () => clearInterval(interval);
     }
-  }, [isMonitoringEnabled]);
+  }, [isMonitoringEnabled, fps, fpsHistory]);
 
   // Keyboard shortcut to toggle performance monitor
   useEffect(() => {

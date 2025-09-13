@@ -274,7 +274,7 @@ export default function ExportControls({
     <Card className={`p-6 ${className}`}>
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
             Export Visualization
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -288,7 +288,7 @@ export default function ExportControls({
               <span>Exporting...</span>
               <span>{exportProgress}%</span>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+            <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700">
               <div
                 className={`bg-primary-600 h-2 rounded-full transition-all duration-300`}
                 style={{ width: `${exportProgress}%` }}
@@ -308,14 +308,14 @@ export default function ExportControls({
                   : undefined
               }
               disabled={isExporting || !info.available}
-              className="flex flex-col items-center gap-2 p-4 h-auto"
+              className="flex h-auto flex-col items-center gap-2 p-4"
             >
               <span className="text-2xl">{info.icon}</span>
               <div className="text-center">
-                <div className="font-medium text-sm">{info.name}</div>
+                <div className="text-sm font-medium">{info.name}</div>
                 <div className="text-xs opacity-75">{info.description}</div>
                 {!info.available && (
-                  <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  <div className="mt-1 text-xs text-amber-600 dark:text-amber-400">
                     Coming Soon
                   </div>
                 )}
@@ -324,7 +324,7 @@ export default function ExportControls({
           ))}
         </div>
 
-        <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
+        <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
           <p>• PNG: Static image of current visualization state</p>
           <p>• SVG: Vector format that scales to any size</p>
           <p>• GIF: Animated sequence of the algorithm steps</p>

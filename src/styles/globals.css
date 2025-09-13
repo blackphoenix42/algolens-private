@@ -1,5 +1,6 @@
-@config "../../tailwind.config.ts";
 @import "tailwindcss";
+
+@config "../../tailwind.config.ts";
 
 /* =========================
    PERFORMANCE OPTIMIZATIONS
@@ -7,10 +8,38 @@
 
 /* Hardware acceleration for smooth animations */
 * {
-  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  -webkit-perspective: 1000;
-  perspective: 1000;
+  perspective: 1000px;
+  transition-duration: 200ms;
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke,
+    opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: var(--smooth-easing);
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-1 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 /* Smooth scrolling with performance optimization */
@@ -22,9 +51,6 @@ html {
 /* GPU acceleration for transforms */
 .transform,
 .transition-transform,
-.hover\\:scale-105:hover,
-.hover\\:scale-110:hover,
-.group:hover .group-hover\\:scale-105,
 [class*="scale-"],
 [class*="rotate-"],
 [class*="translate-"] {
@@ -46,8 +72,8 @@ html {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -56,12 +82,11 @@ html {
    ========================= */
 :root {
   /* Panels (left/right cards) */
-  --panel-bg: #ffffff;
+  --panel-bg: #fff;
   --panel-fg: #0f172a;
   --panel-muted: #64748b;
   --panel-border: #e5e7eb;
-
-  --chip-bg: rgba(255, 255, 255, 0.9);
+  --chip-bg: rgb(255 255 255 / 90%);
   --chip-fg: #111827;
 
   /* Code/pseudocode highlight */
@@ -69,14 +94,14 @@ html {
   --code-active-border: #fde68a;
 
   /* Canvas (center visualizer) */
-  --canvas-bg: #ffffff;
+  --canvas-bg: #fff;
   --canvas-fg: #0f172a; /* axis/label text */
-  --canvas-grid: rgba(0, 0, 0, 0.06);
-  --canvas-axis: rgba(0, 0, 0, 0.9);
-  --canvas-border: rgba(0, 0, 0, 0.12);
-  --canvas-chip-bg: rgba(255, 255, 255, 0.9);
+  --canvas-grid: rgb(0 0 0 / 6%);
+  --canvas-axis: rgb(0 0 0 / 90%);
+  --canvas-border: rgb(0 0 0 / 12%);
+  --canvas-chip-bg: rgb(255 255 255 / 90%);
   --canvas-chip-fg: #111827;
-  --canvas-status-bg: rgba(255, 255, 255, 0.85);
+  --canvas-status-bg: rgb(255 255 255 / 85%);
 
   /* Enhanced animations with 60fps target */
   --spring-easing: cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -85,7 +110,7 @@ html {
   --fast-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   /* Autofill fix */
-  --input-bg: #ffffff;
+  --input-bg: #fff;
   --input-fg: #0f172a;
 }
 
@@ -94,22 +119,18 @@ html {
   --panel-fg: #e5e7eb;
   --panel-muted: #cbd5e1;
   --panel-border: #334155;
-
-  --chip-bg: rgba(2, 6, 23, 0.85);
+  --chip-bg: rgb(2 6 23 / 85%);
   --chip-fg: #e5e7eb;
-
-  --code-active-bg: rgba(250, 204, 21, 0.12);
-  --code-active-border: rgba(250, 204, 21, 0.35);
-
+  --code-active-bg: rgb(250 204 21 / 12%);
+  --code-active-border: rgb(250 204 21 / 35%);
   --canvas-bg: #0b1220;
   --canvas-fg: #e5e7eb;
-  --canvas-grid: rgba(255, 255, 255, 0.1);
-  --canvas-axis: rgba(255, 255, 255, 0.9);
-  --canvas-border: rgba(255, 255, 255, 0.14);
-  --canvas-chip-bg: rgba(2, 6, 23, 0.85);
+  --canvas-grid: rgb(255 255 255 / 10%);
+  --canvas-axis: rgb(255 255 255 / 90%);
+  --canvas-border: rgb(255 255 255 / 14%);
+  --canvas-chip-bg: rgb(2 6 23 / 85%);
   --canvas-chip-fg: #e5e7eb;
-  --canvas-status-bg: rgba(2, 6, 23, 0.75);
-
+  --canvas-status-bg: rgb(2 6 23 / 75%);
   --input-bg: #0b1220;
   --input-fg: #e5e7eb;
 }
@@ -120,7 +141,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
   -webkit-text-fill-color: var(--input-fg) !important;
   transition: background-color 9999s ease-in-out 0s;
 }
@@ -133,10 +154,7 @@ select:-webkit-autofill {
   user-select: none;
 }
 
-/* Enhanced scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
+/* Enhanced scroll behavior - merged with earlier html selector */
 
 /* Enhanced body setup - Fixed for proper scrolling */
 html,
@@ -146,13 +164,12 @@ body {
 
 #root {
   min-height: 100dvh; /* Changed from height to min-height */
-  overflow-y: auto; /* Allow vertical scrolling */
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow: hidden auto; /* Prevent horizontal overflow */ /* Allow vertical scrolling */
 }
 
 body {
   font-family:
-    "Inter",
+    Inter,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -161,7 +178,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
 }
 
 /* Enhanced typography */
@@ -172,18 +189,12 @@ h4,
 h5,
 h6 {
   @apply text-gray-800 dark:text-slate-100;
-  line-height: 1.2;
+
   letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
-/* Enhanced transitions for better UX */
-* {
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke,
-    opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: var(--smooth-easing);
-  transition-duration: 200ms;
-}
+/* Reduce motion for accessibility - merged transitions */
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
@@ -192,16 +203,16 @@ h6 {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 /* Enhanced focus styles */
 *:focus-visible {
+  border-radius: 0.375rem;
   outline: 2px solid #6366f1;
   outline-offset: 2px;
-  border-radius: 0.375rem;
 }
 
 /* Hide scrollbars in the canvas unless truly overflowing */
@@ -210,23 +221,21 @@ h6 {
 }
 
 .viz-surface:fullscreen,
-.viz-shell:fullscreen,
-.viz-surface:-webkit-full-screen,
-.viz-shell:-webkit-full-screen {
-  width: 100vw;
-  height: 100vh;
+.viz-shell:fullscreen {
   background-color: var(--canvas-bg);
   color: var(--canvas-fg);
+  height: 100vh;
+  width: 100vw;
 }
+
 .viz-canvas,
 .viz-canvas * {
   cursor: inherit;
 }
+
 /* Optional: make the fullscreen backdrop match too */
 .viz-surface:fullscreen::backdrop,
-.viz-shell:fullscreen::backdrop,
-.viz-surface:-webkit-full-screen::backdrop,
-.viz-shell:-webkit-full-screen::backdrop {
+.viz-shell:fullscreen::backdrop {
   background-color: var(--canvas-bg);
 }
 
@@ -236,38 +245,45 @@ h6 {
 .code {
   @apply font-mono text-sm;
 }
+
 .codeblock {
+  background: transparent;
+  color: var(--panel-fg);
   font-family:
     "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", monospace;
   font-size: 13px;
-  color: var(--panel-fg);
-  background: transparent;
   line-height: 1.6;
 }
+
 .code-nowrap .code {
   white-space: pre;
 }
+
 .code-wrap .code {
+  overflow-wrap: break-word;
   white-space: pre-wrap;
-  word-break: break-word;
+  word-break: normal;
 }
+
 .code-row {
   display: grid;
-  grid-template-columns: 3ch 1fr;
   gap: 0.75rem;
+  grid-template-columns: 3ch 1fr;
   padding: 2px 10px;
   transition: all 0.2s var(--smooth-easing);
 }
+
 .code-row .ln {
   color: var(--panel-muted);
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
+
 .code-row.active {
   background: var(--code-active-bg);
-  outline: 1px solid var(--code-active-border);
   border-radius: 0.25rem;
+  outline: 1px solid var(--code-active-border);
   transform: translateX(4px);
 }
 
@@ -276,138 +292,128 @@ h6 {
    ========================= */
 .card {
   @apply rounded-xl border p-3 shadow-sm;
+
   background: var(--panel-bg);
-  color: var(--panel-fg);
   border-color: var(--panel-border);
+  color: var(--panel-fg);
   transition: all 0.3s var(--smooth-easing);
 }
 
 .card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
   transform: translateY(-2px);
 }
 
 @layer components {
   .ui-input {
-    @apply w-full rounded-xl border px-3 py-2 shadow-sm
-           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
-           transition-all duration-200;
+    @apply focus:ring-primary-500 focus:border-primary-500 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition-all duration-200 placeholder:text-slate-600 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400;
   }
 
   .ui-input:focus {
+    box-shadow: 0 4px 12px rgb(99 102 241 / 15%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
   }
 
   .ui-select {
-    @apply rounded-xl border px-3 py-2
-           bg-white text-slate-900 border-slate-300
-           focus:outline-none focus:ring-2 focus:ring-primary-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700
-           transition-all duration-200;
+    @apply focus:ring-primary-500 rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 transition-all duration-200 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
   }
 
   .ui-textarea {
-    @apply w-full rounded-xl border px-3 py-2 shadow-sm
-           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
-           min-h-[92px] transition-all duration-200;
+    @apply focus:ring-primary-500 focus:border-primary-500 min-h-[92px] w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition-all duration-200 placeholder:text-slate-600 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400;
   }
 
   /* Enhanced buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium text-white
-           bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500
-           transition-all duration-200 transform hover:scale-105 active:scale-95;
+    @apply bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 inline-flex transform items-center justify-center rounded-xl px-4 py-2 font-medium text-white transition-all duration-200 hover:scale-105 focus:ring-2 focus:outline-none active:scale-95;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium
-           bg-white text-slate-900 border border-slate-300 hover:bg-slate-50
-           dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700
-           transition-all duration-200 transform hover:scale-105 active:scale-95;
+    @apply inline-flex transform items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 font-medium text-slate-900 transition-all duration-200 hover:scale-105 hover:bg-slate-50 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
   }
 
   /* Icon buttons (copy/paste etc.) */
   .icon-btn {
-    @apply inline-flex items-center justify-center rounded border shadow-sm
-           w-8 h-8 text-slate-700 bg-white hover:bg-slate-50 border-slate-300
-           transition-all duration-200 transform hover:scale-110 active:scale-95;
+    @apply inline-flex h-8 w-8 transform items-center justify-center rounded border border-slate-300 bg-white text-slate-700 shadow-sm transition-all duration-200 hover:scale-110 hover:bg-slate-50 active:scale-95;
   }
+
   .dark .icon-btn {
-    @apply text-slate-100 bg-slate-900 hover:bg-slate-800 border-slate-700;
+    @apply border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800;
   }
 
   /* Segmented choices (Bars/Dots/Table, Coloring modes) */
   .seg-btn {
-    @apply px-2.5 py-1 rounded-lg border text-sm transition-all duration-200;
+    @apply rounded-lg border px-2.5 py-1 text-sm transition-all duration-200;
+
     background: var(--panel-bg);
-    color: var(--panel-fg);
     border-color: var(--panel-border);
+    color: var(--panel-fg);
   }
+
   .seg-btn:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
+
   .seg-btn.on {
     @apply font-semibold;
+
     background: #eef2ff;
-    color: #3730a3;
     border-color: #c7d2fe;
+    box-shadow: 0 2px 8px rgb(99 102 241 / 20%);
+    color: #3730a3;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
   }
+
   .dark .seg-btn.on {
-    background: rgba(99, 102, 241, 0.15);
+    background: rgb(99 102 241 / 15%);
+    border-color: rgb(99 102 241 / 35%);
     color: #c7d2fe;
-    border-color: rgba(99, 102, 241, 0.35);
   }
 }
 
 /* Enhanced resizers */
 .resizable-y {
-  resize: vertical;
-  overflow: auto;
-  min-height: 120px;
   max-height: 50vh;
+  min-height: 120px;
+  overflow: auto;
+  resize: vertical;
   transition: all 0.3s var(--smooth-easing);
 }
+
 .resizable-x {
-  resize: horizontal;
-  overflow: auto;
   min-width: 280px;
+  overflow: auto;
+  resize: horizontal;
   transition: all 0.3s var(--smooth-easing);
 }
 
 /* Chips/badges inside panels */
 .chip {
   background: var(--chip-bg);
-  color: var(--chip-fg);
   border-color: var(--panel-border);
+  color: var(--chip-fg);
   transition: all 0.2s var(--smooth-easing);
 }
 
 .chip:hover {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Enhanced dark mode styles */
 .dark .card {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
   color: #e5e7eb;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .dark .card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
 }
 
 .dark .panel-title {
   color: #f8fafc;
 }
+
 .dark .panel-muted {
   color: #cbd5e1;
 }
@@ -418,21 +424,26 @@ h6 {
 .dark .modal-body h3 {
   color: #f1f5f9;
 }
+
 .dark .modal-body p,
 .dark .modal-body li,
 .dark .modal-body span {
   color: #e5e7eb;
 }
+
 .dark .modal-body small {
   color: #cbd5e1;
 }
+
 .dark .modal-body a {
   color: #93c5fd;
   transition: color 0.2s var(--smooth-easing);
 }
+
 .dark .modal-body a:hover {
   color: #dbeafe;
 }
+
 .dark .modal-body code {
   color: #fde68a;
 }
@@ -443,15 +454,19 @@ h6 {
   text-decoration: underline;
   transition: color 0.2s var(--smooth-easing);
 }
+
 .markdown a:hover {
   color: #1d4ed8;
 }
+
 .dark .markdown a {
   color: #93c5fd;
 }
+
 .dark .markdown a:hover {
   color: #dbeafe;
 }
+
 .markdown .katex {
   font-size: 1em;
 }
@@ -459,14 +474,14 @@ h6 {
 /* =========================
    RESPONSIVE UTILITIES
    ========================= */
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .mobile-hide {
     display: none !important;
   }
 
   .mobile-full {
-    width: 100% !important;
     height: 100% !important;
+    width: 100% !important;
   }
 
   .mobile-px-4 {
@@ -475,7 +490,7 @@ h6 {
   }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .desktop-show {
     display: block !important;
   }
@@ -485,25 +500,25 @@ h6 {
    LOADING STATES & SKELETONS
    ========================= */
 .skeleton {
-  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  @apply animate-pulse rounded bg-gray-200 dark:bg-gray-700;
 }
 
 .shimmer {
+  animation: shimmer 1.5s infinite;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgb(255 255 255 / 40%),
     transparent
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
 }
 
 .dark .shimmer {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.1),
+    rgb(255 255 255 / 10%),
     transparent
   );
 }
@@ -512,19 +527,19 @@ h6 {
    ACCESSIBILITY ENHANCEMENTS
    ========================= */
 .sr-only {
-  position: absolute;
-  width: 1px;
+  border: 0;
+  clip-path: inset(50%);
   height: 1px;
-  padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  padding: 0;
+  position: absolute;
   white-space: nowrap;
-  border: 0;
+  width: 1px;
 }
 
 /* High contrast mode support */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .card {
     border-width: 2px;
   }
@@ -536,227 +551,301 @@ h6 {
   }
 }
 
-/* Chrome/Safari autofill theme parity */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
-  -webkit-text-fill-color: var(--input-fg) !important;
-  transition: background-color 9999s ease-in-out 0s;
-}
+/* Autofill selector already defined above - removed duplicate */
 
 /* =========================
    GLOBAL HELPERS
    ========================= */
-.no-select,
-.no-select * {
-  user-select: none;
-}
 
-h1,
-h2,
-h3 {
-  @apply text-gray-800 dark:text-slate-100;
-}
+/* .no-select already defined above - removed duplicate */
 
-/* Hide scrollbars in the canvas unless truly overflowing */
-.viz-canvas {
-  overflow: hidden;
-}
-
-.viz-surface:fullscreen,
-.viz-shell:fullscreen,
-.viz-surface:-webkit-full-screen,
-.viz-shell:-webkit-full-screen {
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--canvas-bg);
-  color: var(--canvas-fg);
-}
-.viz-canvas,
-.viz-canvas * {
-  cursor: inherit;
-}
-/* Optional: make the fullscreen backdrop match too */
-.viz-surface:fullscreen::backdrop,
-.viz-shell:fullscreen::backdrop,
-.viz-surface:-webkit-full-screen::backdrop,
-.viz-shell:-webkit-full-screen::backdrop {
-  background-color: var(--canvas-bg);
-}
+/* Duplicate sections removed - keeping only the first definitions */
 
 /* =========================
-   CODE BLOCKS (one version)
-   ========================= */
-.code {
-  @apply font-mono text-sm;
-}
-.codeblock {
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    monospace;
-  font-size: 13px;
-  color: var(--panel-fg);
-  background: transparent;
-}
-.code-nowrap .code {
-  white-space: pre;
-}
-.code-wrap .code {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.code-row {
-  display: grid;
-  grid-template-columns: 3ch 1fr;
-  gap: 0.75rem;
-  padding: 2px 10px;
-}
-.code-row .ln {
-  color: var(--panel-muted);
-  text-align: right;
-}
-.code-row.active {
-  background: var(--code-active-bg);
-  outline: 1px solid var(--code-active-border);
-}
-
-/* =========================
-   PANELS & FORM CONTROLS
-   ========================= */
-.card {
-  @apply rounded-xl border p-3 shadow-sm;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border-color: var(--panel-border);
-}
-
-@layer components {
-  .ui-input {
-    @apply w-full rounded-xl border px-3 py-2 shadow-sm
-           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
-           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400;
-  }
-  .ui-select {
-    @apply rounded-xl border px-3 py-2
-           bg-white text-slate-900 border-slate-300
-           focus:outline-none focus:ring-2 focus:ring-indigo-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700;
-  }
-  /* NOTE: can't @apply .ui-input; @apply only accepts utilities */
-  .ui-textarea {
-    @apply w-full rounded-xl border px-3 py-2 shadow-sm
-           bg-white text-slate-900 border-slate-300 placeholder:text-slate-600
-           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-           dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-400
-           min-h-[92px];
-  }
-
-  /* Icon buttons (copy/paste etc.) */
-  .icon-btn {
-    @apply inline-flex items-center justify-center rounded border shadow-sm
-           w-8 h-8 text-slate-700 bg-white hover:bg-slate-50 border-slate-300;
-  }
-  .dark .icon-btn {
-    @apply text-slate-100 bg-slate-900 hover:bg-slate-800 border-slate-700;
-  }
-
-  /* Segmented choices (Bars/Dots/Table, Coloring modes) */
-  .seg-btn {
-    @apply px-2.5 py-1 rounded-lg border text-sm transition-colors;
-    background: var(--panel-bg);
-    color: var(--panel-fg);
-    border-color: var(--panel-border);
-  }
-  .seg-btn.on {
-    @apply font-semibold;
-    background: #eef2ff;
-    color: #3730a3;
-    border-color: #c7d2fe;
-  }
-  .dark .seg-btn.on {
-    background: rgba(99, 102, 241, 0.15);
-    color: #c7d2fe;
-    border-color: rgba(99, 102, 241, 0.35);
-  }
-}
-
-/* Resizers */
-.resizable-y {
-  resize: vertical;
-  overflow: auto;
-  min-height: 120px;
-  max-height: 50vh;
-}
-.resizable-x {
-  resize: horizontal;
-  overflow: auto;
-  min-width: 280px;
-}
-
-/* Chips/badges inside panels */
-.chip {
-  background: var(--chip-bg);
-  color: var(--chip-fg);
-  border-color: var(--panel-border);
-}
-/* styles/typography-dark.css */
-
-/* Stronger defaults in dark mode */
-.dark .card {
-  color: #e5e7eb;
-} /* slate-200-ish */
-.dark .panel-title {
-  color: #f8fafc;
-} /* slate-50 */
-.dark .panel-muted {
-  color: #cbd5e1;
-} /* slate-300 */
-
-/* Modal content helpers (applies to children placed inside the modal) */
-.dark .modal-body h1,
-.dark .modal-body h2,
-.dark .modal-body h3 {
-  color: #f1f5f9;
-} /* slate-100/200 edge */
-.dark .modal-body p,
-.dark .modal-body li,
-.dark .modal-body span {
-  color: #e5e7eb;
-} /* slate-200 */
-.dark .modal-body small {
-  color: #cbd5e1;
-} /* slate-300 */
-.dark .modal-body a {
-  color: #93c5fd;
-} /* sky-300 */
-.dark .modal-body code {
-  color: #fde68a;
-} /* amber-200 for inline code */
-
-/* Markdown tweaks */
-.markdown a {
-  text-decoration: underline;
-}
-.dark .markdown a {
-  color: #93c5fd;
-} /* sky-300 */
-.markdown .katex {
-  font-size: 1em;
-} /* keep math inline sized */
 
 /* =========================
    CANVAS SKIN
    ========================= */
+
 /* Applied by the component inline, these tokens ensure dark/light parity: */
+
 /* Removed global overflow:hidden that was preventing scrolling
 html,
 body,
 #root {
   height: 100dvh;
-  overflow: hidden; 
+  overflow: hidden;
 }
 */
+
+/* =========================
+   LIQUID GLASS THEME
+   ========================= */
+
+/* Base liquid glass styles */
+.liquid-glass {
+  backdrop-filter: blur(16px);
+  border: 1px solid rgb(255 255 255 / 20%);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light mode liquid glass */
+.liquid-glass-light {
+  background: rgb(255 255 255 / 25%);
+  border: 1px solid rgb(255 255 255 / 30%);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 8%),
+    inset 0 1px 0 rgb(255 255 255 / 40%),
+    0 0 0 1px rgb(255 255 255 / 10%);
+}
+
+/* Dark mode liquid glass */
+.dark .liquid-glass,
+.liquid-glass-dark {
+  background: rgb(0 0 0 / 25%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+}
+
+/* Liquid glass cards */
+.liquid-glass-card {
+  backdrop-filter: blur(20px);
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 40%),
+    transparent
+  );
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.dark .liquid-glass-card {
+  background: rgb(0 0 0 / 20%);
+  border: 1px solid rgb(255 255 255 / 10%);
+}
+
+.dark .liquid-glass-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 20%),
+    transparent
+  );
+}
+
+/* Liquid glass headers */
+.liquid-glass-header {
+  backdrop-filter: blur(24px);
+  background: rgb(255 255 255 / 80%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-bottom: 1px solid rgb(255 255 255 / 30%);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .liquid-glass-header {
+  background: rgb(0 0 0 / 40%);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+/* Liquid glass sections */
+.liquid-glass-section {
+  backdrop-filter: blur(12px);
+  background: rgb(255 255 255 / 5%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .liquid-glass-section {
+  background: rgb(0 0 0 / 30%);
+}
+
+/* Liquid glass buttons */
+.liquid-glass-button {
+  backdrop-filter: blur(16px);
+  background: rgb(255 255 255 / 20%);
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  transition: all 0.2s ease;
+}
+
+.liquid-glass-button:hover {
+  background: rgb(255 255 255 / 30%);
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 15%),
+    inset 0 1px 0 rgb(255 255 255 / 30%);
+  transform: translateY(-2px);
+}
+
+.dark .liquid-glass-button {
+  background: rgb(0 0 0 / 30%);
+  border: 1px solid rgb(255 255 255 / 15%);
+}
+
+.dark .liquid-glass-button:hover {
+  background: rgb(0 0 0 / 40%);
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 40%),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+}
+
+/* Liquid glass hero background */
+.liquid-glass-hero {
+  backdrop-filter: blur(24px);
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgb(120 119 198 / 30%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgb(255 119 198 / 30%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgb(120 198 255 / 20%) 0%,
+      transparent 50%
+    );
+  position: relative;
+}
+
+.liquid-glass-hero::before {
+  animation: shimmer 3s ease-in-out infinite;
+  background: linear-gradient(
+    45deg,
+    rgb(255 255 255 / 10%) 0%,
+    transparent 25%,
+    transparent 75%,
+    rgb(255 255 255 / 10%) 100%
+  );
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.dark .liquid-glass-hero {
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgb(60 59 108 / 40%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgb(108 59 108 / 40%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgb(60 108 139 / 30%) 0%,
+      transparent 50%
+    );
+}
+
+/* Liquid glass filters */
+.liquid-glass-filter {
+  backdrop-filter: blur(12px);
+  background: rgb(255 255 255 / 15%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 9999px;
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+  transition: all 0.2s ease;
+}
+
+.liquid-glass-filter:hover,
+.liquid-glass-filter.active {
+  background: rgb(255 255 255 / 25%);
+  border: 1px solid rgb(255 255 255 / 40%);
+  transform: scale(1.05);
+}
+
+.dark .liquid-glass-filter {
+  background: rgb(0 0 0 / 20%);
+  border: 1px solid rgb(255 255 255 / 10%);
+}
+
+.dark .liquid-glass-filter:hover,
+.dark .liquid-glass-filter.active {
+  background: rgb(0 0 0 / 30%);
+  border: 1px solid rgb(255 255 255 / 20%);
+}
+
+/* Liquid glass glow effects */
+.liquid-glass-glow {
+  position: relative;
+}
+
+.liquid-glass-glow::after {
+  background: linear-gradient(
+    45deg,
+    rgb(120 119 198 / 30%),
+    rgb(255 119 198 / 30%),
+    rgb(120 198 255 / 30%),
+    rgb(120 255 198 / 30%)
+  );
+  border-radius: inherit;
+  content: "";
+  filter: blur(8px);
+  inset: -2px;
+  opacity: 0%;
+  position: absolute;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.liquid-glass-glow:hover::after {
+  opacity: 100%;
+}
+
+/* Responsive liquid glass adjustments */
+@media (width <= 640px) {
+  .liquid-glass,
+  .liquid-glass-card,
+  .liquid-glass-section {
+    backdrop-filter: blur(12px);
+  }
+}

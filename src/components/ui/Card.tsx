@@ -135,7 +135,7 @@ const CardTitle = forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight text-slate-900 dark:text-slate-100",
+      "text-lg leading-none font-semibold tracking-tight text-slate-900 dark:text-slate-100",
       className
     )}
     {...props}
@@ -182,9 +182,9 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 };

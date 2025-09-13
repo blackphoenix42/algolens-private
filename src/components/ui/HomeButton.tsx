@@ -6,10 +6,7 @@ export default function HomeButton() {
   return (
     <a
       href="/"
-      className="inline-flex items-center gap-2 px-2 py-1 rounded border
-                 bg-white text-slate-900 border-slate-200 hover:bg-slate-100
-                 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800/70
-                 transition-colors"
+      className="inline-flex items-center gap-2 rounded border border-slate-200 bg-white px-2 py-1 text-slate-900 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/70"
       aria-label="Go to Home"
       title="Home"
     >

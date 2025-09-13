@@ -1,20 +1,20 @@
 import {
-  Check,
-  Settings,
-  Info,
   Activity,
-  Keyboard,
-  Volume2,
+  Check,
   Download,
-  Wifi,
-  Smartphone,
-  Zap,
+  Info,
+  Keyboard,
   Palette,
-  Share2,
-  Save,
-  RotateCcw,
   Play,
+  RotateCcw,
+  Save,
+  Settings,
+  Share2,
+  Smartphone,
+  Volume2,
+  Wifi,
   X,
+  Zap,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -208,17 +208,17 @@ export function FeatureStatusPanel({
   const getStatusIcon = (status: FeatureItem["status"]) => {
     switch (status) {
       case "active":
-        return <Check className="w-4 h-4 text-green-600 dark:text-green-400" />;
+        return <Check className="h-4 w-4 text-green-600 dark:text-green-400" />;
       case "available":
-        return <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
+        return <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
       case "offline":
         return (
-          <Wifi className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+          <Wifi className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
         );
       case "disabled":
-        return <X className="w-4 h-4 text-gray-400 dark:text-gray-500" />;
+        return <X className="h-4 w-4 text-gray-400 dark:text-gray-500" />;
       default:
-        return <Info className="w-4 h-4 text-gray-600 dark:text-gray-400" />;
+        return <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />;
     }
   };
 
@@ -243,15 +243,15 @@ export function FeatureStatusPanel({
           externalIsOpen !== undefined ? onClose() : setInternalIsOpen(true)
         }
         className={cn(
-          "fixed bottom-4 right-20 z-40",
-          "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700",
-          "p-3 rounded-lg shadow-lg",
-          "hover:bg-slate-50 dark:hover:bg-slate-750 transition-all duration-200",
+          "fixed right-20 bottom-4 z-40",
+          "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800",
+          "rounded-lg p-3 shadow-lg",
+          "dark:hover:bg-slate-750 transition-all duration-200 hover:bg-slate-50",
           "flex items-center gap-2"
         )}
         title="View Feature Status"
       >
-        <Settings className="w-4 h-4" />
+        <Settings className="h-4 w-4" />
         <span className="text-xs font-medium">
           {activeCount}/{totalCount} Features
         </span>
@@ -260,11 +260,11 @@ export function FeatureStatusPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="mx-4 max-h-[80vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Settings className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <Settings className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 Feature Status
@@ -277,13 +277,13 @@ export function FeatureStatusPanel({
           <button
             onClick={onClose}
             className={cn(
-              "p-2 rounded-lg",
+              "rounded-lg p-2",
               "hover:bg-slate-100 dark:hover:bg-slate-800",
               "transition-colors"
             )}
             title="Close panel"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -291,15 +291,15 @@ export function FeatureStatusPanel({
           {Object.entries(categorizedFeatures).map(
             ([category, categoryFeatures]) => (
               <div key={category}>
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-3">
+                <h3 className="mb-3 text-lg font-semibold text-slate-800 dark:text-slate-200">
                   {getCategoryTitle(category as FeatureItem["category"])}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {categoryFeatures.map((feature) => (
                     <div
                       key={feature.id}
                       className={cn(
-                        "p-4 rounded-lg border",
+                        "rounded-lg border p-4",
                         "bg-slate-50 dark:bg-slate-800/50",
                         "border-slate-200 dark:border-slate-700"
                       )}
@@ -307,12 +307,12 @@ export function FeatureStatusPanel({
                       <div className="flex items-start gap-3">
                         <feature.icon
                           className={cn(
-                            "w-5 h-5 mt-0.5",
+                            "mt-0.5 h-5 w-5",
                             getStatusColor(feature.status)
                           )}
                         />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex items-center gap-2">
                             <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200">
                               {feature.name}
                             </h4>
@@ -331,32 +331,32 @@ export function FeatureStatusPanel({
           )}
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <div className="mt-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+          <div className="mb-2 flex items-center gap-2">
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
               Status Legend
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
             <div className="flex items-center gap-1">
-              <Check className="w-3 h-3 text-green-600" />
+              <Check className="h-3 w-3 text-green-600" />
               <span className="text-slate-600 dark:text-slate-400">Active</span>
             </div>
             <div className="flex items-center gap-1">
-              <Info className="w-3 h-3 text-blue-600" />
+              <Info className="h-3 w-3 text-blue-600" />
               <span className="text-slate-600 dark:text-slate-400">
                 Available
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <Wifi className="w-3 h-3 text-yellow-600" />
+              <Wifi className="h-3 w-3 text-yellow-600" />
               <span className="text-slate-600 dark:text-slate-400">
                 Offline Mode
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <X className="w-3 h-3 text-gray-400" />
+              <X className="h-3 w-3 text-gray-400" />
               <span className="text-slate-600 dark:text-slate-400">
                 Disabled
               </span>

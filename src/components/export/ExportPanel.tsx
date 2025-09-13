@@ -1,7 +1,7 @@
 // src/components/panels/ExportPanel.tsx
 import { useEffect, useMemo, useState } from "react";
 
-import type { DrawOptions, View, ColorMode, Colors } from "@/services/export";
+import type { ColorMode, Colors, DrawOptions, View } from "@/services/export";
 import {
   exportGIF,
   exportJPG,
@@ -107,14 +107,14 @@ export default function ExportPanel({
   }
 
   return (
-    <div className="card text-sm min-w-0 w-full box-border">
-      <div className="font-medium mb-1">Export</div>
+    <div className="card box-border w-full min-w-0 text-sm">
+      <div className="mb-1 font-medium">Export</div>
 
       <div className="grid gap-2">
-        <label className="flex items-center gap-2 min-w-0">
+        <label className="flex min-w-0 items-center gap-2">
           <span className="w-28 shrink-0">Format</span>
           <select
-            className="border rounded px-2 py-1 min-w-0"
+            className="min-w-0 rounded border px-2 py-1"
             value={fmt}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setFmt(e.currentTarget.value as typeof fmt)
@@ -128,7 +128,7 @@ export default function ExportPanel({
           </select>
         </label>
 
-        <label className="flex items-center gap-2 min-w-0">
+        <label className="flex min-w-0 items-center gap-2">
           <span className="w-28 shrink-0">Scale</span>
           <input
             type="range"
@@ -143,10 +143,10 @@ export default function ExportPanel({
         </label>
 
         {(fmt === "gif" || fmt === "mp4") && (
-          <label className="flex items-center gap-2 min-w-0">
+          <label className="flex min-w-0 items-center gap-2">
             <span className="w-28 shrink-0">FPS</span>
             <input
-              className="w-20 border rounded px-1 py-0.5"
+              className="w-20 rounded border px-1 py-0.5"
               type="number"
               min={1}
               max={60}
@@ -157,7 +157,7 @@ export default function ExportPanel({
         )}
 
         <button
-          className="mt-1 px-3 py-1.5 rounded bg-indigo-600 text-white disabled:opacity-60"
+          className="mt-1 rounded bg-indigo-600 px-3 py-1.5 text-white disabled:opacity-60"
           onClick={doExport}
           disabled={busy || !wmImg}
           title={!wmImg ? "Loading watermark…" : "Export"}

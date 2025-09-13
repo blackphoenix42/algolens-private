@@ -1,7 +1,8 @@
 // src/i18n/I18nProvider.tsx
+import "./index"; // Initialize i18n
+
 import React, { Suspense } from "react";
 
-import "./index"; // Initialize i18n
 import { LanguageProvider } from "./LanguageContext";
 
 interface I18nProviderProps {
@@ -16,7 +17,7 @@ interface I18nProviderProps {
 export const I18nProvider: React.FC<I18nProviderProps> = ({
   children,
   fallback = (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       Loading...
     </div>
   ),

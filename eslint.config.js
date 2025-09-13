@@ -6,6 +6,7 @@ import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import storybook from "eslint-plugin-storybook";
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
@@ -40,6 +41,7 @@ export default tseslint.config(
       "jsx-a11y": jsxA11y,
       import: importPlugin,
       "unused-imports": unusedImports,
+      "simple-import-sort": simpleImportSort,
     },
     settings: {
       react: { version: "detect" },
@@ -59,19 +61,8 @@ export default tseslint.config(
       "jsx-a11y/anchor-is-valid": "warn",
 
       // Imports
-      "import/order": [
-        "warn",
-        {
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
-          groups: [
-            ["builtin", "external"],
-            ["internal"],
-            ["parent", "sibling", "index"],
-          ],
-          pathGroupsExcludedImportTypes: ["builtin"],
-        },
-      ],
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
       "import/no-unresolved": "off", // let TS handle it
       "import/no-duplicates": "warn",
 

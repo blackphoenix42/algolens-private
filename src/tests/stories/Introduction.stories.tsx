@@ -20,13 +20,13 @@ export default meta;
 export const Welcome = {
   render: () => (
     <ThemeProvider>
-      <div className="p-8 max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6 text-slate-900 dark:text-slate-100">
+      <div className="mx-auto max-w-4xl p-8">
+        <h1 className="mb-6 text-4xl font-bold text-slate-900 dark:text-slate-100">
           Welcome to AlgoLens Storybook
         </h1>
 
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <p className="text-lg mb-6">
+          <p className="mb-6 text-lg">
             This is the component library for AlgoLens, an interactive algorithm
             visualization platform. Here you can explore, test, and document all
             the UI components used throughout the application.
@@ -87,8 +87,8 @@ export const Welcome = {
             </li>
           </ul>
 
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
+          <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <h3 className="mb-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
               💡 Tip
             </h3>
             <p className="text-blue-800 dark:text-blue-200">

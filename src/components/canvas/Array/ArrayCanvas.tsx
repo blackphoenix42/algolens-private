@@ -1,11 +1,11 @@
 import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
-  forwardRef,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
 } from "react";
 
 type Highlights = {
@@ -384,7 +384,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
     >
       {/* status */}
       <div
-        className="absolute top-1 left-1 z-10 text-[11px] border rounded px-2 py-0.5 shadow"
+        className="absolute top-1 left-1 z-10 rounded border px-2 py-0.5 text-[11px] shadow"
         style={{
           background: "var(--canvas-status-bg, rgba(255,255,255,.85))",
           color: axisText,
@@ -399,7 +399,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
       <div className="absolute top-1 right-1 z-10 flex flex-col gap-1">
         <button
           title="Zoom in"
-          className="w-8 h-8 rounded border shadow hover:bg-slate-50 dark:hover:bg-slate-800"
+          className="h-8 w-8 rounded border shadow hover:bg-slate-50 dark:hover:bg-slate-800"
           style={{
             background: chipBg,
             color: axisText,
@@ -411,7 +411,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
         </button>
         <button
           title="Zoom out"
-          className="w-8 h-8 rounded border shadow hover:bg-slate-50 dark:hover:bg-slate-800"
+          className="h-8 w-8 rounded border shadow hover:bg-slate-50 dark:hover:bg-slate-800"
           style={{
             background: chipBg,
             color: axisText,
@@ -440,7 +440,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
               {/* ===== Bars/Dots/Table ===== */}
               {viewMode !== "table" ? (
                 <div
-                  className="absolute left-0 top-0"
+                  className="absolute top-0 left-0"
                   style={{ width: axisWidth, height: axisHeight }}
                 >
                   {renderArray.map((v, i) => {
@@ -480,7 +480,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                             />
                             {showLabels && (
                               <div
-                                className="absolute text-[11px] border rounded px-1 leading-4 shadow-sm"
+                                className="absolute rounded border px-1 text-[11px] leading-4 shadow-sm"
                                 style={{
                                   top: barTop - 16 - TOP_PAD,
                                   left: BAR_W / 2 - 8,
@@ -516,7 +516,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                             />
                             {showLabels && (
                               <div
-                                className="absolute text-[11px] border rounded px-1 leading-4 shadow-sm"
+                                className="absolute rounded border px-1 text-[11px] leading-4 shadow-sm"
                                 style={{
                                   top: dotTop + 14 - TOP_PAD,
                                   left: BAR_W / 2 - 8,
@@ -539,23 +539,23 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                 // Table view – fills most of the space, highlights animated rows
                 <div className="absolute inset-0 grid place-items-center">
                   <div
-                    className="w-[92%] max-h-[92%] overflow-auto rounded border"
+                    className="max-h-[92%] w-[92%] overflow-auto rounded border"
                     style={{ borderColor: canvasBorder }}
                   >
                     <table
-                      className="text-sm w-full"
+                      className="w-full text-sm"
                       style={{ color: axisText }}
                     >
-                      <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0 z-10">
+                      <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800">
                         <tr>
                           <th
-                            className="px-3 py-2 border"
+                            className="border px-3 py-2"
                             style={{ borderColor: canvasBorder }}
                           >
                             Index
                           </th>
                           <th
-                            className="px-3 py-2 border"
+                            className="border px-3 py-2"
                             style={{ borderColor: canvasBorder }}
                           >
                             Value
@@ -566,13 +566,13 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                         {renderArray.map((v, i) => (
                           <tr key={i} style={{ background: rowBgFor(i) }}>
                             <td
-                              className="px-3 py-1 border"
+                              className="border px-3 py-1"
                               style={{ borderColor: canvasBorder }}
                             >
                               {i}
                             </td>
                             <td
-                              className="px-3 py-1 border"
+                              className="border px-3 py-1"
                               style={{ borderColor: canvasBorder }}
                             >
                               {v}

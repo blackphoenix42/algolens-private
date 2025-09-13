@@ -3,7 +3,7 @@
  * Provides comprehensive keyboard navigation and shortcuts
  */
 
-import { useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Keyboard shortcut definitions

@@ -145,7 +145,7 @@ export default function FloatingParticles({
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute inset-0 pointer-events-none ${className}`}
+      className={`pointer-events-none absolute inset-0 ${className}`}
       style={{ mixBlendMode: "screen" }}
     />
   );

@@ -1,7 +1,7 @@
 // src/components/debug/DebugPanel.tsx
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { logger, LogLevel, LogCategory } from "@/services/monitoring";
+import { LogCategory, logger, LogLevel } from "@/services/monitoring";
 
 interface DebugPanelProps {
   isOpen: boolean;
@@ -131,20 +131,20 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
       <div
         ref={panelRef}
-        className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-7xl h-full max-h-[90vh] flex flex-col shadow-2xl"
+        className="flex h-full max-h-[90vh] w-full max-w-7xl flex-col rounded-lg bg-white shadow-2xl dark:bg-gray-900"
       >
         {/* Enhanced Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🐛</span>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               Debug Logs
             </h2>
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
               <span>Live</span>
             </div>
           </div>
@@ -156,7 +156,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 setLogs([]);
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition-colors"
+              className="rounded-md bg-red-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-600"
             >
               🗑️ Clear
             </button>
@@ -172,14 +172,14 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="px-3 py-1.5 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
+              className="rounded-md bg-blue-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-600"
             >
               💾 Export
             </button>
 
             <button
               onClick={onClose}
-              className="px-3 py-1.5 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition-colors"
+              className="rounded-md bg-gray-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-600"
             >
               ✕ Close
             </button>
@@ -187,8 +187,8 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
         </div>
 
         {/* Enhanced Filters */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+        <div className="border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div className="flex-1">
               <input
@@ -199,7 +199,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
               />
             </div>
 
@@ -214,7 +214,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 );
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             >
               <option value="">All Levels</option>
               <option value={LogLevel.ERROR}>❌ Error</option>
@@ -233,7 +233,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 );
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             >
               <option value="">All Categories</option>
               {Object.values(LogCategory).map((category) => (
@@ -250,7 +250,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             >
               <option value={25}>25 per page</option>
               <option value={50}>50 per page</option>
@@ -275,7 +275,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                 onClick={() =>
                   setSortOrder(sortOrder === "desc" ? "asc" : "desc")
                 }
-                className="flex items-center gap-1 px-2 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                className="flex items-center gap-1 px-2 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 Sort:{" "}
                 {sortOrder === "desc" ? "🔽 Newest first" : "🔼 Oldest first"}
@@ -291,13 +291,13 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
         {/* Enhanced Logs Display */}
         <div
           ref={logsContainerRef}
-          className="flex-1 overflow-auto font-mono text-sm bg-white dark:bg-gray-900"
+          className="flex-1 overflow-auto bg-white font-mono text-sm dark:bg-gray-900"
         >
           {paginatedLogs.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-500 text-center">
+            <div className="flex h-full items-center justify-center text-center text-gray-500">
               <div>
-                <div className="text-4xl mb-4">📝</div>
-                <div className="text-lg font-medium mb-2">No logs found</div>
+                <div className="mb-4 text-4xl">📝</div>
+                <div className="mb-2 text-lg font-medium">No logs found</div>
                 <div className="text-sm">
                   {filteredLogs.length === 0
                     ? "Try adjusting your filters or search terms"
@@ -310,9 +310,9 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
               {paginatedLogs.map((log, index) => (
                 <div
                   key={`${log.timestamp}-${index}`}
-                  className="flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-start gap-3 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                  <span className="text-xs text-gray-500 whitespace-nowrap mt-0.5 font-medium">
+                  <span className="mt-0.5 text-xs font-medium whitespace-nowrap text-gray-500">
                     {new Date(log.timestamp).toLocaleTimeString([], {
                       hour12: false,
                       hour: "2-digit",
@@ -323,22 +323,22 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                   </span>
 
                   <span
-                    className={`text-xs font-bold whitespace-nowrap mt-0.5 ${getLevelColor(log.level)}`}
+                    className={`mt-0.5 text-xs font-bold whitespace-nowrap ${getLevelColor(log.level)}`}
                   >
                     {getLevelEmoji(log.level)} {LogLevel[log.level]}
                   </span>
 
                   <span
-                    className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getCategoryColor(log.category)}`}
+                    className={`rounded-full px-2 py-1 text-xs whitespace-nowrap ${getCategoryColor(log.category)}`}
                   >
                     {log.category.toUpperCase()}
                   </span>
 
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm break-words text-gray-900 dark:text-gray-100">
                       {log.message}
                       {log.component && (
-                        <span className="inline-block ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+                        <span className="ml-2 inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                           {log.component}
                         </span>
                       )}
@@ -346,11 +346,11 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
 
                     {log.data !== undefined && (
                       <details className="mt-2">
-                        <summary className="cursor-pointer text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 select-none">
+                        <summary className="cursor-pointer text-xs text-blue-600 select-none hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200">
                           📋 Show data
                         </summary>
-                        <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-auto">
-                          <pre className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                        <div className="mt-2 overflow-auto rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
+                          <pre className="text-xs whitespace-pre-wrap text-gray-800 dark:text-gray-200">
                             {formatLogData(log.data)}
                           </pre>
                         </div>
@@ -359,11 +359,11 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
 
                     {log.stack && log.level === LogLevel.ERROR && (
                       <details className="mt-2">
-                        <summary className="cursor-pointer text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 select-none">
+                        <summary className="cursor-pointer text-xs text-red-600 select-none hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
                           🔍 Stack trace
                         </summary>
-                        <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg overflow-auto">
-                          <pre className="text-xs text-red-800 dark:text-red-200 whitespace-pre-wrap">
+                        <div className="mt-2 overflow-auto rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+                          <pre className="text-xs whitespace-pre-wrap text-red-800 dark:text-red-200">
                             {log.stack}
                           </pre>
                         </div>
@@ -378,20 +378,20 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
+          <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   ⏮️ First
                 </button>
                 <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   ⬅️ Prev
                 </button>
@@ -405,14 +405,14 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
                     setCurrentPage(Math.min(totalPages, currentPage + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   Next ➡️
                 </button>
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   Last ⏭️
                 </button>
@@ -426,8 +426,8 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
         )}
 
         {/* Enhanced Stats Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900">
+          <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
             <div className="text-center">
               <div className="font-semibold text-gray-900 dark:text-gray-100">
                 {logs.length}

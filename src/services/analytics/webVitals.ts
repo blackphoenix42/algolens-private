@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/react";
-import { onCLS, onINP, onLCP, onFCP, onTTFB } from "web-vitals";
+import { onCLS, onFCP, onINP, onLCP, onTTFB } from "web-vitals";
 
 import { track } from "./analytics";
 

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import type { ArrayCanvasHandle } from "./ArrayCanvas";
-
 import { useFullscreen } from "@/hooks/useFullscreen";
+
+import type { ArrayCanvasHandle } from "./ArrayCanvas";
 
 type Props = {
   surfaceRef: React.RefObject<HTMLDivElement | null>; // FULLSCREEN targets this whole surface
@@ -72,28 +72,25 @@ export default function CanvasToolbar({
   return (
     <div
       className={
-        "card text-sm min-w-0 " +
-        "bg-white border border-slate-200 " +
-        "dark:bg-slate-900 dark:border-slate-700"
+        "card min-w-0 text-sm " +
+        "border border-slate-200 bg-white" +
+        "dark:border-slate-700 dark:bg-slate-900"
       }
     >
       {/* Header with collapse/expand */}
       <div className="flex items-center justify-between">
-        <div className="font-semibold panel-title text-slate-900 dark:text-slate-200">
+        <div className="panel-title font-semibold text-slate-900 dark:text-slate-200">
           Canvas Controls
         </div>
         <button
-          className="px-2 py-1 rounded border
-                     bg-white border-slate-200 hover:bg-slate-100
-                     dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800/70
-                     inline-flex items-center justify-center"
+          className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="canvas-controls-body"
           title={open ? "Collapse" : "Expand"}
         >
           <ChevronDownIcon
-            className={`w-4 h-4 transition-transform duration-200 ${
+            className={`h-4 w-4 transition-transform duration-200 ${
               open ? "rotate-180" : "rotate-0"
             }`}
           />
@@ -104,7 +101,7 @@ export default function CanvasToolbar({
       {!open ? null : (
         <div
           id="canvas-controls-body"
-          className="mt-2 flex flex-wrap gap-2 items-center text-slate-900 dark:text-slate-200"
+          className="mt-2 flex flex-wrap items-center gap-2 text-slate-900 dark:text-slate-200"
         >
           <button
             className={baseBtn}

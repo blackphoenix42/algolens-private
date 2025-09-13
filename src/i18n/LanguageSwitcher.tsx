@@ -1,11 +1,11 @@
 // src/i18n/LanguageSwitcher.tsx
 import { ChevronDown } from "lucide-react";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import { cn } from "@/utils";
 
 import { useI18n, useLanguages } from "./hooks";
 import type { Languages as LanguageType } from "./index";
-
-import { cn } from "@/utils";
 
 interface LanguageSwitcherProps {
   className?: string;
@@ -75,13 +75,13 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
             className={cn(
-              "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+              "rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
               "border border-transparent",
               "hover:scale-105 active:scale-95",
-              "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+              "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
               currentLanguage === lang.code
                 ? "bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900 dark:text-primary-200 dark:border-primary-800 shadow-soft"
-                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
             )}
             aria-label={`Switch to ${lang.name}`}
             title={`Switch to ${lang.name}`}
@@ -103,29 +103,29 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg",
-          "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600",
+          "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
+          "border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800",
           "text-slate-700 dark:text-slate-300",
-          "hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500",
-          "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800",
+          "hover:border-slate-400 hover:bg-slate-50 dark:hover:border-slate-500 dark:hover:bg-slate-700",
+          "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-800",
           "transition-all duration-200 hover:scale-105 active:scale-95",
           "shadow-soft hover:shadow-medium",
           isOpen &&
-            "ring-2 ring-primary-500 border-primary-300 dark:border-primary-600"
+            "ring-primary-500 border-primary-300 dark:border-primary-600 ring-2"
         )}
         aria-label="Select language"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
         <span className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          <span className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
             {currentLanguage}
           </span>
           {showLabel && <span>{currentLang?.nativeName}</span>}
         </span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 transition-transform duration-200",
+            "h-4 w-4 transition-transform duration-200",
             isOpen && "rotate-180"
           )}
         />
@@ -136,8 +136,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <div
           className={cn(
             "fixed z-[9999] mt-2 w-48",
-            "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700",
-            "rounded-xl shadow-large dark:shadow-slate-900/50",
+            "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800",
+            "shadow-large rounded-xl dark:shadow-slate-900/50",
             "overflow-hidden",
             "animate-in slide-in-from-top-2 duration-200"
           )}
@@ -159,7 +159,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               className={cn(
                 "w-full px-4 py-3 text-left text-sm transition-colors duration-150",
                 "hover:bg-slate-100 dark:hover:bg-slate-700",
-                "focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-700",
+                "focus:bg-slate-100 focus:outline-none dark:focus:bg-slate-700",
                 "flex items-center justify-between gap-3",
                 currentLanguage === lang.code &&
                   "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300",
@@ -180,11 +180,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                <span className="text-xs font-bold tracking-wide text-slate-400 uppercase">
                   {lang.code}
                 </span>
                 {currentLanguage === lang.code && (
-                  <div className="w-2 h-2 bg-primary-600 rounded-full" />
+                  <div className="bg-primary-600 h-2 w-2 rounded-full" />
                 )}
               </div>
             </button>

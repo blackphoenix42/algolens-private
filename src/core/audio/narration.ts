@@ -434,7 +434,7 @@ export class UInarrator {
 }
 
 // React hooks for easy integration
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function useVoiceNarrator(settings?: Partial<VoiceSettings>) {
   const narratorRef = useRef<VoiceNarrator | null>(null);

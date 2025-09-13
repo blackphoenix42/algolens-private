@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import React from "react";
 
 interface MotionBarProps {
@@ -220,12 +220,12 @@ export const MotionArray: React.FC<MotionArrayProps> = ({
   };
 
   return (
-    <div className={`w-full h-full overflow-auto ${className}`}>
+    <div className={`h-full w-full overflow-auto ${className}`}>
       <motion.svg
         width={totalWidth}
         height={totalHeight}
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-        className="w-full h-full"
+        className="h-full w-full"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}

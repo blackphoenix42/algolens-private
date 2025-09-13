@@ -181,5 +181,5 @@ export const searchingAlgos: AlgoMeta[] = [
   },
 ];
 
-export { run as linearSearch } from "./linearSearch";
 export { run as binarySearch } from "./binarySearch";
+export { run as linearSearch } from "./linearSearch";

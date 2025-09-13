@@ -3,9 +3,10 @@ set -e
 
 # --- settings -------------------------------------------------
 : "${SKIP_PREPUSH_BUILD:=0}"   # set to 1 to skip build locally
+: "${SKIP_PREPUSH_DEPS:=0}"    # set to 1 to skip dependency checks locally
 # --------------------------------------------------------------
 
-echo "husky(pre-push): running checks…"
+echo "🚀 husky(pre-push): running comprehensive checks…"
 
 # ensure repo root
 REPO_ROOT="$(git rev-parse --show-toplevel)"
@@ -14,16 +15,41 @@ cd "$REPO_ROOT"
 echo "→ Typecheck"
 npm run -s typecheck
 
-echo "→ Lint (if present)"
-if npm run -s lint >/dev/null 2>&1; then
-  npm run -s lint
+echo "→ Lint & CSS checks"
+if npm run -s lint:all >/dev/null 2>&1; then
+  npm run -s lint:all
 else
-  echo "  (no 'lint' script; skipping)"
+  echo "  (no 'lint:all' script; falling back to lint)"
+  npm run -s lint
+fi
+
+echo "→ Format check"
+if npm run -s format:check >/dev/null 2>&1; then
+  npm run -s format:check
+else
+  echo "  (no 'format:check' script; skipping)"
+fi
+
+if [ "$SKIP_PREPUSH_DEPS" -eq 0 ]; then
+  echo "→ Dependency checks"
+  if npm run -s deps:unused >/dev/null 2>&1; then
+    npm run -s deps:unused
+  else
+    echo "  (no 'deps:unused' script; skipping)"
+  fi
+
+  echo "→ License check"
+  if npm run -s licenses:check >/dev/null 2>&1; then
+    npm run -s licenses:check
+  else
+    echo "  (no 'licenses:check' script; skipping)"
+  fi
+else
+  echo "→ Dependency checks skipped (SKIP_PREPUSH_DEPS=1)"
 fi
 
 echo "→ Tests"
 if npm run -s test >/dev/null 2>&1; then
-  # don't pass Vitest flags to Playwright; just run the script as-is
   npm run -s test
 else
   echo "  (no 'test' script; skipping)"
@@ -40,4 +66,4 @@ else
   echo "→ Build skipped (SKIP_PREPUSH_BUILD=1)"
 fi
 
-echo "✓ All pre-push checks passed"
+echo "✅ All pre-push checks passed! Ready to push."

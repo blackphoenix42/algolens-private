@@ -1,13 +1,13 @@
-import { ChevronLeft, ChevronRight, X, Play, RotateCcw } from "lucide-react";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import "./OnboardingTour.css";
+
+import { ChevronLeft, ChevronRight, Play, RotateCcw, X } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { usePreferences } from "@/hooks/usePreferences";
 import { log } from "@/services/monitoring";
 import { cn } from "@/utils";
-
-import "./OnboardingTour.css";
 
 interface TourStep {
   id: string;
@@ -338,7 +338,7 @@ export default function OnboardingTour({
     return (
       <>
         {isLastStep ? "Complete" : "Next"}
-        {!isLastStep && <ChevronRight className="w-4 h-4" />}
+        {!isLastStep && <ChevronRight className="h-4 w-4" />}
       </>
     );
   }, [currentStep, steps.length]);
@@ -419,13 +419,13 @@ export default function OnboardingTour({
         className={cn(
           "z-50 w-80 max-w-[90vw] p-6 shadow-2xl",
           step.position === "center"
-            ? "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+            ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform"
             : "fixed"
         )}
         style={step.position !== "center" ? getCardPosition() : {}}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">📚</span>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -434,22 +434,22 @@ export default function OnboardingTour({
           </div>
           <button
             onClick={skipTour}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="rounded p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             title="Skip tour"
             aria-label="Skip tour"
           >
-            <X className="w-4 h-4 text-slate-500" />
+            <X className="h-4 w-4 text-slate-500" />
           </button>
         </div>
 
         {/* Content */}
         <div className="mb-6">
-          <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+          <p className="leading-relaxed text-slate-600 dark:text-slate-400">
             {step.content}
           </p>
           {isWaitingForElement && (
-            <div className="flex items-center gap-2 mt-3 text-sm text-slate-500 dark:text-slate-400">
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <div className="border-primary-600 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"></div>
               <span>Looking for page element...</span>
             </div>
           )}
@@ -464,7 +464,7 @@ export default function OnboardingTour({
               onClick={runDemo}
               className="flex items-center gap-2"
             >
-              <Play className="w-4 h-4" />
+              <Play className="h-4 w-4" />
               Try Demo
             </Button>
           </div>
@@ -472,15 +472,15 @@ export default function OnboardingTour({
 
         {/* Progress */}
         <div className="mb-4">
-          <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+          <div className="mb-2 flex justify-between text-xs text-slate-500 dark:text-slate-400">
             <span>
               Step {currentStep + 1} of {steps.length}
             </span>
             <span>{Math.round(((currentStep + 1) / steps.length) * 100)}%</span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+          <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
             <div
-              className="bg-primary-600 h-1.5 rounded-full progress-bar"
+              className="bg-primary-600 progress-bar h-1.5 rounded-full"
               data-progress={Math.round(
                 ((currentStep + 1) / steps.length) * 100
               )}
@@ -490,25 +490,19 @@ export default function OnboardingTour({
 
         {/* Don't Show Again Option - Only show on first step */}
         {currentStep === 0 && (
-          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-            <label className="flex items-center gap-3 text-sm cursor-pointer group">
+          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+            <label className="group flex cursor-pointer items-center gap-3 text-sm">
               <div className="relative flex items-center">
                 <input
                   type="checkbox"
                   checked={dontShowAgain}
                   onChange={(e) => handleDontShowAgainChange(e.target.checked)}
-                  className="sr-only peer"
+                  className="peer sr-only"
                 />
-                <div
-                  className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded 
-                            peer-checked:bg-primary-600 peer-checked:border-primary-600 
-                            peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:ring-offset-1
-                            transition-all duration-200 group-hover:border-primary-400
-                            flex items-center justify-center"
-                >
+                <div className="peer-checked:bg-primary-600 peer-checked:border-primary-600 peer-focus:ring-primary-500 group-hover:border-primary-400 flex h-5 w-5 items-center justify-center rounded border-2 border-slate-300 transition-all duration-200 peer-focus:ring-2 peer-focus:ring-offset-1 dark:border-slate-600">
                   {dontShowAgain && (
                     <svg
-                      className="w-3 h-3 text-white"
+                      className="h-3 w-3 text-white"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -522,10 +516,10 @@ export default function OnboardingTour({
                 </div>
               </div>
               <div className="flex-1">
-                <span className="text-slate-700 dark:text-slate-300 font-medium">
+                <span className="font-medium text-slate-700 dark:text-slate-300">
                   Don't show this tour again
                 </span>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   You can always restart the tour from the settings menu
                 </p>
               </div>
@@ -543,7 +537,7 @@ export default function OnboardingTour({
               disabled={currentStep === 0}
               className="flex items-center gap-1"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="h-4 w-4" />
               Back
             </Button>
 
@@ -554,7 +548,7 @@ export default function OnboardingTour({
               className="flex items-center gap-1"
               title="Restart tour"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
 

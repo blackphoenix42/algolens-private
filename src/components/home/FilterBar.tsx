@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { CATALOG } from "@/engine/registry";
 import { useI18n } from "@/i18n";
-import { cn } from "@/utils";
+import type { AlgoMeta } from "@/types/algorithms";
+import { cn, createSearchableFromAlgoMeta } from "@/utils";
 
 export type SortKey =
   | "relevance"
@@ -51,6 +53,19 @@ export default function FilterBar(props: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Create searchable algorithm data
+  const allAlgorithms = useMemo(() => {
+    const algorithms: AlgoMeta[] = [];
+    Object.values(CATALOG).forEach((categoryAlgos) => {
+      algorithms.push(...categoryAlgos);
+    });
+    return algorithms;
+  }, []);
+
+  const searchableItems = useMemo(() => {
+    return createSearchableFromAlgoMeta(allAlgorithms);
+  }, [allAlgorithms]);
+
   // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -75,15 +90,12 @@ export default function FilterBar(props: Props) {
     <div
       className={cn(
         "sticky top-4 z-40 mb-6 transition-all duration-300",
-        "rounded-2xl border backdrop-blur-xl",
-        "bg-white/80 dark:bg-slate-900/80",
-        "border-slate-200/80 dark:border-slate-700/80",
-        "shadow-xl"
+        "liquid-glass-card shadow-xl"
       )}
     >
       {/* Main Search and Controls */}
       <div className="p-4 md:p-6">
-        <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           {/* Search Input */}
           <div className="flex-1">
             <SearchInput
@@ -93,6 +105,20 @@ export default function FilterBar(props: Props) {
                 defaultValue:
                   "Search algorithms, data structures, or concepts...",
               })}
+              // Performance optimization for fast typing
+              debounceMs={80}
+              // Enhanced search props
+              searchableItems={searchableItems}
+              enableFuzzySearch={true}
+              enableTypoCorrection={true}
+              showCategories={true}
+              maxDisplayedResults={6}
+              searchOptions={{
+                fuzzyThreshold: 0.5,
+                maxResults: 10,
+                highlightMatches: true,
+              }}
+              // Legacy fallback for backward compatibility
               suggestions={[...categories, ...tags]}
               showSuggestions={true}
               className="w-full"
@@ -103,13 +129,13 @@ export default function FilterBar(props: Props) {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-2">
             {/* Sort Dropdown */}
             <div className="relative">
               <select
                 value={sortKey}
                 onChange={(e) => setSortKey(e.target.value as SortKey)}
-                className="ui-select text-sm min-w-[120px] appearance-none cursor-pointer"
+                className="ui-select min-w-[120px] cursor-pointer appearance-none text-sm"
                 title={t("controls.sort")}
               >
                 <option value="relevance">
@@ -139,7 +165,7 @@ export default function FilterBar(props: Props) {
             >
               <span className="ml-1">{t("common.filter")}</span>
               {hasActiveFilters && (
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary-500 rounded-full animate-pulse" />
+                <span className="bg-primary-500 absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full" />
               )}
             </Button>
 
@@ -160,11 +186,11 @@ export default function FilterBar(props: Props) {
 
       {/* Expanded Filters */}
       {isExpanded && (
-        <div className="px-4 pb-4 md:px-6 md:pb-6 space-y-4 border-t border-slate-200/50 dark:border-slate-700/50 animate-fade-in-down">
+        <div className="animate-fade-in-down space-y-4 border-t border-white/20 px-4 pb-4 md:px-6 md:pb-6 dark:border-white/10">
           {/* Categories */}
           {categories.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 Categories
               </h4>
               <div className="flex flex-wrap gap-2">
@@ -176,10 +202,10 @@ export default function FilterBar(props: Props) {
                       setSelectedCategories(toggleIn(selectedCategories, cat))
                     }
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border",
+                      "liquid-glass-filter px-3 py-1.5 text-sm font-medium transition-all duration-200",
                       selectedCategories.includes(cat)
-                        ? "bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900 dark:text-primary-300"
-                        : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                        ? "active text-primary-700 dark:text-primary-300"
+                        : "text-slate-700 dark:text-slate-300"
                     )}
                   >
                     {cat.replace("-", " ").toUpperCase()}
@@ -192,7 +218,7 @@ export default function FilterBar(props: Props) {
           {/* Difficulties */}
           {difficulties.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 Difficulty
               </h4>
               <div className="flex flex-wrap gap-2">
@@ -206,10 +232,10 @@ export default function FilterBar(props: Props) {
                       )
                     }
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border",
+                      "liquid-glass-filter px-3 py-1.5 text-sm font-medium transition-all duration-200",
                       selectedDifficulties.includes(diff)
-                        ? "bg-secondary-100 text-secondary-700 border-secondary-200 dark:bg-secondary-900 dark:text-secondary-300"
-                        : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                        ? "active text-secondary-700 dark:text-secondary-300"
+                        : "text-slate-700 dark:text-slate-300"
                     )}
                   >
                     {diff}
@@ -222,20 +248,20 @@ export default function FilterBar(props: Props) {
           {/* Tags */}
           {tags.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 Tags
               </h4>
-              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+              <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
                 {tags.slice(0, 20).map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => setSelectedTags(toggleIn(selectedTags, tag))}
                     className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 border",
+                      "liquid-glass-filter px-2.5 py-1 text-xs font-medium transition-all duration-200",
                       selectedTags.includes(tag)
-                        ? "bg-secondary-100 text-secondary-700 border-secondary-200 dark:bg-secondary-900 dark:text-secondary-300"
-                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                        ? "active text-secondary-700 dark:text-secondary-300"
+                        : "text-slate-600 dark:text-slate-400"
                     )}
                   >
                     {tag}

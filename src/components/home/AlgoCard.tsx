@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Card } from "@/components/ui/Card";
 import { useI18n } from "@/i18n";
-import { cn, getDifficultyColor, formatDifficulty } from "@/utils";
+import { cn, formatDifficulty, getDifficultyColor } from "@/utils";
 
 export type AlgoItem = {
   slug: string;
@@ -23,7 +23,7 @@ function DifficultyPill({ v }: { v?: AlgoItem["difficulty"] }) {
   return (
     <span
       className={cn(
-        "px-2 py-1 rounded-full text-xs font-semibold transition-all duration-200",
+        "rounded-full px-2 py-1 text-xs font-semibold transition-all duration-200",
         styles
       )}
     >
@@ -46,7 +46,7 @@ function TinyBars({ seed = 1, accent }: { seed?: number; accent: string }) {
       {hs.map((t, i) => (
         <div
           key={i}
-          className="bg-white/95 rounded-sm transition-all duration-300 transform hover:scale-110"
+          className="transform rounded-sm bg-white/95 transition-all duration-300 hover:scale-110"
           style={{
             width: 18,
             height: `${t * 70}%`,
@@ -88,9 +88,9 @@ function AlgoCard({
       interactive={true}
       data-tour={dataTour}
       className={cn(
-        "group overflow-hidden transition-all duration-300 transform cursor-pointer",
-        "hover:shadow-xl hover:scale-105",
-        "border-0 shadow-soft min-h-[44px] touch-target",
+        "group liquid-glass-card liquid-glass-glow transform cursor-pointer overflow-hidden transition-all duration-300",
+        "hover:scale-105 hover:shadow-xl",
+        "shadow-soft touch-target min-h-[44px]",
         isHovered && "shadow-glow"
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -100,9 +100,9 @@ function AlgoCard({
       {/* Enhanced thumbnail with animations */}
       <div
         className={cn(
-          "relative h-36 transition-all duration-500 overflow-hidden",
+          "relative h-36 overflow-hidden transition-all duration-500",
           headerBg,
-          "bg-gradient-to-br from-current to-opacity-80"
+          "to-opacity-80 bg-gradient-to-br from-current"
         )}
       >
         <TinyBars seed={seed} accent={accent || "#3b82f6"} />
@@ -111,20 +111,19 @@ function AlgoCard({
         <div
           className={cn(
             "absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent",
-            "transform -skew-x-12 -translate-x-full transition-transform duration-1000",
+            "-translate-x-full -skew-x-12 transform transition-transform duration-1000",
             isHovered && "translate-x-full"
           )}
         />
 
         {/* Badge row (right) */}
-        <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
           {item.badge ? (
             <span
               className={cn(
-                "px-2 py-1 rounded-full text-xs font-semibold",
-                "bg-white/90 text-slate-900 border border-white/60",
-                "dark:bg-slate-900/80 dark:text-slate-100 dark:border-slate-700",
-                "transition-all duration-200 transform",
+                "liquid-glass-filter px-2 py-1 text-xs font-semibold",
+                "text-slate-900 dark:text-slate-100",
+                "transform transition-all duration-200",
                 isHovered && "scale-110"
               )}
             >
@@ -137,10 +136,9 @@ function AlgoCard({
         <div className="absolute bottom-3 left-3 z-10">
           <span
             className={cn(
-              "px-2 py-1 rounded-full text-xs font-medium",
-              "bg-black/20 text-white backdrop-blur-sm",
-              "transition-all duration-200",
-              isHovered && "bg-black/30"
+              "liquid-glass-filter px-2 py-1 text-xs font-medium",
+              "text-white backdrop-blur-sm",
+              "transition-all duration-200"
             )}
           >
             {topic.replace("-", " ").toUpperCase()}
@@ -149,12 +147,12 @@ function AlgoCard({
       </div>
 
       {/* Enhanced content */}
-      <div className="p-4 space-y-3">
+      <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <h3
             className={cn(
-              "text-base font-semibold leading-tight text-slate-900 dark:text-slate-100",
-              "transition-colors duration-200 group-hover:text-primary-600",
+              "text-base leading-tight font-semibold text-slate-900 dark:text-slate-100",
+              "group-hover:text-primary-600 transition-colors duration-200",
               "dark:group-hover:text-primary-400"
             )}
           >
@@ -165,7 +163,7 @@ function AlgoCard({
 
         <p
           className={cn(
-            "text-sm text-slate-600 dark:text-slate-300 line-clamp-2",
+            "line-clamp-2 text-sm text-slate-600 dark:text-slate-300",
             "transition-colors duration-200"
           )}
         >
@@ -179,12 +177,10 @@ function AlgoCard({
               <span
                 key={tag}
                 className={cn(
-                  "px-2 py-1 rounded-md text-xs font-medium",
-                  "bg-slate-100 text-slate-700 border border-slate-200",
-                  "dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
+                  "liquid-glass-filter px-2 py-1 text-xs font-medium",
+                  "text-slate-700 dark:text-slate-300",
                   "transition-all duration-200 hover:scale-105",
-                  "hover:bg-primary-100 hover:text-primary-700",
-                  "dark:hover:bg-primary-900 dark:hover:text-primary-300"
+                  "hover:text-primary-700 dark:hover:text-primary-300"
                 )}
               >
                 {tag}
@@ -193,9 +189,8 @@ function AlgoCard({
             {item.tags.length > 3 && (
               <span
                 className={cn(
-                  "px-2 py-1 rounded-md text-xs font-medium",
-                  "bg-slate-100 text-slate-500 border border-slate-200",
-                  "dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                  "liquid-glass-filter px-2 py-1 text-xs font-medium",
+                  "text-slate-500 dark:text-slate-400"
                 )}
               >
                 +{item.tags.length - 3}
@@ -207,17 +202,17 @@ function AlgoCard({
         {/* Quick action buttons */}
         <div
           className={cn(
-            "flex items-center justify-between pt-2 opacity-0 transform translate-y-2",
-            "transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
+            "flex translate-y-2 transform items-center justify-between pt-2 opacity-0",
+            "transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
           )}
         >
           <div className="flex items-center space-x-2">
             <button
               className={cn(
-                "flex items-center space-x-1 px-2 py-1 rounded-md text-xs",
-                "text-slate-600 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400",
-                "hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200",
-                "min-h-[44px] touch-target"
+                "flex items-center space-x-1 rounded-md px-2 py-1 text-xs",
+                "hover:text-primary-600 dark:hover:text-primary-400 text-slate-600 dark:text-slate-400",
+                "transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800",
+                "touch-target min-h-[44px]"
               )}
               onClick={(e) => {
                 e.stopPropagation();
@@ -225,7 +220,7 @@ function AlgoCard({
                 navigate(`/viz/${topic}/${item.slug}?autostart=true`);
               }}
             >
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
@@ -237,7 +232,7 @@ function AlgoCard({
           </div>
 
           <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse-soft" />
+            <div className="animate-pulse-soft h-2 w-2 rounded-full bg-green-500" />
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {t("common.ready", { defaultValue: "Ready" })}
             </span>

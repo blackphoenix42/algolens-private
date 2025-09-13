@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 import {
-  LineChart,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
 
 import { Button } from "@/components/ui/Button";
@@ -234,7 +234,7 @@ export default function ComplexityExplorer({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Complexity Analysis
@@ -285,13 +285,13 @@ export default function ComplexityExplorer({
       {/* Algorithm Complexity Visualization */}
       <Card className="p-6">
         <div className="mb-6">
-          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">
+          <h4 className="mb-2 font-medium text-slate-900 dark:text-slate-100">
             Time Complexity: {algorithmName}
           </h4>
         </div>
 
         {/* Interactive Chart */}
-        <div className="h-64 w-full mb-6">
+        <div className="mb-6 h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={complexityData.chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -365,10 +365,10 @@ export default function ComplexityExplorer({
         <div className="space-y-4">
           {/* Best Case */}
           {complexity.time.best !== complexity.time.average && (
-            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-4 h-4 rounded-full"
+                  className="h-4 w-4 rounded-full"
                   style={{
                     backgroundColor: getComplexityColor(complexity.time.best),
                   }}
@@ -390,10 +390,10 @@ export default function ComplexityExplorer({
           )}
 
           {/* Average Case */}
-          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-primary-200 dark:border-primary-700">
+          <div className="border-primary-200 dark:border-primary-700 flex items-center justify-between rounded-lg border-2 bg-slate-50 p-4 dark:bg-slate-800">
             <div className="flex items-center gap-3">
               <div
-                className="w-4 h-4 rounded-full"
+                className="h-4 w-4 rounded-full"
                 style={{
                   backgroundColor: getComplexityColor(complexity.time.average),
                 }}
@@ -415,10 +415,10 @@ export default function ComplexityExplorer({
 
           {/* Worst Case */}
           {complexity.time.worst !== complexity.time.average && (
-            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-4 h-4 rounded-full"
+                  className="h-4 w-4 rounded-full"
                   style={{
                     backgroundColor: getComplexityColor(complexity.time.worst),
                   }}
@@ -445,7 +445,7 @@ export default function ComplexityExplorer({
       {showComparison && (
         <Card className="p-6">
           <div className="mb-4">
-            <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-2">
+            <h4 className="mb-2 font-medium text-slate-900 dark:text-slate-100">
               Common Complexity Comparison
             </h4>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -454,7 +454,7 @@ export default function ComplexityExplorer({
             </p>
           </div>
 
-          <div className="h-64 w-full mb-6">
+          <div className="mb-6 h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={commonComplexities.chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -539,11 +539,11 @@ export default function ComplexityExplorer({
             {Object.entries(commonComplexities.simple).map(([name, data]) => (
               <div
                 key={name}
-                className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                className="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-4 h-4 rounded-full"
+                    className="h-4 w-4 rounded-full"
                     style={{ backgroundColor: getComplexityColor(name) }}
                   />
                   <div>
@@ -569,12 +569,12 @@ export default function ComplexityExplorer({
       {/* Additional Info */}
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="p-4">
-          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-3">
+          <h4 className="mb-3 font-medium text-slate-900 dark:text-slate-100">
             Space Complexity
           </h4>
           <div className="flex items-center gap-3">
             <div
-              className="w-4 h-4 rounded-full"
+              className="h-4 w-4 rounded-full"
               style={{ backgroundColor: getComplexityColor(complexity.space) }}
             />
             <div>
@@ -589,12 +589,12 @@ export default function ComplexityExplorer({
         </Card>
 
         <Card className="p-4">
-          <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-3">
+          <h4 className="mb-3 font-medium text-slate-900 dark:text-slate-100">
             Algorithm Properties
           </h4>
           <div className="space-y-2 text-sm">
             {complexity.stable !== undefined && (
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">
                   Stable:
                 </span>
@@ -606,7 +606,7 @@ export default function ComplexityExplorer({
               </div>
             )}
             {complexity.inPlace !== undefined && (
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400">
                   In-place:
                 </span>
@@ -619,7 +619,7 @@ export default function ComplexityExplorer({
             )}
             {complexity.stable === undefined &&
               complexity.inPlace === undefined && (
-                <div className="text-slate-500 dark:text-slate-400 italic">
+                <div className="text-slate-500 italic dark:text-slate-400">
                   No additional properties defined
                 </div>
               )}

@@ -1,5 +1,5 @@
 // e2e/fixtures/test.ts
-import { test as base, expect } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 
 type Fixtures = {
   /** Navigate to the app (defaults to "/"), with animations disabled & noisy requests blocked */
@@ -39,4 +39,4 @@ test.use({
   baseURL: process.env.VITE_PREVIEW_URL ?? "http://127.0.0.1:4173",
 });
 
-export { test, expect };
+export { expect, test };

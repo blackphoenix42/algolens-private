@@ -1,22 +1,23 @@
-import React, { useCallback, useState, useEffect } from "react";
+import "reactflow/dist/style.css";
+
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  ReactFlow,
-  Node,
   addEdge,
-  ConnectionLineType,
-  Panel,
-  useNodesState,
-  useEdgesState,
-  Controls,
-  MiniMap,
   Background,
   BackgroundVariant,
   Connection,
-  MarkerType,
-  NodeChange,
+  ConnectionLineType,
+  Controls,
   EdgeChange,
+  MarkerType,
+  MiniMap,
+  Node,
+  NodeChange,
+  Panel,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "reactflow";
-import "reactflow/dist/style.css";
 
 interface GraphNode extends Node {
   data: {
@@ -68,7 +69,7 @@ const nodeTypes = {
     selected: boolean;
   }) => (
     <div
-      className={`px-4 py-2 shadow-md rounded-full bg-white border-2 transition-all duration-300 ${
+      className={`rounded-full border-2 bg-white px-4 py-2 shadow-md transition-all duration-300 ${
         data.visited
           ? "border-green-500 bg-green-100"
           : data.inPath
@@ -79,7 +80,7 @@ const nodeTypes = {
       }`}
     >
       <div className="flex flex-col items-center">
-        <div className="font-bold text-sm">{data.label}</div>
+        <div className="text-sm font-bold">{data.label}</div>
         {data.distance !== undefined && (
           <div className="text-xs text-gray-600">{data.distance}</div>
         )}
@@ -208,7 +209,7 @@ export default function GraphCanvas({
   }, [nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange]);
 
   return (
-    <div className={`w-full h-full ${className}`}>
+    <div className={`h-full w-full ${className}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -226,27 +227,27 @@ export default function GraphCanvas({
 
         <Panel
           position="top-left"
-          className="bg-white p-4 rounded-lg shadow-md"
+          className="rounded-lg bg-white p-4 shadow-md"
         >
           <div className="space-y-2">
-            <h3 className="font-semibold text-sm">Graph Controls</h3>
+            <h3 className="text-sm font-semibold">Graph Controls</h3>
             <div className="flex flex-col gap-2">
               <button
                 onClick={addNode}
                 disabled={isAnimating}
-                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
+                className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600 disabled:opacity-50"
               >
                 Add Node
               </button>
               <button
                 onClick={clearHighlighting}
                 disabled={isAnimating}
-                className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 disabled:opacity-50"
+                className="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600 disabled:opacity-50"
               >
                 Clear Highlights
               </button>
             </div>
-            <div className="text-xs text-gray-600 mt-2">
+            <div className="mt-2 text-xs text-gray-600">
               <p>• Drag nodes to reposition</p>
               <p>• Click and drag to connect nodes</p>
               <p>• Select nodes/edges to delete</p>
@@ -256,10 +257,10 @@ export default function GraphCanvas({
 
         <Panel
           position="top-right"
-          className="bg-white p-4 rounded-lg shadow-md"
+          className="rounded-lg bg-white p-4 shadow-md"
         >
           <div className="space-y-2">
-            <h3 className="font-semibold text-sm">Algorithm</h3>
+            <h3 className="text-sm font-semibold">Algorithm</h3>
             <select
               value={selectedAlgorithm || ""}
               onChange={(e) =>
@@ -269,7 +270,7 @@ export default function GraphCanvas({
                     : (e.target.value as "dijkstra" | "bfs" | "dfs" | "mst")
                 )
               }
-              className="w-full p-2 border rounded text-sm"
+              className="w-full rounded border p-2 text-sm"
               disabled={isAnimating}
             >
               <option value="">Select Algorithm</option>

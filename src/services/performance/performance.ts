@@ -5,15 +5,63 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Performance monitoring
+// Enhanced performance monitoring with alerts
 export const performanceMetrics = {
   lcp: 0,
   fid: 0,
   cls: 0,
   inp: 0,
+  // New metrics
+  ttfb: 0, // Time to First Byte
+  fcp: 0, // First Contentful Paint
+  totalBlockingTime: 0,
 };
 
-// Track Core Web Vitals
+// Performance alerts system
+export interface PerformanceAlert {
+  id: string;
+  type: "warning" | "error" | "info";
+  metric: string;
+  message: string;
+  timestamp: number;
+  value: number;
+  threshold: number;
+}
+
+let performanceAlerts: PerformanceAlert[] = [];
+let alertCallbacks: ((alert: PerformanceAlert) => void)[] = [];
+
+export function addPerformanceAlert(
+  alert: Omit<PerformanceAlert, "id" | "timestamp">
+) {
+  const fullAlert: PerformanceAlert = {
+    ...alert,
+    id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+  };
+
+  performanceAlerts = [...performanceAlerts.slice(-19), fullAlert]; // Keep last 20 alerts
+  alertCallbacks.forEach((callback) => callback(fullAlert));
+}
+
+export function getPerformanceAlerts(): PerformanceAlert[] {
+  return performanceAlerts;
+}
+
+export function onPerformanceAlert(
+  callback: (alert: PerformanceAlert) => void
+) {
+  alertCallbacks.push(callback);
+  return () => {
+    alertCallbacks = alertCallbacks.filter((cb) => cb !== callback);
+  };
+}
+
+export function clearPerformanceAlerts() {
+  performanceAlerts = [];
+}
+
+// Track Core Web Vitals with enhanced monitoring
 export function trackWebVitals() {
   if (typeof window === "undefined") return;
 
@@ -29,11 +77,45 @@ export function trackWebVitals() {
 
         if (lastEntry.startTime > 4000) {
           console.warn(`LCP is ${lastEntry.startTime}ms (target: <2500ms)`);
+          addPerformanceAlert({
+            type: "warning",
+            metric: "LCP",
+            message:
+              "Largest Contentful Paint is slow. Consider optimizing images and critical resources.",
+            value: lastEntry.startTime,
+            threshold: 2500,
+          });
         }
       });
       observer.observe({ type: "largest-contentful-paint", buffered: true });
     } catch (e) {
       console.warn("LCP tracking failed:", e);
+    }
+
+    // Track FCP (First Contentful Paint)
+    try {
+      const fcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        for (const entry of entries) {
+          if (entry.name === "first-contentful-paint") {
+            performanceMetrics.fcp = entry.startTime;
+
+            if (entry.startTime > 3000) {
+              addPerformanceAlert({
+                type: "warning",
+                metric: "FCP",
+                message:
+                  "First Contentful Paint is slow. Optimize your initial page load.",
+                value: entry.startTime,
+                threshold: 1800,
+              });
+            }
+          }
+        }
+      });
+      fcpObserver.observe({ type: "paint", buffered: true });
+    } catch (e) {
+      console.warn("FCP tracking failed:", e);
     }
 
     // Track CLS (Cumulative Layout Shift)
@@ -50,13 +132,88 @@ export function trackWebVitals() {
         }
         performanceMetrics.cls = clsValue;
 
-        if (clsValue > 0.1) {
+        if (clsValue > 0.25) {
           console.warn(`CLS is ${clsValue} (target: <0.1)`);
+          addPerformanceAlert({
+            type: "error",
+            metric: "CLS",
+            message:
+              "High Cumulative Layout Shift detected. Set dimensions for dynamic content.",
+            value: clsValue,
+            threshold: 0.1,
+          });
+        } else if (clsValue > 0.1) {
+          addPerformanceAlert({
+            type: "warning",
+            metric: "CLS",
+            message:
+              "Moderate layout shift detected. Consider improving layout stability.",
+            value: clsValue,
+            threshold: 0.1,
+          });
         }
       });
       clsObserver.observe({ type: "layout-shift", buffered: true });
     } catch (e) {
       console.warn("CLS tracking failed:", e);
+    }
+
+    // Track Total Blocking Time and Long Tasks
+    try {
+      const longTaskObserver = new PerformanceObserver((list) => {
+        let totalBlockingTime = 0;
+        for (const entry of list.getEntries()) {
+          // Tasks longer than 50ms are considered blocking
+          if (entry.duration > 50) {
+            totalBlockingTime += entry.duration - 50;
+          }
+        }
+
+        if (totalBlockingTime > 0) {
+          performanceMetrics.totalBlockingTime += totalBlockingTime;
+
+          if (totalBlockingTime > 300) {
+            addPerformanceAlert({
+              type: "warning",
+              metric: "TBT",
+              message:
+                "Long tasks detected. Break up JavaScript execution to improve responsiveness.",
+              value: totalBlockingTime,
+              threshold: 300,
+            });
+          }
+        }
+      });
+      longTaskObserver.observe({ type: "longtask", buffered: true });
+    } catch (e) {
+      console.warn("Long task tracking failed:", e);
+    }
+
+    // Track Navigation Timing for TTFB
+    try {
+      const navigationObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.entryType === "navigation") {
+            const navEntry = entry as PerformanceNavigationTiming;
+            const ttfb = navEntry.responseStart - navEntry.requestStart;
+            performanceMetrics.ttfb = ttfb;
+
+            if (ttfb > 800) {
+              addPerformanceAlert({
+                type: "warning",
+                metric: "TTFB",
+                message:
+                  "Slow server response time. Consider optimizing your backend or CDN.",
+                value: ttfb,
+                threshold: 200,
+              });
+            }
+          }
+        }
+      });
+      navigationObserver.observe({ type: "navigation", buffered: true });
+    } catch (e) {
+      console.warn("Navigation timing failed:", e);
     }
   }
 }
@@ -177,9 +334,10 @@ export function useImageLoader(src: string) {
   return { loaded, error };
 }
 
-// FPS monitoring
+// Enhanced FPS monitoring with trend analysis
 export function useFPSMonitor() {
   const [fps, setFps] = useState(60);
+  const [fpsHistory, setFpsHistory] = useState<number[]>([]);
   const frameCount = useRef(0);
   const lastTime = useRef(performance.now());
   const animationFrame = useRef<number | null>(null);
@@ -195,8 +353,31 @@ export function useFPSMonitor() {
         );
         setFps(currentFPS);
 
-        if (currentFPS < 30) {
-          console.warn(`Low FPS detected: ${currentFPS}fps (target: 60fps)`);
+        // Update FPS history
+        setFpsHistory((prev) => [...prev.slice(-29), currentFPS]);
+
+        // Performance alerts for FPS
+        if (currentFPS < 20) {
+          console.warn(
+            `Very low FPS detected: ${currentFPS}fps (target: 60fps)`
+          );
+          addPerformanceAlert({
+            type: "error",
+            metric: "FPS",
+            message:
+              "Very low frame rate detected. Consider reducing animation complexity or using requestIdleCallback.",
+            value: currentFPS,
+            threshold: 30,
+          });
+        } else if (currentFPS < 30) {
+          addPerformanceAlert({
+            type: "warning",
+            metric: "FPS",
+            message:
+              "Low frame rate detected. Performance optimizations recommended.",
+            value: currentFPS,
+            threshold: 30,
+          });
         }
 
         frameCount.current = 0;
@@ -215,7 +396,7 @@ export function useFPSMonitor() {
     };
   }, []);
 
-  return fps;
+  return { fps, fpsHistory };
 }
 
 // Optimized state updater to prevent unnecessary re-renders

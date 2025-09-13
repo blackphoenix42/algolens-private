@@ -61,8 +61,8 @@ export type AlgoMeta = {
 
 // Export types for better organization
 export type {
+  Counters as AlgoCounters,
   Frame as AlgoFrame, // Alias for backward compatibility
   Algorithm as AlgoFunction,
   Highlights as AlgoHighlights,
-  Counters as AlgoCounters,
 };

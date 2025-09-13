@@ -1,5 +1,5 @@
-import { useSpring, animated, useSprings, config } from "@react-spring/web";
-import React, { useState, useCallback, useEffect } from "react";
+import { animated, config, useSpring, useSprings } from "@react-spring/web";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface SpringBarProps {
   value: number;
@@ -272,18 +272,18 @@ export const SpringSortingDemo: React.FC = () => {
   return (
     <animated.div
       style={containerSpring}
-      className="w-full p-6 bg-white rounded-lg shadow-lg"
+      className="w-full rounded-lg bg-white p-6 shadow-lg"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-bold mb-4">
+        <h3 className="mb-4 text-lg font-bold">
           Spring Physics Array Visualization
         </h3>
 
-        <div className="flex gap-3 mb-4">
+        <div className="mb-4 flex gap-3">
           <button
             onClick={generateArray}
             disabled={isAnimating}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
           >
             Generate Array
           </button>
@@ -291,7 +291,7 @@ export const SpringSortingDemo: React.FC = () => {
           <button
             onClick={shuffleArray}
             disabled={isAnimating}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+            className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 disabled:opacity-50"
           >
             Shuffle
           </button>
@@ -299,7 +299,7 @@ export const SpringSortingDemo: React.FC = () => {
           <button
             onClick={animatedBubbleSort}
             disabled={isAnimating}
-            className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:opacity-50"
+            className="rounded bg-purple-500 px-4 py-2 text-white hover:bg-purple-600 disabled:opacity-50"
           >
             {isAnimating ? "Sorting..." : "Bubble Sort"}
           </button>
@@ -309,7 +309,7 @@ export const SpringSortingDemo: React.FC = () => {
       <SpringArray
         array={array}
         highlights={highlights}
-        className="bg-gray-50 rounded-lg p-4"
+        className="rounded-lg bg-gray-50 p-4"
       />
 
       <div className="mt-4 text-sm text-gray-600">

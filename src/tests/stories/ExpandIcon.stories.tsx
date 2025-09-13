@@ -1,4 +1,4 @@
-import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
+import type { Meta, StoryFn, StoryObj } from "@storybook/react-vite";
 
 import { ExpandIcon } from "../../components/ui/Icons";
 import { ThemeProvider } from "../../providers/ThemeProvider";
@@ -35,11 +35,11 @@ export const DifferentSizes: Story = {
   render: () => (
     <ThemeProvider>
       <div className="flex items-center space-x-4">
-        <ExpandIcon className="w-3 h-3" />
-        <ExpandIcon className="w-4 h-4" />
-        <ExpandIcon className="w-6 h-6" />
-        <ExpandIcon className="w-8 h-8" />
-        <ExpandIcon className="w-12 h-12" />
+        <ExpandIcon className="h-3 w-3" />
+        <ExpandIcon className="h-4 w-4" />
+        <ExpandIcon className="h-6 w-6" />
+        <ExpandIcon className="h-8 w-8" />
+        <ExpandIcon className="h-12 w-12" />
       </div>
     </ThemeProvider>
   ),
@@ -56,7 +56,7 @@ export const WithButton: Story = {
   render: () => (
     <ThemeProvider>
       <button
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm bg-white/80 dark:bg-slate-800/80 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+        className="inline-flex items-center gap-2 rounded-lg border bg-white/80 px-3 py-2 shadow-sm transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:hover:bg-slate-800"
         title="Expand to fullscreen"
       >
         <ExpandIcon />
@@ -82,7 +82,7 @@ export const InDarkMode: Story = {
     (Story: StoryFn, context) => (
       <div className="dark">
         <ThemeProvider>
-          <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">
+          <div className="flex min-h-[100px] items-center justify-center bg-slate-900 p-4">
             {Story(context.args, context)}
           </div>
         </ThemeProvider>

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj, StoryFn } from "@storybook/react-vite";
+import type { Meta, StoryFn, StoryObj } from "@storybook/react-vite";
 
 import HomeButton from "../../components/ui/HomeButton";
 import { HomeIcon } from "../../components/ui/Icons";
@@ -42,7 +42,7 @@ export const InDarkMode: Story = {
     (Story: StoryFn, context) => (
       <div className="dark">
         <ThemeProvider>
-          <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">
+          <div className="flex min-h-[100px] items-center justify-center bg-slate-900 p-4">
             {Story(context.args, context)}
           </div>
         </ThemeProvider>
@@ -57,9 +57,9 @@ export const IconOnly: Story = {
     <ThemeProvider>
       <div className="flex items-center space-x-4">
         <HomeIcon />
-        <HomeIcon className="w-6 h-6" />
-        <HomeIcon className="w-8 h-8" />
-        <HomeIcon className="w-12 h-12" />
+        <HomeIcon className="h-6 w-6" />
+        <HomeIcon className="h-8 w-8" />
+        <HomeIcon className="h-12 w-12" />
       </div>
     </ThemeProvider>
   ),

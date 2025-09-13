@@ -23,7 +23,7 @@ export function AlgorithmIcon({
             width="8"
             height="30"
             fill="url(#grad1)"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <rect
             x="25"
@@ -31,7 +31,7 @@ export function AlgorithmIcon({
             width="8"
             height="45"
             fill="url(#grad2)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <rect
             x="40"
@@ -39,7 +39,7 @@ export function AlgorithmIcon({
             width="8"
             height="60"
             fill="url(#grad3)"
-            className="animate-pulse animation-delay-300"
+            className="animation-delay-300 animate-pulse"
           />
           <rect
             x="55"
@@ -47,7 +47,7 @@ export function AlgorithmIcon({
             width="8"
             height="20"
             fill="url(#grad1)"
-            className="animate-pulse animation-delay-400"
+            className="animation-delay-400 animate-pulse"
           />
           <rect
             x="70"
@@ -55,7 +55,7 @@ export function AlgorithmIcon({
             width="8"
             height="40"
             fill="url(#grad2)"
-            className="animate-pulse animation-delay-500"
+            className="animation-delay-500 animate-pulse"
           />
           <rect
             x="85"
@@ -63,7 +63,7 @@ export function AlgorithmIcon({
             width="8"
             height="55"
             fill="url(#grad3)"
-            className="animate-pulse animation-delay-600"
+            className="animation-delay-600 animate-pulse"
           />
 
           {/* Arrow indicating movement */}
@@ -109,35 +109,35 @@ export function AlgorithmIcon({
             cy="20"
             r="6"
             fill="url(#nodeGrad1)"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <circle
             cx="80"
             cy="20"
             r="6"
             fill="url(#nodeGrad2)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <circle
             cx="50"
             cy="50"
             r="6"
             fill="url(#nodeGrad3)"
-            className="animate-pulse animation-delay-300"
+            className="animation-delay-300 animate-pulse"
           />
           <circle
             cx="20"
             cy="80"
             r="6"
             fill="url(#nodeGrad1)"
-            className="animate-pulse animation-delay-400"
+            className="animation-delay-400 animate-pulse"
           />
           <circle
             cx="80"
             cy="80"
             r="6"
             fill="url(#nodeGrad2)"
-            className="animate-pulse animation-delay-500"
+            className="animation-delay-500 animate-pulse"
           />
 
           {/* Graph edges */}
@@ -151,25 +151,25 @@ export function AlgorithmIcon({
             d="M20 20 L50 50"
             stroke="url(#edgeGrad)"
             strokeWidth="2"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <path
             d="M80 20 L50 50"
             stroke="url(#edgeGrad)"
             strokeWidth="2"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <path
             d="M50 50 L20 80"
             stroke="url(#edgeGrad)"
             strokeWidth="2"
-            className="animate-pulse animation-delay-300"
+            className="animation-delay-300 animate-pulse"
           />
           <path
             d="M50 50 L80 80"
             stroke="url(#edgeGrad)"
             strokeWidth="2"
-            className="animate-pulse animation-delay-400"
+            className="animation-delay-400 animate-pulse"
           />
         </g>
         <defs>
@@ -213,42 +213,42 @@ export function AlgorithmIcon({
             cy="35"
             r="4"
             fill="url(#treeGrad2)"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <circle
             cx="70"
             cy="35"
             r="4"
             fill="url(#treeGrad2)"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <circle
             cx="20"
             cy="55"
             r="3"
             fill="url(#treeGrad3)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <circle
             cx="40"
             cy="55"
             r="3"
             fill="url(#treeGrad3)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <circle
             cx="60"
             cy="55"
             r="3"
             fill="url(#treeGrad3)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <circle
             cx="80"
             cy="55"
             r="3"
             fill="url(#treeGrad3)"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
 
           {/* Tree connections */}
@@ -295,7 +295,7 @@ export function AlgorithmIcon({
             height="15"
             fill="url(#arrayGrad1)"
             rx="2"
-            className="animate-pulse animation-delay-100"
+            className="animation-delay-100 animate-pulse"
           />
           <rect
             x="30"
@@ -304,7 +304,7 @@ export function AlgorithmIcon({
             height="15"
             fill="url(#arrayGrad2)"
             rx="2"
-            className="animate-pulse animation-delay-200"
+            className="animation-delay-200 animate-pulse"
           />
           <rect
             x="50"
@@ -313,7 +313,7 @@ export function AlgorithmIcon({
             height="15"
             fill="url(#arrayGrad3)"
             rx="2"
-            className="animate-pulse animation-delay-300"
+            className="animation-delay-300 animate-pulse"
           />
           <rect
             x="70"
@@ -322,7 +322,7 @@ export function AlgorithmIcon({
             height="15"
             fill="url(#arrayGrad1)"
             rx="2"
-            className="animate-pulse animation-delay-400"
+            className="animation-delay-400 animate-pulse"
           />
 
           {/* Array indices */}

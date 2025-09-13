@@ -24,5 +24,11 @@
     "types": ["vite/client"]
   },
   "include": ["src", "env.d.ts"],
-  "exclude": ["dist", "node_modules", "e2e", "playwright-report", "test-results"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "e2e",
+    "playwright-report",
+    "test-results"
+  ]
 }

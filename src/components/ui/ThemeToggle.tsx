@@ -25,7 +25,7 @@ const ThemeToggle = React.memo(() => {
   return (
     <button
       onClick={handleToggle}
-      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm bg-white/90 dark:bg-slate-800/90 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all duration-150 ease-out will-change-transform hover:scale-105 active:scale-95"
+      className="inline-flex items-center gap-2 rounded-lg border bg-white/90 px-3 py-2 shadow-sm transition-all duration-150 ease-out will-change-transform hover:scale-105 hover:bg-white active:scale-95 dark:border-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800"
       title="Switch theme"
     >
       <span className="text-sm font-medium transition-colors duration-150">

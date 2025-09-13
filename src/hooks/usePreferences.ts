@@ -2,7 +2,7 @@
  * React hook for managing user preferences
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { PreferencesManager, UserPreferences } from "@/services/storage";
 

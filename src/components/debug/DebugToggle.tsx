@@ -1,9 +1,9 @@
 // src/components/debug/DebugToggle.tsx
-import { useState, useEffect } from "react";
-
-import DebugPanel from "./DebugPanel";
+import { useEffect, useState } from "react";
 
 import { LogCategory, logger } from "@/services/monitoring";
+
+import DebugPanel from "./DebugPanel";
 
 export default function DebugToggle() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +55,7 @@ export default function DebugToggle() {
           );
           setIsOpen(true);
         }}
-        className="fixed bottom-4 left-4 bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 z-40"
+        className="fixed bottom-4 left-4 z-40 rounded-full bg-red-500 p-2 text-white shadow-lg hover:bg-red-600"
         title="Open Debug Panel (Ctrl+Shift+D)"
         aria-label="Open debug panel"
       >

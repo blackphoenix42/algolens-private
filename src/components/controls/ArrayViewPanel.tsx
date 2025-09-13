@@ -56,17 +56,14 @@ export default function ArrayViewPanel({
     onColorsChange({ ...colors, [k]: e.target.value });
 
   return (
-    <div className="card text-sm min-w-0">
+    <div className="card min-w-0 text-sm">
       {/* Header with collapse/expand */}
       <div className="flex items-center justify-between">
-        <div className="font-medium panel-title">
+        <div className="panel-title font-medium">
           {t("controls.arrayView", { defaultValue: "Array View" })}
         </div>
         <button
-          className="px-2 py-1 rounded border
-                     bg-white border-slate-200 hover:bg-slate-100
-                     dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800/70
-                     inline-flex items-center justify-center"
+          className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="arrayview-body"
@@ -77,7 +74,7 @@ export default function ArrayViewPanel({
           }
         >
           <ChevronDownIcon
-            className={`w-4 h-4 transition-transform duration-200 ${
+            className={`h-4 w-4 transition-transform duration-200 ${
               open ? "rotate-180" : "rotate-0"
             }`}
           />
@@ -90,10 +87,10 @@ export default function ArrayViewPanel({
       </div>
 
       {!open ? null : (
-        <div id="arrayview-body" className="grid gap-2 mt-2 min-w-0">
+        <div id="arrayview-body" className="mt-2 grid min-w-0 gap-2">
           {/* Types */}
           <div className="grid gap-2">
-            <div className="text-xs font-semibold panel-muted">
+            <div className="panel-muted text-xs font-semibold">
               {t("controls.types", { defaultValue: "Types" })}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -119,8 +116,8 @@ export default function ArrayViewPanel({
           </div>
 
           {/* Labels & Axes */}
-          <div className="grid gap-2 mt-3">
-            <div className="text-xs font-semibold panel-muted">
+          <div className="mt-3 grid gap-2">
+            <div className="panel-muted text-xs font-semibold">
               {t("controls.labelsAndAxes", { defaultValue: "Labels & Axes" })}
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -146,8 +143,8 @@ export default function ArrayViewPanel({
           </div>
 
           {/* Coloring */}
-          <div className="grid gap-2 mt-3">
-            <div className="text-xs font-semibold panel-muted">
+          <div className="mt-3 grid gap-2">
+            <div className="panel-muted text-xs font-semibold">
               {t("controls.coloring.title", { defaultValue: "Coloring" })}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -179,7 +176,7 @@ export default function ArrayViewPanel({
 
             {colorMode === "custom" && (
               <div
-                className="grid items-center gap-x-4 gap-y-2 mt-1"
+                className="mt-1 grid items-center gap-x-4 gap-y-2"
                 style={{ gridTemplateColumns: "auto auto auto auto" }}
               >
                 <span className="panel-muted">

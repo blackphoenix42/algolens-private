@@ -1,25 +1,25 @@
 // src/components/canvas/EnhancedArrayVisualization.tsx
 import React, {
-  useMemo,
-  useState,
-  useRef,
-  useCallback,
-  useImperativeHandle,
   forwardRef,
+  useCallback,
   useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
   Cell,
   LabelList,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 import { cn } from "@/utils";
@@ -481,7 +481,7 @@ const EnhancedArrayVisualization = forwardRef<
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
+        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-800">
           <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
             Index: {data.index}
           </p>
@@ -489,19 +489,19 @@ const EnhancedArrayVisualization = forwardRef<
             Value: {data.value}
           </p>
           {highlights?.pivot === data.index && (
-            <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+            <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
               Pivot
             </p>
           )}
           {(highlights?.compared?.[0] === data.index ||
             highlights?.compared?.[1] === data.index) && (
-            <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
+            <p className="text-xs font-medium text-yellow-600 dark:text-yellow-400">
               Comparing
             </p>
           )}
           {(highlights?.swapped?.[0] === data.index ||
             highlights?.swapped?.[1] === data.index) && (
-            <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+            <p className="text-xs font-medium text-red-600 dark:text-red-400">
               Swapped
             </p>
           )}
@@ -659,23 +659,23 @@ const EnhancedArrayVisualization = forwardRef<
 
   const renderTable = () => (
     <div
-      className="w-full h-full overflow-auto"
+      className="h-full w-full overflow-auto"
       style={{
         fontSize: `${12 * scale}px`,
       }}
     >
-      <div className="min-h-full flex flex-col">
-        <div className="overflow-auto flex-1">
+      <div className="flex min-h-full flex-col">
+        <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0 z-10">
+            <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700">
+                <th className="border-b border-slate-200 px-4 py-3 text-left font-medium text-slate-900 dark:border-slate-700 dark:text-slate-100">
                   Index
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700">
+                <th className="border-b border-slate-200 px-4 py-3 text-left font-medium text-slate-900 dark:border-slate-700 dark:text-slate-100">
                   Value
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700">
+                <th className="border-b border-slate-200 px-4 py-3 text-left font-medium text-slate-900 dark:border-slate-700 dark:text-slate-100">
                   Status
                 </th>
               </tr>
@@ -715,22 +715,22 @@ const EnhancedArrayVisualization = forwardRef<
                       opacity: dragIdx === index ? 0.7 : 1,
                     }}
                   >
-                    <td className="px-4 py-2 text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800">
+                    <td className="border-b border-slate-100 px-4 py-2 text-slate-900 dark:border-slate-800 dark:text-slate-100">
                       {index}
                     </td>
-                    <td className="px-4 py-2 text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800">
+                    <td className="border-b border-slate-100 px-4 py-2 text-slate-900 dark:border-slate-800 dark:text-slate-100">
                       <span
-                        className="inline-flex items-center justify-center w-8 h-8 rounded text-white text-sm font-medium"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded text-sm font-medium text-white"
                         style={{ backgroundColor: getBarColor(index, value) }}
                       >
                         {value}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                    <td className="border-b border-slate-100 px-4 py-2 text-slate-600 dark:border-slate-800 dark:text-slate-400">
                       {status && (
                         <span
                           className={cn(
-                            "inline-flex px-2 py-1 rounded-full text-xs font-medium",
+                            "inline-flex rounded-full px-2 py-1 text-xs font-medium",
                             status === "Pivot" &&
                               "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
                             status === "Comparing" &&
@@ -759,7 +759,7 @@ const EnhancedArrayVisualization = forwardRef<
     <div
       ref={wrapperRef}
       className={cn(
-        "relative w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-auto",
+        "relative w-full overflow-auto rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900",
         className
       )}
       style={{
@@ -770,21 +770,21 @@ const EnhancedArrayVisualization = forwardRef<
       {/* Zoom Controls */}
       <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
         <button
-          className="w-8 h-8 bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center text-slate-600 dark:text-slate-400"
+          className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-400 dark:hover:bg-slate-800"
           onClick={() => zoomAt(1.2)}
           title="Zoom In"
         >
           +
         </button>
         <button
-          className="w-8 h-8 bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center text-slate-600 dark:text-slate-400"
+          className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-400 dark:hover:bg-slate-800"
           onClick={() => zoomAt(1 / 1.2)}
           title="Zoom Out"
         >
           −
         </button>
         <button
-          className="w-8 h-8 bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center justify-center text-slate-600 dark:text-slate-400"
+          className="flex h-8 w-8 items-center justify-center rounded border border-slate-200 bg-white/90 text-slate-600 shadow-sm transition-colors hover:bg-white dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-400 dark:hover:bg-slate-800"
           onClick={() => {
             setScale(1);
             setAngle(0);
@@ -796,7 +796,7 @@ const EnhancedArrayVisualization = forwardRef<
       </div>
 
       {/* Scrollable Chart Container */}
-      <div className="w-full h-full overflow-auto">
+      <div className="h-full w-full overflow-auto">
         <div
           ref={rotatorRef}
           className="relative"

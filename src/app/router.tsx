@@ -2,17 +2,17 @@ import * as Sentry from "@sentry/react";
 import React, { useEffect } from "react";
 import {
   createBrowserRouter,
-  RouterProvider,
-  useRouteError,
   isRouteErrorResponse,
   Link,
+  RouterProvider,
+  useRouteError,
 } from "react-router-dom";
-
-import { AppLayout } from "./AppLayout";
 
 import HomePage from "@/pages/HomePage";
 import VisualizerPage from "@/pages/VisualizerPage";
 import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
+
+import { AppLayout } from "./AppLayout";
 
 /** Used ONLY as errorElement (has access to useRouteError) */
 function ErrorBoundary() {
@@ -42,24 +42,24 @@ function ErrorBoundary() {
   });
 
   return (
-    <div className="min-h-screen grid place-items-center p-6">
-      <div className="max-w-lg w-full border rounded-xl p-6 shadow-sm bg-white dark:bg-slate-900 dark:border-slate-700">
-        <h1 className="text-2xl font-bold mb-2">
+    <div className="grid min-h-screen place-items-center p-6">
+      <div className="w-full max-w-lg rounded-xl border bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <h1 className="mb-2 text-2xl font-bold">
           {status} — {statusText}
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+        <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
           {msg || "Something went wrong while rendering this page."}
         </p>
         <div className="flex gap-2">
           <Link
             to="/"
-            className="px-3 py-2 rounded-lg border bg-white hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
+            className="rounded-lg border bg-white px-3 py-2 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
           >
             ← Back to Home
           </Link>
           <button
             onClick={() => window.location.reload()}
-            className="px-3 py-2 rounded-lg border bg-white hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
+            className="rounded-lg border bg-white px-3 py-2 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
           >
             Retry
           </button>

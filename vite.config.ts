@@ -3,6 +3,7 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 
 const isCI = process.env.CI === "true";
@@ -33,6 +34,14 @@ export default defineConfig({
         sourcemaps: {
           assets: "./dist/**",
         },
+      }),
+    // Bundle analyzer - only generate in CI or when ANALYZE=true
+    (process.env.CI === "true" || process.env.ANALYZE === "true") &&
+      visualizer({
+        filename: "dist/bundle-analysis.html",
+        open: !process.env.CI,
+        gzipSize: true,
+        brotliSize: true,
       }),
   ].filter(Boolean),
 

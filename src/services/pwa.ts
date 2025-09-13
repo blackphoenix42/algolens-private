@@ -409,4 +409,4 @@ export function usePWA() {
 import React from "react";
 
 export { PWAManager };
-export type { OfflineAlgorithm, CacheConfig };
+export type { CacheConfig, OfflineAlgorithm };

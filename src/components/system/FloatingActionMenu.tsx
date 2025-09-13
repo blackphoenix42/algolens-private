@@ -1,12 +1,12 @@
 import {
-  Volume2,
-  VolumeX,
-  Download,
   Activity,
+  Download,
+  Info,
   Keyboard,
   MoreVertical,
+  Volume2,
+  VolumeX,
   X,
-  Info,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -66,10 +66,10 @@ export function FloatingActionMenu() {
       {/* Menu Items */}
       <div
         className={cn(
-          "flex flex-col gap-2 mb-2 transition-all duration-300",
+          "mb-2 flex flex-col gap-2 transition-all duration-300",
           isOpen
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4 pointer-events-none"
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-4 opacity-0"
         )}
       >
         {menuItems.map((item, index) => (
@@ -77,18 +77,18 @@ export function FloatingActionMenu() {
             key={index}
             onClick={item.onClick}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg",
-              "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700",
-              "hover:bg-slate-50 dark:hover:bg-slate-750 transition-all duration-200",
+              "flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg",
+              "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800",
+              "dark:hover:bg-slate-750 transition-all duration-200 hover:bg-slate-50",
               "text-slate-700 dark:text-slate-200",
               item.active &&
-                "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
+                "border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/20"
             )}
             title={item.label}
           >
             <item.icon
               className={cn(
-                "w-4 h-4",
+                "h-4 w-4",
                 item.active && "text-blue-600 dark:text-blue-400"
               )}
             />
@@ -103,17 +103,17 @@ export function FloatingActionMenu() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center justify-center w-12 h-12 rounded-full shadow-lg",
-          "bg-blue-600 hover:bg-blue-700 text-white",
+          "flex h-12 w-12 items-center justify-center rounded-full shadow-lg",
+          "bg-blue-600 text-white hover:bg-blue-700",
           "transition-all duration-200",
           isOpen && "rotate-45"
         )}
         title={isOpen ? "Close Menu" : "Open Quick Actions"}
       >
         {isOpen ? (
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" />
         ) : (
-          <MoreVertical className="w-5 h-5" />
+          <MoreVertical className="h-5 w-5" />
         )}
       </button>
 

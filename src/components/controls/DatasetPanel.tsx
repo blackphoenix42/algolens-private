@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useI18n } from "@/i18n";
 import {
-  makeRandomArray,
+  makeDuplicatesArray,
+  makeFewUniqueArray,
   makeGaussianArray,
   makeNearlySortedArrayDir,
+  makeRandomArray,
   makeReversedArray,
-  makeFewUniqueArray,
-  makeDuplicatesArray,
   makeSawtoothArray,
   makeSortedArray,
   parseCustomInput,
@@ -37,8 +37,7 @@ function IconButton({
       {toast && (
         <span
           aria-live="polite"
-          className="absolute -top-6 right-0 text-[11px] px-2 py-[2px] rounded shadow
-                     bg-black/80 text-white"
+          className="absolute -top-6 right-0 rounded bg-black/80 px-2 py-[2px] text-[11px] text-white shadow"
         >
           {toast}
         </span>
@@ -48,7 +47,7 @@ function IconButton({
 }
 
 const CopySvg = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden>
+  <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
     <path
       d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V9Z"
       fill="currentColor"
@@ -74,7 +73,7 @@ const CopySvg = () => (
 );
 
 const PasteSvg = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden>
+  <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
     <path d="M8 4h8v3H8z" fill="currentColor" opacity=".2" />
     <rect
       x="6"
@@ -217,17 +216,14 @@ export default function DatasetPanel({ value, onChange }: Props) {
   }
 
   return (
-    <div className="card text-sm min-w-0">
+    <div className="card min-w-0 text-sm">
       {/* Header with collapse/expand */}
       <div className="flex items-center justify-between">
-        <div className="font-medium panel-title">
+        <div className="panel-title font-medium">
           {t("controls.dataset", { defaultValue: "Dataset" })}
         </div>
         <button
-          className="px-2 py-1 rounded border
-             bg-white border-slate-200 hover:bg-slate-100
-             dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800/70
-             inline-flex items-center justify-center"
+          className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="dataset-body"
@@ -238,7 +234,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
           }
         >
           <ChevronDownIcon
-            className={`w-4 h-4 transition-transform duration-200 ${
+            className={`h-4 w-4 transition-transform duration-200 ${
               open ? "rotate-180" : "rotate-0"
             }`}
           />
@@ -251,10 +247,10 @@ export default function DatasetPanel({ value, onChange }: Props) {
       </div>
 
       {!open ? null : (
-        <div id="dataset-body" className="grid gap-2 mt-2 min-w-0">
+        <div id="dataset-body" className="mt-2 grid min-w-0 gap-2">
           {/* Size */}
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 min-w-0">
-            <span className="w-24 shrink-0 panel-muted">
+          <div className="grid min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2">
+            <span className="panel-muted w-24 shrink-0">
               {t("controls.size", { defaultValue: "Size" })}
             </span>
             <input
@@ -276,8 +272,8 @@ export default function DatasetPanel({ value, onChange }: Props) {
           </div>
 
           {/* Range */}
-          <label className="flex items-center gap-2 min-w-0">
-            <span className="w-24 shrink-0 panel-muted">
+          <label className="flex min-w-0 items-center gap-2">
+            <span className="panel-muted w-24 shrink-0">
               {t("controls.range", { defaultValue: "Range" })}
             </span>
             <input
@@ -286,7 +282,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
               onChange={(e) => setMin(Number(e.target.value))}
               className="ui-input w-16 shrink-0"
             />
-            <span className="shrink-0 panel-muted">to</span>
+            <span className="panel-muted shrink-0">to</span>
             <input
               type="number"
               value={max}
@@ -296,8 +292,8 @@ export default function DatasetPanel({ value, onChange }: Props) {
           </label>
 
           {/* Seed */}
-          <label className="flex items-center gap-2 min-w-0">
-            <span className="w-24 shrink-0 panel-muted">
+          <label className="flex min-w-0 items-center gap-2">
+            <span className="panel-muted w-24 shrink-0">
               {t("controls.seed", { defaultValue: "Seed" })}
             </span>
             <input
@@ -308,11 +304,11 @@ export default function DatasetPanel({ value, onChange }: Props) {
             />
           </label>
 
-          <div className="flex items-center gap-2 flex-wrap min-w-0 pl-24">
-            <span className="text-xs font-semibold panel-muted">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 pl-24">
+            <span className="panel-muted text-xs font-semibold">
               {t("controls.mode", { defaultValue: "Mode" })}
             </span>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 className={`seg-btn ${seedMode === "fixed" ? "on" : ""}`}
                 onClick={() => setSeedMode("fixed")}
@@ -337,8 +333,8 @@ export default function DatasetPanel({ value, onChange }: Props) {
           </div>
 
           {/* Type */}
-          <div className="grid gap-2 min-w-0">
-            <div className="text-xs font-semibold panel-muted">Type</div>
+          <div className="grid min-w-0 gap-2">
+            <div className="panel-muted text-xs font-semibold">Type</div>
             <select
               value={dist}
               onChange={(e) => setDist(e.target.value as Dist)}
@@ -433,8 +429,8 @@ export default function DatasetPanel({ value, onChange }: Props) {
           </div>
 
           {dist === "few" && (
-            <label className="flex items-center gap-2 min-w-0">
-              <span className="w-24 shrink-0 panel-muted">
+            <label className="flex min-w-0 items-center gap-2">
+              <span className="panel-muted w-24 shrink-0">
                 {t("controls.uniques", { defaultValue: "Uniques" })}
               </span>
               <input
@@ -448,8 +444,8 @@ export default function DatasetPanel({ value, onChange }: Props) {
             </label>
           )}
           {dist === "sawtooth" && (
-            <label className="flex items-center gap-2 min-w-0">
-              <span className="w-24 shrink-0 panel-muted">
+            <label className="flex min-w-0 items-center gap-2">
+              <span className="panel-muted w-24 shrink-0">
                 {t("controls.period", { defaultValue: "Period" })}
               </span>
               <input
@@ -464,7 +460,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
           )}
 
           {dist === "custom" && (
-            <div className="grid gap-1 min-w-0">
+            <div className="grid min-w-0 gap-1">
               <div className="flex items-center justify-between">
                 <span className="panel-title">
                   {t("controls.customNumbers", {
@@ -495,7 +491,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
           {/* Actions */}
           <div className="flex items-center gap-2 pt-1">
             <button
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-white shadow-sm hover:bg-indigo-500"
               onClick={gen}
               title={
                 seedMode === "fixed"
@@ -514,7 +510,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
 
           {/* Preview */}
           <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold panel-muted">
+            <div className="panel-muted text-xs font-semibold">
               {t("controls.numbers", { defaultValue: "Numbers" })}
             </div>
             <IconButton
@@ -526,11 +522,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
               <CopySvg />
             </IconButton>
           </div>
-          <div
-            className="font-mono text-xs p-2 max-h-28 overflow-auto whitespace-pre-wrap break-words w-full box-border
-                       rounded border bg-slate-50 text-slate-700
-                       dark:bg-slate-800 dark:text-slate-200"
-          >
+          <div className="box-border max-h-28 w-full overflow-auto rounded border bg-slate-50 p-2 font-mono text-xs break-words whitespace-pre-wrap text-slate-700 dark:bg-slate-800 dark:text-slate-200">
             {previewText || "—"}
           </div>
         </div>

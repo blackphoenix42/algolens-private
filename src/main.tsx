@@ -1,20 +1,25 @@
 // src/main.tsx
+// Validate environment variables first
+import "./config/env";
+// Initialize axe for accessibility testing in development
+import "./config/axe";
+import "./services/monitoring/sessionTracker"; // Initialize session tracking
+import "@/styles/globals.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
-
-import { initAnalytics } from "./services/analytics/analytics";
-import { initWebVitals } from "./services/analytics/webVitals";
-import "./services/monitoring/sessionTracker"; // Initialize session tracking
 
 import AppRouter from "@/app/router";
 import { I18nProvider } from "@/i18n";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { log, logger, LogCategory } from "@/services/monitoring";
+import { log, LogCategory, logger } from "@/services/monitoring";
 import {
   initSentry,
   MaybeSentryErrorBoundary,
 } from "@/services/monitoring/sentry.client.config";
-import "@/styles/globals.css";
+
+import { initAnalytics } from "./services/analytics/analytics";
+import { initWebVitals } from "./services/analytics/webVitals";
 
 // Remove lazy loading for now to debug the issue
 
@@ -40,12 +45,12 @@ class AppErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-md w-full mx-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900 rounded-full mb-4">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="mx-4 w-full max-w-md">
+            <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
                 <svg
-                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  className="h-6 w-6 text-red-600 dark:text-red-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -58,23 +63,23 @@ class AppErrorBoundary extends React.Component<
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center mb-2">
+              <h3 className="mb-2 text-center text-lg font-medium text-gray-900 dark:text-white">
                 Something went wrong
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+              <p className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
                 AlgoLens encountered an unexpected error. Please try refreshing
                 the page.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => window.location.reload()}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                  className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
                 >
                   Refresh Page
                 </button>
                 <button
                   onClick={() => this.setState({ hasError: false })}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  className="flex-1 rounded-md bg-gray-200 px-4 py-2 text-gray-900 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                 >
                   Try Again
                 </button>

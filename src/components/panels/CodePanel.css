@@ -7,38 +7,42 @@
 .code-nowrap .code {
   white-space: pre;
 }
+
 .code-wrap .code {
-  white-space: pre-wrap;
-  word-break: break-word;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: normal;
 }
 
 /* Row + line numbers */
 .code-row {
   display: grid;
-  grid-template-columns: 3.25ch 1fr;
   gap: 0.75rem;
-  padding: 0 0.5rem 0 0.5rem;
+  grid-template-columns: 3.25ch 1fr;
   line-height: 1.6;
+  padding: 0 0.5rem;
 }
+
 .code-row .ln {
-  user-select: none;
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  opacity: 80%;
   padding-right: 0.25rem;
-  opacity: 0.8;
+  text-align: right;
+  user-select: none;
 }
+
 .code-row.active {
-  background: rgba(250, 204, 21, 0.18); /* yellow-300/18 */
-  outline: 1px solid rgba(252, 211, 77, 0.8); /* yellow-ish ring */
+  background: rgb(250 204 21 / 18%); /* yellow-300/18 */
+  outline: 1px solid rgb(252 211 77 / 80%); /* yellow-ish ring */
 }
+
 .dark .code-row.active {
-  background: rgba(202, 138, 4, 0.22); /* amber-600-ish / 22% */
-  outline: 1px solid rgba(217, 119, 6, 0.6);
+  background: rgb(202 138 4 / 22%); /* amber-600-ish / 22% */
+  outline: 1px solid rgb(217 119 6 / 60%);
 }
 
 /* Ensure long tokens don't overflow */
 .code-row .code {
-  min-width: 0;
   display: block;
+  min-width: 0;
 }

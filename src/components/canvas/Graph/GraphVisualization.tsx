@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Node } from "reactflow";
 
 import GraphCanvas from "./GraphCanvas";
@@ -343,9 +343,9 @@ export default function GraphVisualization({
   }, [isAnimating]);
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex h-full flex-col ${className}`}>
       {/* Control Panel */}
-      <div className="flex flex-wrap gap-4 p-4 bg-white border-b shadow-sm">
+      <div className="flex flex-wrap gap-4 border-b bg-white p-4 shadow-sm">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Algorithm:</label>
           <select
@@ -354,7 +354,7 @@ export default function GraphVisualization({
               setSelectedAlgorithm(e.target.value as typeof selectedAlgorithm)
             }
             disabled={isAnimating}
-            className="px-3 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="rounded border px-3 py-1 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select Algorithm</option>
             <option value="bfs">Breadth-First Search</option>
@@ -370,7 +370,7 @@ export default function GraphVisualization({
             value={startNode}
             onChange={(e) => setStartNode(e.target.value)}
             disabled={isAnimating}
-            className="px-3 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="rounded border px-3 py-1 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
           >
             {nodes.map((node) => (
               <option key={node.id} value={node.id}>
@@ -383,7 +383,7 @@ export default function GraphVisualization({
         <button
           onClick={startAlgorithm}
           disabled={!selectedAlgorithm || isAnimating}
-          className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isAnimating ? "Running..." : "Start Algorithm"}
         </button>
@@ -391,7 +391,7 @@ export default function GraphVisualization({
         <button
           onClick={generateRandomGraph}
           disabled={isAnimating}
-          className="px-4 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded bg-green-500 px-4 py-2 text-sm text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Generate Random Graph
         </button>

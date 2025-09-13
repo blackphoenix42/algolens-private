@@ -2,14 +2,14 @@
 import { useState } from "react";
 
 import ExportPanel from "@/components/export/ExportPanel";
-import type { View, ColorMode, Colors, DrawOptions } from "@/services/export";
+import type { ColorMode, Colors, DrawOptions, View } from "@/services/export";
 
 /** Simple chevron that rotates when collapsed/expanded */
 function Chevron({ open }: { open: boolean }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className={`w-4 h-4 transition-transform ${
+      className={`h-4 w-4 transition-transform ${
         open ? "-rotate-180" : "rotate-0"
       }`}
       aria-hidden
@@ -43,9 +43,9 @@ export default function CollapsibleExportPanel(
   const [collapsed, setCollapsed] = useState(true); // Start collapsed
 
   return (
-    <div className="card relative text-sm min-w-0">
+    <div className="card relative min-w-0 text-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <button
           className="inline-flex items-center gap-2 text-left"
           onClick={() => setCollapsed((v) => !v)}
@@ -60,7 +60,7 @@ export default function CollapsibleExportPanel(
         </button>
 
         {/* Export Badge */}
-        <div className="text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
+        <div className="rounded-full bg-green-50 px-2 py-1 text-xs text-green-700 dark:bg-green-900/20 dark:text-green-300">
           📤 PNG, SVG, GIF, MP4
         </div>
       </div>

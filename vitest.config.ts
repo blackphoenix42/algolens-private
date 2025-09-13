@@ -1,7 +1,8 @@
-import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
-import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 const dirname =
   typeof __dirname !== "undefined"
@@ -20,7 +21,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     // Create this file if you need RTL/jest-dom, mocks, etc.
-    setupFiles: ["src/test/setup.ts"],
+    setupFiles: ["src/tests/setup.ts"],
     css: true,
     // Keep E2E & generated outputs out of unit runs
     exclude: [

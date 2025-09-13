@@ -1,20 +1,20 @@
+import "./Transport.css";
+
 import {
-  SkipBack,
-  StepBack,
-  Play,
-  Pause,
-  StepForward,
-  SkipForward,
-  Rewind,
   FastForward,
+  Pause,
+  Play,
+  Rewind,
+  SkipBack,
+  SkipForward,
+  StepBack,
+  StepForward,
 } from "lucide-react";
 import React from "react";
 
 import { useI18n } from "@/i18n";
 import { LogCategory, logger } from "@/services/monitoring";
 import { cn } from "@/utils";
-
-import "./Transport.css";
 
 type Props = {
   playing: boolean;
@@ -79,23 +79,23 @@ export default function Transport(p: Props) {
   }, [progress]);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       {/* Playback Controls */}
-      <div className="flex items-center justify-center gap-2 mb-4">
+      <div className="mb-4 flex items-center justify-center gap-2">
         {/* Skip to Start */}
         <button
           onClick={onToStart}
           disabled={idx === 0}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.goToStart", { defaultValue: "Go to start" })}
           aria-label={t("controls.goToStart", { defaultValue: "Go to start" })}
         >
-          <SkipBack className="w-4 h-4" />
+          <SkipBack className="h-4 w-4" />
         </button>
 
         {/* Step Backward */}
@@ -110,9 +110,9 @@ export default function Transport(p: Props) {
           }}
           disabled={idx === 0}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.previousStep", { defaultValue: "Previous step" })}
@@ -120,7 +120,7 @@ export default function Transport(p: Props) {
             defaultValue: "Previous step",
           })}
         >
-          <StepBack className="w-4 h-4" />
+          <StepBack className="h-4 w-4" />
         </button>
 
         {/* Play Backward */}
@@ -136,11 +136,11 @@ export default function Transport(p: Props) {
           }}
           disabled={playing && direction === -1}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             playing && direction === -1
               ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
               : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.playBackward", { defaultValue: "Play backward" })}
@@ -148,7 +148,7 @@ export default function Transport(p: Props) {
             defaultValue: "Play backward",
           })}
         >
-          <Rewind className="w-4 h-4" />
+          <Rewind className="h-4 w-4" />
         </button>
 
         {/* Play/Pause */}
@@ -174,9 +174,9 @@ export default function Transport(p: Props) {
             }
           }}
           className={cn(
-            "p-3 rounded-lg transition-all duration-200",
+            "rounded-lg p-3 transition-all duration-200",
             "bg-primary-600 hover:bg-primary-700 text-white shadow-sm",
-            "flex items-center justify-center min-w-[44px]"
+            "flex min-w-[44px] items-center justify-center"
           )}
           title={
             playing
@@ -190,9 +190,9 @@ export default function Transport(p: Props) {
           }
         >
           {playing ? (
-            <Pause className="w-5 h-5" />
+            <Pause className="h-5 w-5" />
           ) : (
-            <Play className="w-5 h-5" />
+            <Play className="h-5 w-5" />
           )}
         </button>
 
@@ -201,11 +201,11 @@ export default function Transport(p: Props) {
           onClick={onPlayForward}
           disabled={playing && direction === 1}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             playing && direction === 1
               ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
               : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.playForward", { defaultValue: "Play forward" })}
@@ -213,7 +213,7 @@ export default function Transport(p: Props) {
             defaultValue: "Play forward",
           })}
         >
-          <FastForward className="w-4 h-4" />
+          <FastForward className="h-4 w-4" />
         </button>
 
         {/* Step Forward */}
@@ -221,15 +221,15 @@ export default function Transport(p: Props) {
           onClick={onNext}
           disabled={idx >= total - 1}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.nextStep", { defaultValue: "Next step" })}
           aria-label={t("controls.nextStep", { defaultValue: "Next step" })}
         >
-          <StepForward className="w-4 h-4" />
+          <StepForward className="h-4 w-4" />
         </button>
 
         {/* Skip to End */}
@@ -237,21 +237,21 @@ export default function Transport(p: Props) {
           onClick={onToEnd}
           disabled={idx >= total - 1}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "rounded-lg p-2 transition-all duration-200",
             "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "flex items-center justify-center"
           )}
           title={t("controls.goToEnd", { defaultValue: "Go to end" })}
           aria-label={t("controls.goToEnd", { defaultValue: "Go to end" })}
         >
-          <SkipForward className="w-4 h-4" />
+          <SkipForward className="h-4 w-4" />
         </button>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-4">
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+        <div className="mb-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>
             {t("controls.step", { defaultValue: "Step" })} {idx + 1}
           </span>
@@ -266,7 +266,7 @@ export default function Transport(p: Props) {
             max={Math.max(total - 1, 0)}
             value={idx}
             onChange={(e) => onSeek(Number(e.target.value))}
-            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg transport-slider focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            className="transport-slider focus:ring-primary-500 h-2 w-full rounded-lg bg-slate-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:bg-slate-700"
             aria-label={t("controls.seekToStep", {
               defaultValue: "Seek to step",
             })}
@@ -284,7 +284,7 @@ export default function Transport(p: Props) {
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
             {t("controls.speed", { defaultValue: "Speed" })}
           </label>
-          <div className={cn("text-sm font-mono", getSpeedColor(speed))}>
+          <div className={cn("font-mono text-sm", getSpeedColor(speed))}>
             {formatSpeed(speed)}
           </div>
         </div>
@@ -297,14 +297,14 @@ export default function Transport(p: Props) {
             step={0.1}
             value={speed}
             onChange={(e) => onSpeedChange(Number(e.target.value))}
-            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg transport-slider focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            className="transport-slider focus:ring-primary-500 h-2 w-full rounded-lg bg-slate-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:bg-slate-700"
             aria-label={t("controls.animationSpeed", {
               defaultValue: "Animation speed",
             })}
           />
 
           {/* Speed markers */}
-          <div className="flex justify-between text-xs text-slate-400 mt-1 px-1">
+          <div className="mt-1 flex justify-between px-1 text-xs text-slate-400">
             <span>0.1×</span>
             <span className="font-semibold">1×</span>
             <span>4×</span>
@@ -312,7 +312,7 @@ export default function Transport(p: Props) {
         </div>
 
         {/* Speed descriptions */}
-        <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        <div className="text-center text-xs text-slate-500 dark:text-slate-400">
           {speed < 0.5 &&
             t("controls.speedVerySlowDesc", {
               defaultValue: "Very slow - detailed analysis",

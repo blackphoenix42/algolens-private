@@ -5,8 +5,8 @@ import {
 } from "javascript-algorithms/src/algorithms/search";
 import {
   bubbleSort,
-  quickSort,
   mergeSort,
+  quickSort,
 } from "javascript-algorithms/src/algorithms/sorting";
 import { Graph } from "javascript-algorithms/src/data-structures/graph";
 

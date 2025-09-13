@@ -15,16 +15,16 @@ export default function ExplainPanel({
   return (
     <div className="card relative">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium mb-2">Explanation</div>
+        <div className="mb-2 text-sm font-medium">Explanation</div>
         <button
-          className="px-2 py-1 rounded border"
+          className="rounded border px-2 py-1"
           onClick={() => setOpen(true)}
           title="Expand"
         >
           <ExpandIcon />
         </button>
       </div>
-      <p className="text-sm text-gray-800 min-h-[3rem]">
+      <p className="min-h-[3rem] text-sm text-gray-800">
         {explain ?? "Step through to see explanations for each action."}
       </p>
 

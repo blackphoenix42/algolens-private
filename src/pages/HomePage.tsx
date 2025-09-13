@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DebugToggle from "@/components/debug/DebugToggle";
@@ -262,7 +262,7 @@ export default function HomePage() {
     catalog,
   ]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     logger.info(LogCategory.USER_INTERACTION, "Filters cleared", {
       previousFilters: {
         query: q,
@@ -280,7 +280,192 @@ export default function HomePage() {
     setSelectedTags([]);
     setSelectedDifficulties([]);
     setSortKey("relevance");
-  };
+  }, [
+    q,
+    selectedCategories,
+    selectedTags,
+    selectedDifficulties,
+    sortKey,
+    totalShown,
+  ]);
+
+  // Home page keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle shortcuts when typing in inputs
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        // Allow specific global shortcuts even in inputs
+        if (
+          !["Escape", "F1"].includes(event.key) &&
+          !event.ctrlKey &&
+          !event.metaKey
+        ) {
+          return;
+        }
+      }
+
+      // Handle home page specific shortcuts
+      switch (true) {
+        // Filter Management
+        case event.ctrlKey && event.shiftKey && event.key === "C":
+          event.preventDefault();
+          clearFilters();
+          break;
+
+        case event.ctrlKey && event.shiftKey && event.key === "F": {
+          event.preventDefault();
+          // Show featured algorithms
+          clearFilters();
+          const featuresSection = document.querySelector(
+            "[data-about-section]"
+          );
+          if (featuresSection) {
+            scrollToElement(featuresSection as Element, 100);
+          }
+          break;
+        }
+
+        // Difficulty filters
+        case event.altKey && event.key === "1":
+          event.preventDefault();
+          setSelectedDifficulties((prev) =>
+            prev.includes("Easy")
+              ? prev.filter((d) => d !== "Easy")
+              : [...prev, "Easy"]
+          );
+          break;
+
+        case event.altKey && event.key === "2":
+          event.preventDefault();
+          setSelectedDifficulties((prev) =>
+            prev.includes("Medium")
+              ? prev.filter((d) => d !== "Medium")
+              : [...prev, "Medium"]
+          );
+          break;
+
+        case event.altKey && event.key === "3":
+          event.preventDefault();
+          setSelectedDifficulties((prev) =>
+            prev.includes("Hard")
+              ? prev.filter((d) => d !== "Hard")
+              : [...prev, "Hard"]
+          );
+          break;
+
+        // Quick category access
+        case event.ctrlKey && event.key === "1":
+          event.preventDefault();
+          setSelectedCategories(["sorting"]);
+          setQ("");
+          break;
+
+        case event.ctrlKey && event.key === "2":
+          event.preventDefault();
+          setSelectedCategories(["searching"]);
+          setQ("");
+          break;
+
+        case event.ctrlKey && event.key === "3":
+          event.preventDefault();
+          setSelectedCategories(["graphs"]);
+          setQ("");
+          break;
+
+        case event.ctrlKey && event.key === "4":
+          event.preventDefault();
+          setSelectedCategories(["trees"]);
+          setQ("");
+          break;
+
+        case event.ctrlKey && event.key === "0":
+          event.preventDefault();
+          clearFilters();
+          break;
+
+        // Page controls
+        case event.ctrlKey && event.key === "h":
+          event.preventDefault();
+          toggleHeroSection();
+          break;
+
+        case event.ctrlKey && event.key === "t":
+          event.preventDefault();
+          resetOnboardingTour();
+          setShowOnboarding(true);
+          break;
+
+        case event.ctrlKey && event.key === "r":
+          event.preventDefault();
+          // Refresh catalog by clearing filters and scrolling to top
+          clearFilters();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          break;
+
+        // Page navigation
+        case event.key === "PageDown": {
+          event.preventDefault();
+          const nextSection = document.querySelector("main");
+          if (nextSection) {
+            scrollToElement(nextSection as Element, 100);
+          }
+          break;
+        }
+
+        case event.key === "PageUp":
+          event.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          break;
+
+        // Search enhancements
+        case event.key === "Enter" && !event.ctrlKey && !event.metaKey: {
+          // If search is focused and has content, blur to trigger search
+          const searchInput = document.querySelector(
+            '[data-testid="search-input"]'
+          ) as HTMLInputElement;
+          if (
+            searchInput &&
+            document.activeElement === searchInput &&
+            searchInput.value
+          ) {
+            searchInput.blur();
+          }
+          break;
+        }
+
+        case event.key === "Escape":
+          event.preventDefault();
+          // Clear search and close any open panels
+          if (q) {
+            setQ("");
+          } else {
+            clearFilters();
+          }
+          // Remove focus from any active element
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [
+    clearFilters,
+    toggleHeroSection,
+    resetOnboardingTour,
+    setShowOnboarding,
+    setSelectedCategories,
+    setSelectedDifficulties,
+    setQ,
+    q,
+  ]);
 
   const featuredAlgorithms = useMemo(() => {
     const featured = [
@@ -312,12 +497,25 @@ export default function HomePage() {
   }, [allItems.length, catalog, tagUniverse.length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-x-hidden overflow-y-auto">
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Liquid Glass Background Elements */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="liquid-glass-hero animate-float absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-30"></div>
+        <div
+          className="liquid-glass-hero animate-float absolute right-1/4 bottom-1/4 h-72 w-72 rounded-full opacity-20"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="liquid-glass-hero animate-float absolute top-3/4 left-3/4 h-48 w-48 rounded-full opacity-25"
+          style={{ animationDelay: "4s" }}
+        ></div>
+      </div>
+
       {/* Hero Section */}
       {showHero && (
         <section
           data-tour="hero-section"
-          className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-secondary-600 to-primary-800 dark:from-primary-800 dark:via-secondary-800 dark:to-primary-950 min-h-[100vh] flex items-center"
+          className="liquid-glass-hero relative flex min-h-[100vh] items-center overflow-hidden"
         >
           {/* Animated Background */}
           <div className="absolute inset-0">
@@ -328,94 +526,94 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
 
             {/* Animated Background Pattern */}
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+PC9zdmc+')] opacity-30 animate-pulse-soft"></div>
+            <div className="animate-pulse-soft absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+PC9zdmc+')] opacity-30"></div>
 
             {/* Glowing Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float animation-delay-1000"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-gradient-to-r from-orange-400/20 to-pink-400/20 rounded-full blur-3xl animate-float animation-delay-2000"></div>
+            <div className="animate-float animation-delay-1000 absolute top-1/4 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-3xl"></div>
+            <div className="animate-float animation-delay-2000 absolute right-1/4 bottom-1/4 h-40 w-40 rounded-full bg-gradient-to-r from-orange-400/20 to-pink-400/20 blur-3xl"></div>
 
             {/* Algorithm-themed floating icons */}
-            <div className="hidden sm:block absolute top-20 left-20 animate-float animation-delay-500">
+            <div className="animate-float animation-delay-500 absolute top-20 left-20 hidden sm:block">
               <AlgorithmIcon
                 variant="sorting"
-                className="w-12 h-12 opacity-20"
+                className="h-12 w-12 opacity-20"
               />
             </div>
-            <div className="hidden md:block absolute top-32 right-32 animate-float animation-delay-1500">
-              <AlgorithmIcon variant="graph" className="w-10 h-10 opacity-15" />
+            <div className="animate-float animation-delay-1500 absolute top-32 right-32 hidden md:block">
+              <AlgorithmIcon variant="graph" className="h-10 w-10 opacity-15" />
             </div>
-            <div className="hidden lg:block absolute bottom-40 left-16 animate-float animation-delay-2500">
-              <AlgorithmIcon variant="tree" className="w-14 h-14 opacity-25" />
+            <div className="animate-float animation-delay-2500 absolute bottom-40 left-16 hidden lg:block">
+              <AlgorithmIcon variant="tree" className="h-14 w-14 opacity-25" />
             </div>
-            <div className="hidden sm:block absolute bottom-20 right-20 animate-float animation-delay-3000">
-              <AlgorithmIcon variant="array" className="w-11 h-11 opacity-20" />
+            <div className="animate-float animation-delay-3000 absolute right-20 bottom-20 hidden sm:block">
+              <AlgorithmIcon variant="array" className="h-11 w-11 opacity-20" />
             </div>
 
             {/* Mobile-friendly smaller icons */}
-            <div className="block sm:hidden absolute top-16 right-8 animate-float animation-delay-500">
-              <AlgorithmIcon variant="sorting" className="w-8 h-8 opacity-15" />
+            <div className="animate-float animation-delay-500 absolute top-16 right-8 block sm:hidden">
+              <AlgorithmIcon variant="sorting" className="h-8 w-8 opacity-15" />
             </div>
-            <div className="block sm:hidden absolute bottom-32 left-8 animate-float animation-delay-2000">
-              <AlgorithmIcon variant="graph" className="w-7 h-7 opacity-20" />
+            <div className="animate-float animation-delay-2000 absolute bottom-32 left-8 block sm:hidden">
+              <AlgorithmIcon variant="graph" className="h-7 w-7 opacity-20" />
             </div>
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32 w-full">
+          <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-24 lg:px-8 lg:py-32">
             <div className="text-center">
               {/* Enhanced Main Title */}
-              <div className="mb-8 md:mb-12 animate-fade-in-up">
-                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-4 md:mb-6 leading-tight">
+              <div className="animate-fade-in-up mb-8 md:mb-12">
+                <h1 className="mb-4 text-4xl leading-tight font-black sm:text-5xl md:mb-6 md:text-7xl lg:text-8xl">
                   <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent drop-shadow-2xl">
                     {t("app.name")}
                   </span>
                 </h1>
-                <div className="h-1 w-24 md:w-32 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full animate-shimmer"></div>
+                <div className="animate-shimmer mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 md:w-32"></div>
               </div>
 
               {/* Enhanced Subtitle */}
-              <div className="mb-12 md:mb-16 animate-fade-in-up animation-delay-200">
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 mb-4 md:mb-6 max-w-4xl mx-auto font-light leading-relaxed px-4">
+              <div className="animate-fade-in-up animation-delay-200 mb-12 md:mb-16">
+                <p className="mx-auto mb-4 max-w-4xl px-4 text-lg leading-relaxed font-light text-white/90 sm:text-xl md:mb-6 md:text-2xl lg:text-3xl">
                   {t("app.tagline")}
                 </p>
-                <p className="text-sm sm:text-base md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-4">
+                <p className="mx-auto max-w-3xl px-4 text-sm leading-relaxed text-white/70 sm:text-base md:text-xl">
                   {t("app.description")}
                 </p>
               </div>
 
               {/* Enhanced Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12 md:mb-16 animate-fade-in-up animation-delay-400 px-4">
-                <div className="group text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-blue-200 transition-colors">
+              <div className="animate-fade-in-up animation-delay-400 mb-12 grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:gap-6 md:mb-16 md:gap-8">
+                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
+                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-blue-200 sm:text-4xl md:text-5xl">
                     {stats.algorithms}
                   </div>
-                  <div className="text-white/80 text-xs sm:text-sm md:text-base font-medium uppercase tracking-wider">
+                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
                     {t("navigation.algorithms")}
                   </div>
-                  <div className="mt-2 h-0.5 w-8 sm:w-12 bg-gradient-to-r from-blue-400 to-transparent mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-blue-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
                 </div>
-                <div className="group text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-purple-200 transition-colors">
+                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
+                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-purple-200 sm:text-4xl md:text-5xl">
                     {stats.categories}
                   </div>
-                  <div className="text-white/80 text-xs sm:text-sm md:text-base font-medium uppercase tracking-wider">
+                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
                     Categories
                   </div>
-                  <div className="mt-2 h-0.5 w-8 sm:w-12 bg-gradient-to-r from-purple-400 to-transparent mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-purple-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
                 </div>
-                <div className="group text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105 sm:col-span-3 md:col-span-1">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 group-hover:text-orange-200 transition-colors">
+                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:col-span-3 sm:p-6 md:col-span-1">
+                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-orange-200 sm:text-4xl md:text-5xl">
                     {stats.tags}
                   </div>
-                  <div className="text-white/80 text-xs sm:text-sm md:text-base font-medium uppercase tracking-wider">
+                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
                     {t("navigation.algorithms")}{" "}
                     {t("common.topics", { defaultValue: "Topics" })}
                   </div>
-                  <div className="mt-2 h-0.5 w-8 sm:w-12 bg-gradient-to-r from-orange-400 to-transparent mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-orange-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
                 </div>
               </div>
 
               {/* Enhanced CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center animate-fade-in-up animation-delay-600 px-4">
+              <div className="animate-fade-in-up animation-delay-600 flex flex-col justify-center gap-4 px-4 sm:flex-row sm:gap-6">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -436,15 +634,15 @@ export default function HomePage() {
                       scrollToElement(mainElement, 100);
                     }
                   }}
-                  className="group bg-white text-primary-700 hover:bg-blue-50 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg sm:rounded-xl border-2 border-transparent hover:border-blue-200 w-full sm:w-auto"
+                  className="group liquid-glass-button w-full px-6 py-3 text-base font-semibold text-slate-900 hover:scale-105 sm:w-auto sm:px-8 sm:py-4 sm:text-lg dark:text-white"
                 >
-                  <span className="mr-2 text-lg sm:text-xl group-hover:animate-bounce-subtle">
+                  <span className="group-hover:animate-bounce-subtle mr-2 text-lg sm:text-xl">
                     🚀
                   </span>
                   <span className="truncate">
                     {t("home.exploreAlgorithms")}
                   </span>
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform">
+                  <span className="ml-2 transition-transform group-hover:translate-x-1">
                     →
                   </span>
                 </Button>
@@ -474,15 +672,15 @@ export default function HomePage() {
                       }
                     }
                   }}
-                  className="group border-2 border-white/50 text-white hover:bg-white/10 hover:border-white shadow-xl hover:shadow-2xl transition-all duration-300 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg sm:rounded-xl backdrop-blur-sm w-full sm:w-auto"
+                  className="group liquid-glass-button w-full px-6 py-3 text-base font-semibold text-white hover:scale-105 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
                 >
-                  <span className="mr-2 text-lg sm:text-xl group-hover:animate-pulse">
+                  <span className="mr-2 text-lg group-hover:animate-pulse sm:text-xl">
                     📚
                   </span>
                   <span className="truncate">
                     {t("common.learnMore", { defaultValue: "Learn More" })}
                   </span>
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform">
+                  <span className="ml-2 transition-transform group-hover:translate-x-1">
                     →
                   </span>
                 </Button>
@@ -493,11 +691,11 @@ export default function HomePage() {
           {/* Enhanced Close Hero Button */}
           <button
             onClick={() => toggleHeroSection()}
-            className="absolute top-6 right-6 p-3 text-white/60 hover:text-white transition-all duration-300 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm border border-white/20 hover:border-white/40 group"
+            className="group absolute top-6 right-6 rounded-full border border-white/20 bg-white/10 p-3 text-white/60 backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/20 hover:text-white"
             title="Close hero section"
           >
             <svg
-              className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300"
+              className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -516,25 +714,25 @@ export default function HomePage() {
       {/* Enhanced Navigation Header */}
       <header
         className={cn(
-          "sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 dark:bg-slate-900/95 dark:border-slate-700/60 shadow-sm",
+          "liquid-glass-header sticky top-0 z-30 shadow-sm",
           "transition-all duration-300"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3 group">
-                <div className="text-2xl md:text-3xl group-hover:scale-110 transition-transform duration-300">
+              <div className="group flex items-center gap-3">
+                <div className="text-2xl transition-transform duration-300 group-hover:scale-110 md:text-3xl">
                   🔬
                 </div>
-                <h2 className="text-xl md:text-2xl font-black bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+                <h2 className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-xl font-black text-transparent md:text-2xl">
                   AlgoLens
                 </h2>
               </div>
               {!showHero && (
                 <button
                   onClick={() => toggleHeroSection()}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-800/30 rounded-full transition-all duration-200 hover:scale-105"
+                  className="text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-800/30 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105"
                 >
                   <span className="text-xs">✨</span>
                   Show Hero
@@ -543,13 +741,13 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center gap-3 md:gap-6">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 sm:flex dark:border-slate-700 dark:bg-slate-800">
+                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
                 <div className="text-sm text-slate-700 dark:text-slate-300">
-                  <span className="font-semibold text-primary-600 dark:text-primary-400">
+                  <span className="text-primary-600 dark:text-primary-400 font-semibold">
                     {totalShown}
                   </span>
-                  <span className="text-slate-500 dark:text-slate-400 ml-1">
+                  <span className="ml-1 text-slate-500 dark:text-slate-400">
                     algorithms
                   </span>
                 </div>
@@ -566,7 +764,7 @@ export default function HomePage() {
                   defaultValue: "Show quick tour",
                 })}
               >
-                <span className="mr-2 group-hover:animate-bounce-subtle">
+                <span className="group-hover:animate-bounce-subtle mr-2">
                   🎯
                 </span>
                 <span className="hidden sm:inline">
@@ -604,36 +802,36 @@ export default function HomePage() {
         selectedCategories.length === 0 &&
         selectedTags.length === 0 &&
         selectedDifficulties.length === 0 && (
-          <section className="px-4 py-12 bg-gradient-to-br from-slate-50 via-white to-slate-100/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-            <div className="max-w-7xl mx-auto">
+          <section className="liquid-glass-section relative px-4 py-12">
+            <div className="mx-auto max-w-7xl">
               <div
-                className="text-center mb-12 animate-fade-in-up"
+                className="animate-fade-in-up mb-12 text-center"
                 data-about-section
               >
-                <div className="inline-flex items-center gap-3 mb-6 px-4 py-2 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-full border border-primary-200/30 dark:border-primary-700/30">
-                  <span className="text-2xl animate-bounce-subtle">✨</span>
-                  <span className="text-lg font-semibold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+                <div className="liquid-glass-filter mb-6 inline-flex items-center gap-3 px-4 py-2">
+                  <span className="animate-bounce-subtle text-2xl">✨</span>
+                  <span className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-lg font-semibold text-transparent">
                     Featured Algorithms
                   </span>
                 </div>
 
-                <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-slate-100 mb-6 leading-tight">
+                <h3 className="mb-6 text-3xl leading-tight font-black text-slate-900 md:text-4xl dark:text-slate-100">
                   Start Your Journey with
-                  <span className="bg-gradient-to-r from-primary-600 via-secondary-600 to-primary-700 bg-clip-text text-transparent">
+                  <span className="from-primary-600 via-secondary-600 to-primary-700 bg-gradient-to-r bg-clip-text text-transparent">
                     {" "}
                     Popular Algorithms
                   </span>
                 </h3>
 
-                <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
+                <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
                   Discover the fundamental algorithms that every developer
                   should master. Each one comes with
-                  <span className="font-semibold text-primary-600 dark:text-primary-400">
+                  <span className="text-primary-600 dark:text-primary-400 font-semibold">
                     {" "}
                     interactive visualizations
                   </span>{" "}
                   and
-                  <span className="font-semibold text-secondary-600 dark:text-secondary-400">
+                  <span className="text-secondary-600 dark:text-secondary-400 font-semibold">
                     {" "}
                     real-time analysis
                   </span>
@@ -642,20 +840,20 @@ export default function HomePage() {
 
                 {/* Enhanced Value Proposition Pills */}
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <div className="group bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-300 px-4 py-2 rounded-full border border-primary-200/50 dark:border-primary-700/50 hover:scale-105 transition-all duration-300 cursor-default">
-                    <span className="mr-2 group-hover:animate-bounce-subtle">
+                  <div className="group liquid-glass-filter text-primary-700 dark:text-primary-300 cursor-default px-4 py-2 transition-all duration-300 hover:scale-105">
+                    <span className="group-hover:animate-bounce-subtle mr-2">
                       🚀
                     </span>
                     Interactive Learning
                   </div>
-                  <div className="group bg-gradient-to-r from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 text-green-700 dark:text-green-300 px-4 py-2 rounded-full border border-green-200/50 dark:border-green-700/50 hover:scale-105 transition-all duration-300 cursor-default">
-                    <span className="mr-2 group-hover:animate-bounce-subtle">
+                  <div className="group liquid-glass-filter cursor-default px-4 py-2 text-green-700 transition-all duration-300 hover:scale-105 dark:text-green-300">
+                    <span className="group-hover:animate-bounce-subtle mr-2">
                       📊
                     </span>
                     Step-by-Step Visualization
                   </div>
-                  <div className="group bg-gradient-to-r from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-800/30 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-full border border-purple-200/50 dark:border-purple-700/50 hover:scale-105 transition-all duration-300 cursor-default">
-                    <span className="mr-2 group-hover:animate-bounce-subtle">
+                  <div className="group liquid-glass-filter cursor-default px-4 py-2 text-purple-700 transition-all duration-300 hover:scale-105 dark:text-purple-300">
+                    <span className="group-hover:animate-bounce-subtle mr-2">
                       ⚡
                     </span>
                     Performance Analysis
@@ -668,7 +866,7 @@ export default function HomePage() {
                   <Card
                     key={`${topic}/${item.slug}`}
                     variant="elevated"
-                    className="group relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100/50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950/50 border-2 border-transparent hover:border-primary-200/50 dark:hover:border-primary-700/50 hover:scale-105 hover:-translate-y-2 transition-all duration-500 cursor-pointer shadow-lg hover:shadow-2xl"
+                    className="group liquid-glass-card liquid-glass-glow relative cursor-pointer overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
                     onClick={() => {
                       logger.info(
                         LogCategory.USER_INTERACTION,
@@ -687,18 +885,18 @@ export default function HomePage() {
                     }}
                   >
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary-50/30 dark:to-primary-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="to-primary-50/30 dark:to-primary-900/20 absolute inset-0 bg-gradient-to-br from-transparent via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                     <div className="relative p-6 text-center">
-                      <div className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-300 filter group-hover:drop-shadow-lg">
+                      <div className="mb-4 text-4xl filter transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-lg">
                         {TOPIC_META[topic]?.icon ?? "📘"}
                       </div>
 
-                      <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-3 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors duration-300">
+                      <h4 className="group-hover:text-primary-700 dark:group-hover:text-primary-300 mb-3 text-lg font-bold text-slate-900 transition-colors duration-300 dark:text-slate-100">
                         {item.title}
                       </h4>
 
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 min-h-[3rem] leading-relaxed">
+                      <p className="mb-6 min-h-[3rem] text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                         {item.summary ||
                           `Master the fundamentals of ${pretty(topic)}`}
                       </p>
@@ -707,17 +905,17 @@ export default function HomePage() {
                         {/* Difficulty Badge */}
                         <div
                           className={cn(
-                            "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border",
+                            "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
                             item.difficulty === "Easy"
-                              ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800"
+                              ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
                               : item.difficulty === "Medium"
-                                ? "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
-                                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
+                                ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                                : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
                           )}
                         >
                           <div
                             className={cn(
-                              "w-2 h-2 rounded-full",
+                              "h-2 w-2 rounded-full",
                               item.difficulty === "Easy"
                                 ? "bg-green-500"
                                 : item.difficulty === "Medium"
@@ -731,7 +929,7 @@ export default function HomePage() {
                         <Button
                           size="sm"
                           variant="primary"
-                          className="w-full min-h-[44px] touch-target group-hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700"
+                          className="touch-target from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 min-h-[44px] w-full bg-gradient-to-r transition-all duration-300 group-hover:shadow-lg"
                           onClick={(e) => {
                             e.stopPropagation();
 
@@ -756,7 +954,7 @@ export default function HomePage() {
                         >
                           <span className="mr-2">🎯</span>
                           Try Now
-                          <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
+                          <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
                             →
                           </span>
                         </Button>
@@ -771,28 +969,28 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="px-4 py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl">
           {Object.keys(filteredGrouped).length === 0 ? (
-            <div className="text-center py-16 animate-fade-in-up">
+            <div className="animate-fade-in-up py-16 text-center">
               <div className="relative mb-8">
                 {/* Animated Search Illustration */}
-                <div className="text-8xl mb-4 animate-bounce-subtle">🔍</div>
-                <div className="absolute -top-2 -right-2 text-2xl animate-float animation-delay-500">
+                <div className="animate-bounce-subtle mb-4 text-8xl">🔍</div>
+                <div className="animate-float animation-delay-500 absolute -top-2 -right-2 text-2xl">
                   ✨
                 </div>
-                <div className="absolute -bottom-2 -left-2 text-xl animate-float animation-delay-1000">
+                <div className="animate-float animation-delay-1000 absolute -bottom-2 -left-2 text-xl">
                   💫
                 </div>
               </div>
 
-              <div className="max-w-md mx-auto mb-8">
-                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+              <div className="mx-auto mb-8 max-w-md">
+                <h3 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">
                   {t("common.noAlgorithmsFound", {
                     defaultValue: "No algorithms found",
                   })}
                 </h3>
 
-                <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                <p className="mb-6 leading-relaxed text-slate-600 dark:text-slate-400">
                   {t("common.adjustSearchTerms", {
                     defaultValue:
                       "Don't worry! Try adjusting your search terms or filters to discover the perfect algorithm.",
@@ -800,8 +998,8 @@ export default function HomePage() {
                 </p>
 
                 {/* Helpful suggestions */}
-                <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 font-medium">
+                <div className="liquid-glass-card mb-6 p-4">
+                  <p className="mb-3 text-sm font-medium text-slate-600 dark:text-slate-400">
                     Try searching for:
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
@@ -810,7 +1008,7 @@ export default function HomePage() {
                         <button
                           key={suggestion}
                           onClick={() => setQ(suggestion)}
-                          className="px-3 py-1.5 text-xs font-medium bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full border border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200 hover:scale-105"
+                          className="liquid-glass-filter hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all duration-200 hover:scale-105 dark:text-slate-300"
                         >
                           {suggestion}
                         </button>
@@ -820,11 +1018,11 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Button
                   onClick={clearFilters}
                   variant="primary"
-                  className="bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 bg-gradient-to-r shadow-lg transition-all duration-300 hover:shadow-xl"
                 >
                   <span className="mr-2">✨</span>
                   {t("common.clearAllFilters", {
@@ -843,7 +1041,7 @@ export default function HomePage() {
                     }
                   }}
                   variant="outline"
-                  className="border-slate-300 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500"
+                  className="hover:border-primary-400 dark:hover:border-primary-500 border-slate-300 dark:border-slate-600"
                 >
                   <span className="mr-2">🎯</span>
                   View Featured
@@ -854,17 +1052,17 @@ export default function HomePage() {
             <div className="space-y-16">
               {Object.entries(filteredGrouped).map(([topic, rows]) => (
                 <section key={topic} className="animate-fade-in-up">
-                  <div className="flex items-center gap-4 mb-8 group">
-                    <div className="text-3xl group-hover:scale-110 transition-transform duration-300 cursor-default">
+                  <div className="group mb-8 flex items-center gap-4">
+                    <div className="cursor-default text-3xl transition-transform duration-300 group-hover:scale-110">
                       {TOPIC_META[topic]?.icon ?? "📘"}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
+                      <h3 className="group-hover:text-primary-600 dark:group-hover:text-primary-400 text-2xl font-black text-slate-900 transition-colors duration-300 md:text-3xl dark:text-slate-100">
                         {pretty(topic)}
                       </h3>
-                      <div className="h-0.5 w-0 group-hover:w-24 bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-500 mt-1"></div>
+                      <div className="from-primary-500 to-secondary-500 mt-1 h-0.5 w-0 bg-gradient-to-r transition-all duration-500 group-hover:w-24"></div>
                     </div>
-                    <div className="bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 px-4 py-2 rounded-full text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-sm">
+                    <div className="liquid-glass-card px-4 py-2 text-sm font-bold text-slate-700 shadow-sm dark:text-slate-300">
                       {rows.length} algorithms
                     </div>
                   </div>
@@ -894,25 +1092,25 @@ export default function HomePage() {
       </main>
 
       {/* Enhanced Footer */}
-      <footer className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-t border-slate-700 dark:border-slate-800 mt-16 overflow-hidden">
+      <footer className="liquid-glass-section relative mt-16 overflow-hidden border-t border-white/20 dark:border-white/10">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZm9vdGVyR3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2Zvb3RlckdyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
 
         {/* Gradient Overlays */}
-        <div className="absolute top-0 left-1/4 w-32 h-32 bg-gradient-to-r from-primary-600/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-gradient-to-r from-secondary-600/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="from-primary-600/10 absolute top-0 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
+        <div className="from-secondary-600/10 absolute right-1/4 bottom-0 h-40 w-40 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
             {/* Brand Section */}
             <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+              <div className="mb-4 flex items-center justify-center gap-3 md:justify-start">
                 <span className="text-3xl">🔬</span>
-                <h3 className="text-xl font-black bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                <h3 className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-xl font-black text-transparent">
                   AlgoLens
                 </h3>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto md:mx-0">
+              <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-400 md:mx-0">
                 Making algorithms and data structures accessible through
                 interactive visualizations and hands-on learning.
               </p>
@@ -920,8 +1118,8 @@ export default function HomePage() {
 
             {/* Features Section */}
             <div className="text-center">
-              <h4 className="text-white font-semibold mb-4">What We Offer</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
+              <h4 className="mb-4 font-semibold text-white">What We Offer</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
                 <li className="flex items-center justify-center gap-2">
                   <span className="text-primary-400">📊</span>
                   Interactive Visualizations
@@ -943,21 +1141,21 @@ export default function HomePage() {
 
             {/* Stats Section */}
             <div className="text-center md:text-right">
-              <h4 className="text-white font-semibold mb-4">Learning Stats</h4>
+              <h4 className="mb-4 font-semibold text-white">Learning Stats</h4>
               <div className="space-y-3">
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-3 border border-slate-700/50">
-                  <div className="text-2xl font-bold text-primary-400">
+                <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
+                  <div className="text-primary-400 text-2xl font-bold">
                     {stats.algorithms}
                   </div>
-                  <div className="text-slate-400 text-xs uppercase tracking-wider">
+                  <div className="text-xs tracking-wider text-slate-400 uppercase">
                     Algorithms
                   </div>
                 </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-3 border border-slate-700/50">
-                  <div className="text-2xl font-bold text-secondary-400">
+                <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
+                  <div className="text-secondary-400 text-2xl font-bold">
                     {stats.categories}
                   </div>
-                  <div className="text-slate-400 text-xs uppercase tracking-wider">
+                  <div className="text-xs tracking-wider text-slate-400 uppercase">
                     Categories
                   </div>
                 </div>
@@ -966,11 +1164,11 @@ export default function HomePage() {
           </div>
 
           {/* Bottom Section */}
-          <div className="border-t border-slate-700/50 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-slate-400 text-sm text-center sm:text-left">
-              <p className="flex items-center justify-center sm:justify-start gap-2">
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/50 pt-8 sm:flex-row">
+            <div className="text-center text-sm text-slate-400 sm:text-left">
+              <p className="flex items-center justify-center gap-2 sm:justify-start">
                 Built with
-                <span className="text-red-400 animate-pulse">❤️</span>
+                <span className="animate-pulse text-red-400">❤️</span>
                 for learning algorithms and data structures
               </p>
             </div>
@@ -981,7 +1179,7 @@ export default function HomePage() {
                   resetOnboardingTour();
                   setShowOnboarding(true);
                 }}
-                className="text-slate-400 hover:text-white text-sm transition-colors duration-200 flex items-center gap-2"
+                className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
               >
                 <span>🎯</span>
                 Take the Tour
@@ -989,7 +1187,7 @@ export default function HomePage() {
 
               <button
                 onClick={() => toggleHeroSection()}
-                className="text-slate-400 hover:text-white text-sm transition-colors duration-200 flex items-center gap-2"
+                className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
               >
                 <span>✨</span>
                 {showHero ? "Hide Hero" : "Show Hero"}

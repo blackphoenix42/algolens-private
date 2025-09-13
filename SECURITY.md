@@ -2,7 +2,7 @@
 
 This document explains how to report security vulnerabilities in **Algorithm Visualizer** (the "Project"), our coordinated disclosure process, what is in and out of scope, and the secure‑by‑default practices we follow.
 
-> **TL;DR** — If you’ve found a vulnerability, please email **security@\[YOUR‑DOMAIN]** or open a **GitHub Security Advisory** draft for this repository. Do *not* create a public issue. We’ll acknowledge within **3 business days (IST, UTC+05:30)** and work with you under coordinated disclosure.
+> **TL;DR** — If you’ve found a vulnerability, please email **security@\[YOUR‑DOMAIN]** or open a **GitHub Security Advisory** draft for this repository. Do _not_ create a public issue. We’ll acknowledge within **3 business days (IST, UTC+05:30)** and work with you under coordinated disclosure.
 
 ---
 
@@ -10,17 +10,17 @@ This document explains how to report security vulnerabilities in **Algorithm Vis
 
 Please use one of the private channels below:
 
-* **Email:** `security@[YOUR-DOMAIN]`
-* **GitHub Security Advisory (preferred):** *Security ➜ Advisories ➜ Report a vulnerability* on this repo
-* **Encryption:** PGP key (fingerprint & block below). If you need our key published elsewhere, ask in your first message.
+- **Email:** `security@[YOUR-DOMAIN]`
+- **GitHub Security Advisory (preferred):** _Security ➜ Advisories ➜ Report a vulnerability_ on this repo
+- **Encryption:** PGP key (fingerprint & block below). If you need our key published elsewhere, ask in your first message.
 
 When reporting, include as much detail as possible:
 
-* Affected **component** (e.g., UI route, worker, build pipeline) and **version/commit**
-* **Reproduction steps** (clear, minimal PoC)
-* **Impact** and suggested **CVSS v3.1 vector string** (e.g., `AV:N/AC:L/…`) if you’re comfortable
-* **Logs/screenshots** or a short video, if safe to share
-* Your **contact** and if you want **public credit** (name/handle/link)
+- Affected **component** (e.g., UI route, worker, build pipeline) and **version/commit**
+- **Reproduction steps** (clear, minimal PoC)
+- **Impact** and suggested **CVSS v3.1 vector string** (e.g., `AV:N/AC:L/…`) if you’re comfortable
+- **Logs/screenshots** or a short video, if safe to share
+- Your **contact** and if you want **public credit** (name/handle/link)
 
 ### PGP Public Key (placeholder)
 
@@ -36,12 +36,12 @@ When reporting, include as much detail as possible:
 
 ## 🔐 Coordinated Disclosure Policy
 
-* **Acknowledgement:** within **3 business days** of receipt (IST).
-* **Triage & initial assessment:** within **7 days**.
-* **Fix target:** within **90 days** from triage for most issues. Critical actively‑exploited issues may be fast‑tracked.
-* **Embargo:** We ask that you **do not publicly disclose** or share details until a fix is released and an advisory is published.
-* **Credit:** With your consent, we will thank you in the release notes and/or a `SECURITY-THANKS.md`. No monetary bounty at this time.
-* **CVE:** For qualifying vulnerabilities, we may request a CVE via GitHub Security Advisories.
+- **Acknowledgement:** within **3 business days** of receipt (IST).
+- **Triage & initial assessment:** within **7 days**.
+- **Fix target:** within **90 days** from triage for most issues. Critical actively‑exploited issues may be fast‑tracked.
+- **Embargo:** We ask that you **do not publicly disclose** or share details until a fix is released and an advisory is published.
+- **Credit:** With your consent, we will thank you in the release notes and/or a `SECURITY-THANKS.md`. No monetary bounty at this time.
+- **CVE:** For qualifying vulnerabilities, we may request a CVE via GitHub Security Advisories.
 
 If we cannot meet these timelines (e.g., dependency‑driven), we will keep you updated with revised milestones.
 
@@ -51,18 +51,18 @@ If we cannot meet these timelines (e.g., dependency‑driven), we will keep you 
 
 **In scope**
 
-* Code in this repository (application, build scripts, configuration, GitHub Actions).
-* The deployed static site/app for this project: **https\://\[YOUR‑PROD‑DOMAIN]** (and staging/previews if we share them).
-* Project infrastructure we control (e.g., GitHub Actions, container images built from this repo).
+- Code in this repository (application, build scripts, configuration, GitHub Actions).
+- The deployed static site/app for this project: **https\://\[YOUR‑PROD‑DOMAIN]** (and staging/previews if we share them).
+- Project infrastructure we control (e.g., GitHub Actions, container images built from this repo).
 
 **Out of scope** (please don’t test):
 
-* **Denial of Service** (DoS), volumetric or resource‑exhaustion attacks.
-* **Automated scanning** with high request rates, spam, or brute forcing.
-* **Third‑party services** we do not control (e.g., Vercel/Netlify/Cloudflare platforms themselves).
-* **Social engineering**, phishing, physical security, or lost/stolen devices.
-* **Self‑XSS**, clickjacking on non‑sensitive pages, or missing best‑practice headers on non‑production previews.
-* Issues requiring a compromised device, rooted/ jail‑broken environment, or non‑default browser flags.
+- **Denial of Service** (DoS), volumetric or resource‑exhaustion attacks.
+- **Automated scanning** with high request rates, spam, or brute forcing.
+- **Third‑party services** we do not control (e.g., Vercel/Netlify/Cloudflare platforms themselves).
+- **Social engineering**, phishing, physical security, or lost/stolen devices.
+- **Self‑XSS**, clickjacking on non‑sensitive pages, or missing best‑practice headers on non‑production previews.
+- Issues requiring a compromised device, rooted/ jail‑broken environment, or non‑default browser flags.
 
 If you’re unsure, ask — we’re happy to clarify scope.
 
@@ -70,11 +70,11 @@ If you’re unsure, ask — we’re happy to clarify scope.
 
 ## 🧪 Rules of Engagement (Responsible Testing)
 
-* Use **test data** only; do not access, modify, or exfiltrate real user data.
-* **No service disruption**: avoid actions that degrade availability or developer productivity.
-* Keep request rates low; prefer **single‑IP** testing with reasonable throttles.
-* Do not run intrusive scanners against **preview PR deployments** unless coordinated.
-* If you accidentally access sensitive data, **stop testing** and **report immediately**.
+- Use **test data** only; do not access, modify, or exfiltrate real user data.
+- **No service disruption**: avoid actions that degrade availability or developer productivity.
+- Keep request rates low; prefer **single‑IP** testing with reasonable throttles.
+- Do not run intrusive scanners against **preview PR deployments** unless coordinated.
+- If you accidentally access sensitive data, **stop testing** and **report immediately**.
 
 Safe harbor: If you follow this policy in good faith, we will not pursue or support legal action against you for your research on this project.
 
@@ -99,10 +99,10 @@ Prioritization may also consider exploitability, affected user count, availabili
 
 ### Frontend & Browser Hardening
 
-* The app is a **static client‑side** site built with **Vite + React + TypeScript**.
-* Production is served behind HTTPS with security headers (see below). **Never** expose the Vite dev server to the public internet.
-* We avoid `dangerouslySetInnerHTML`, `eval`, and untrusted HTML; sanitize any dynamic content.
-* Use **Content Security Policy (CSP)** in production builds to limit script origins.
+- The app is a **static client‑side** site built with **Vite + React + TypeScript**.
+- Production is served behind HTTPS with security headers (see below). **Never** expose the Vite dev server to the public internet.
+- We avoid `dangerouslySetInnerHTML`, `eval`, and untrusted HTML; sanitize any dynamic content.
+- Use **Content Security Policy (CSP)** in production builds to limit script origins.
 
 ### Recommended Security Headers (configure via `public/_headers` or platform settings)
 
@@ -120,21 +120,21 @@ Tailor `connect-src`/`img-src` as needed.
 
 ### Secrets Management
 
-* **Do not commit secrets**. Use `.env.local` for local development and platform secret stores in CI/CD.
-* Repository includes (or recommends) **gitleaks** to scan commits. If you find a leaked secret, rotate it immediately and open a private advisory.
+- **Do not commit secrets**. Use `.env.local` for local development and platform secret stores in CI/CD.
+- Repository includes (or recommends) **gitleaks** to scan commits. If you find a leaked secret, rotate it immediately and open a private advisory.
 
 ### Supply‑Chain & Dependencies
 
-* Lockfile committed (`package-lock.json`/`pnpm-lock.yaml`).
-* Automated updates via **Renovate/Dependabot** (security patches prioritized).
-* CI runs `npm audit --omit=dev` (or equivalent) and blocks on **Critical/High** unless overridden with a documented risk acceptance.
-* Only vetted third‑party libraries are used; avoid unmaintained or source‑obfuscated packages.
+- Lockfile committed (`package-lock.json`/`pnpm-lock.yaml`).
+- Automated updates via **Renovate/Dependabot** (security patches prioritized).
+- CI runs `npm audit --omit=dev` (or equivalent) and blocks on **Critical/High** unless overridden with a documented risk acceptance.
+- Only vetted third‑party libraries are used; avoid unmaintained or source‑obfuscated packages.
 
 ### Build, CI, and Releases
 
-* CI uses `npm ci` (clean, reproducible installs) and provenance‑friendly builds.
-* Release artifacts are **tagged** and checksummed; optionally signed (`git tag -s`).
-* GitHub Actions run with **least privilege** (scoped tokens, restricted secrets, pinned actions by SHA).
+- CI uses `npm ci` (clean, reproducible installs) and provenance‑friendly builds.
+- Release artifacts are **tagged** and checksummed; optionally signed (`git tag -s`).
+- GitHub Actions run with **least privilege** (scoped tokens, restricted secrets, pinned actions by SHA).
 
 ---
 
@@ -164,8 +164,8 @@ We track security advisories via **GitHub Security Advisories** and link them fr
 
 ## 📬 Contact Recap
 
-* Primary: `security@[YOUR-DOMAIN]`
-* Backup: `[MAINTAINER NAME] <[MAINTAINER EMAIL]>`
-* PGP: see block & fingerprint above
+- Primary: `security@[YOUR-DOMAIN]`
+- Backup: `[MAINTAINER NAME] <[MAINTAINER EMAIL]>`
+- PGP: see block & fingerprint above
 
 > Replace placeholders in **ALL CAPS** before publishing. Save this file as `SECURITY.md` in the repository root.

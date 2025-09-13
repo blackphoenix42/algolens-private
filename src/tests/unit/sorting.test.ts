@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { run as bubbleSort } from "../../algorithms/sorting/algos/bubbleSort";
 import { run as insertionSort } from "../../algorithms/sorting/algos/insertionSort";
@@ -6,10 +6,10 @@ import { run as mergeSort } from "../../algorithms/sorting/algos/mergeSort";
 import { run as quickSort } from "../../algorithms/sorting/algos/quickSort";
 import { run as selectionSort } from "../../algorithms/sorting/algos/selectionSort";
 import type { Algorithm, Frame } from "../../engine/types";
-import { testArrays, expectedResults } from "../fixtures/testArrays";
+import { expectedResults, testArrays } from "../fixtures/testArrays";
 import {
-  testSortingAlgorithm,
   getFinalArray,
+  testSortingAlgorithm,
 } from "../helpers/algorithmTestUtils";
 
 // Convert Algorithm type to simpler array input function for testing

@@ -97,14 +97,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
             {label}
           </label>
         )}
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500">
+            <div className="absolute top-1/2 left-3 -translate-y-1/2 transform text-slate-400 dark:text-slate-500">
               {leftIcon}
             </div>
           )}
@@ -115,7 +115,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               inputVariants({ variant, inputSize, state: currentState }),
               leftIcon && "pl-10",
               (rightIcon || loading) && "pr-10",
-              isFocused && "ring-2 ring-primary-500 ring-opacity-20",
+              isFocused && "ring-primary-500 ring-opacity-20 ring-2",
               className
             )}
             ref={ref}
@@ -133,7 +133,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {(rightIcon || loading) && (
             <div
               className={cn(
-                "absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500",
+                "absolute top-1/2 right-3 -translate-y-1/2 transform text-slate-400 dark:text-slate-500",
                 onRightIconClick &&
                   "cursor-pointer hover:text-slate-600 dark:hover:text-slate-300"
               )}
@@ -141,7 +141,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             >
               {loading ? (
                 <svg
-                  className="animate-spin h-4 w-4"
+                  className="h-4 w-4 animate-spin"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

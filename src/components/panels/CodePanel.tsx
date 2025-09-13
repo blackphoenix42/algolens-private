@@ -1,14 +1,14 @@
 // src/components/panels/CodePanel.tsx
+import "highlight.js/styles/github.css";
+import "@/styles/hljs-dark-overrides.css";
+import "./CodePanel.css";
+
 import hljs from "highlight.js/lib/core";
 import cpp from "highlight.js/lib/languages/cpp";
 import java from "highlight.js/lib/languages/java";
 import javascript from "highlight.js/lib/languages/javascript";
 import python from "highlight.js/lib/languages/python";
-import { useMemo, useState, useEffect } from "react";
-
-import "highlight.js/styles/github.css";
-import "@/styles/hljs-dark-overrides.css";
-import "./CodePanel.css";
+import { useEffect, useMemo, useState } from "react";
 
 import type { AlgoMeta } from "@/types/algorithms";
 
@@ -71,7 +71,7 @@ function Chevron({ open }: { open: boolean }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className={`w-4 h-4 transition-transform ${
+      className={`h-4 w-4 transition-transform ${
         open ? "-rotate-180" : "rotate-0"
       }`}
       aria-hidden
@@ -132,21 +132,13 @@ export default function CodePanel({
 
   return (
     <div
-      className={`card overflow-hidden relative ${fillHeight ? "h-full" : ""}
-        bg-white border border-slate-200
-        dark:bg-slate-900 dark:border-slate-700`}
+      className={`card relative overflow-hidden ${fillHeight ? "h-full" : ""} border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900`}
     >
       {/* Header bar */}
-      <div
-        className="flex items-center justify-between px-2 py-1 border-b
-                   bg-slate-50 border-slate-200
-                   dark:bg-slate-800 dark:border-slate-700"
-      >
+      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-2">
           <button
-            className="px-1.5 py-1 rounded border
-                       bg-white border-slate-200 hover:bg-slate-100
-                       dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800/70"
+            className="rounded border border-slate-200 bg-white px-1.5 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
             onClick={() => setCollapsed((v) => !v)}
             aria-expanded={!collapsed}
             aria-controls="codepanel-body"
@@ -157,23 +149,21 @@ export default function CodePanel({
 
           <div className="flex gap-2">
             <button
-              className={`px-2 py-1 rounded
-                ${
-                  tab === "pseudocode"
-                    ? "bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              className={`rounded px-2 py-1 ${
+                tab === "pseudocode"
+                  ? "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-700/60"
+              }`}
               onClick={() => setTab("pseudocode")}
             >
               Pseudocode
             </button>
             <button
-              className={`px-2 py-1 rounded
-                ${
-                  tab === "code"
-                    ? "bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              className={`rounded px-2 py-1 ${
+                tab === "code"
+                  ? "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-700/60"
+              }`}
               onClick={() => setTab("code")}
             >
               Code
@@ -183,9 +173,7 @@ export default function CodePanel({
 
         {!collapsed && tab === "code" && (
           <select
-            className="rounded border px-2 py-1 text-sm
-                       bg-white border-slate-200 text-slate-900
-                       dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
+            className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             value={lang}
             onChange={(e) => setLang(e.target.value as Lang)}
           >
@@ -205,21 +193,20 @@ export default function CodePanel({
               className="overflow-auto"
               style={{ maxHeight: fillHeight ? "100%" : "auto" }}
             >
-              <ol className="font-mono text-sm leading-6 p-2">
+              <ol className="p-2 font-mono text-sm leading-6">
                 {meta.pseudocode.map((line: string, i: number) => {
                   const isActive = (activePcLine ?? -1) - 1 === i;
                   return (
                     <li
                       key={i}
-                      className={`px-2 rounded mb-1 transition-colors
-                        ${
-                          isActive
-                            ? "bg-yellow-100 ring-1 ring-yellow-300 dark:bg-yellow-900/30 dark:ring-yellow-700"
-                            : "hover:bg-slate-100 dark:hover:bg-slate-800/70"
-                        }`}
+                      className={`mb-1 rounded px-2 transition-colors ${
+                        isActive
+                          ? "bg-yellow-100 ring-1 ring-yellow-300 dark:bg-yellow-900/30 dark:ring-yellow-700"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800/70"
+                      }`}
                     >
                       <div>
-                        <span className="text-gray-400 dark:text-gray-500 select-none mr-2">
+                        <span className="mr-2 text-gray-400 select-none dark:text-gray-500">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span className="text-slate-900 dark:text-slate-200">
@@ -227,10 +214,7 @@ export default function CodePanel({
                         </span>
                       </div>
                       {isActive && explain && (
-                        <div
-                          className="mt-1 text-xs text-gray-800 bg-yellow-50 border border-yellow-200 rounded px-2 py-1
-                                     dark:text-yellow-50 dark:bg-yellow-900/40 dark:border-yellow-800"
-                        >
+                        <div className="mt-1 rounded border border-yellow-200 bg-yellow-50 px-2 py-1 text-xs text-gray-800 dark:border-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-50">
                           {explain}
                         </div>
                       )}
@@ -241,21 +225,15 @@ export default function CodePanel({
             </div>
           ) : (
             <div
-              className={`codeblock overflow-auto relative ${
+              className={`codeblock relative overflow-auto ${
                 wrap ? "code-wrap" : "code-nowrap"
               } bg-white dark:bg-slate-900`}
               style={{ maxHeight: fillHeight ? "100%" : "auto" }}
             >
               {/* inline toolbar */}
-              <div
-                className="sticky top-0 z-10 flex justify-end gap-2 p-2
-                           bg-gradient-to-b from-white/90 to-transparent
-                           dark:from-slate-900/90"
-              >
+              <div className="sticky top-0 z-10 flex justify-end gap-2 bg-gradient-to-b from-white/90 to-transparent p-2 dark:from-slate-900/90">
                 <button
-                  className="px-2 py-1 rounded border inline-flex items-center
-                             border-slate-200 hover:bg-slate-100
-                             dark:border-slate-700 dark:hover:bg-slate-800/70"
+                  className="inline-flex items-center rounded border border-slate-200 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800/70"
                   onClick={() => setWrap((w) => !w)}
                   title="Toggle word wrap"
                   aria-pressed={wrap}
@@ -263,9 +241,7 @@ export default function CodePanel({
                   <WrapIcon />
                 </button>
                 <button
-                  className="px-2 py-1 rounded border inline-flex items-center
-                             border-slate-200 hover:bg-slate-100
-                             dark:border-slate-700 dark:hover:bg-slate-800/70"
+                  className="inline-flex items-center rounded border border-slate-200 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800/70"
                   onClick={copy}
                   title="Copy code"
                 >
@@ -296,9 +272,7 @@ export default function CodePanel({
 
       {copied && (
         <div
-          className="absolute top-2 right-2 px-2 py-1 rounded
-                     bg-black/80 text-white text-xs shadow
-                     dark:bg-black/70"
+          className="absolute top-2 right-2 rounded bg-black/80 px-2 py-1 text-xs text-white shadow dark:bg-black/70"
           role="status"
           aria-live="polite"
         >

@@ -280,7 +280,7 @@ Maintain a section in the project changelog or a `DESIGN_CHANGELOG.md`:
 ### Panel Header (TSX)
 
 ```tsx
-<div className="flex items-center justify-between h-12 px-3 border-b border-border">
+<div className="border-border flex h-12 items-center justify-between border-b px-3">
   <h2 className="text-sm font-medium">Pseudocode</h2>
   <div className="flex items-center gap-2">{/* actions */}</div>
 </div>
@@ -290,7 +290,7 @@ Maintain a section in the project changelog or a `DESIGN_CHANGELOG.md`:
 
 ```tsx
 <button
-  className="h-9 px-3 rounded-xl border border-border bg-bg hover:bg-border/30 active:scale-[0.98] transition"
+  className="border-border bg-bg hover:bg-border/30 h-9 rounded-xl border px-3 transition active:scale-[0.98]"
   aria-label="Step"
 >
   <IconStep className="size-4" />

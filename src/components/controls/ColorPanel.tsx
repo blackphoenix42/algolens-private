@@ -17,7 +17,7 @@ export default function ColorPanel({ value, onChange }: Props) {
 
   return (
     <div className="card">
-      <div className="text-sm font-medium mb-2">Colors</div>
+      <div className="mb-2 text-sm font-medium">Colors</div>
 
       {/* grid: [label picker] [label picker] */}
       <div

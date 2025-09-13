@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "framer-motion";
-import React, { useState, useCallback, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { MotionArray } from "./MotionArray";
 
@@ -127,7 +127,7 @@ export default function EnhancedArrayCanvas({
 
   return (
     <motion.div
-      className={`w-full bg-white rounded-lg border shadow-sm ${className}`}
+      className={`w-full rounded-lg border bg-white shadow-sm ${className}`}
       style={{ height }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -135,30 +135,30 @@ export default function EnhancedArrayCanvas({
     >
       {/* Control Panel */}
       <motion.div
-        className="flex flex-wrap items-center gap-3 p-4 bg-gray-50 border-b rounded-t-lg"
+        className="flex flex-wrap items-center gap-3 rounded-t-lg border-b bg-gray-50 p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Array Size:</span>
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+          <span className="rounded bg-blue-100 px-2 py-1 text-sm text-blue-800">
             {localArray.length}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Selected:</span>
-          <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm">
+          <span className="rounded bg-purple-100 px-2 py-1 text-sm text-purple-800">
             {selectedBars.length > 0 ? selectedBars.join(", ") : "None"}
           </span>
         </div>
 
-        <div className="flex gap-2 ml-auto">
+        <div className="ml-auto flex gap-2">
           <motion.button
             onClick={generateRandomArray}
             disabled={isAnimating}
-            className="px-3 py-1.5 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50 transition-colors"
+            className="rounded bg-green-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-green-600 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -168,7 +168,7 @@ export default function EnhancedArrayCanvas({
           <motion.button
             onClick={shuffleArray}
             disabled={isAnimating}
-            className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50 transition-colors"
+            className="rounded bg-orange-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -178,7 +178,7 @@ export default function EnhancedArrayCanvas({
           <motion.button
             onClick={sortArray}
             disabled={isAnimating}
-            className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50 transition-colors"
+            className="rounded bg-blue-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -188,7 +188,7 @@ export default function EnhancedArrayCanvas({
       </motion.div>
 
       {/* Array Visualization */}
-      <div className="flex-1 p-4 overflow-hidden">
+      <div className="flex-1 overflow-hidden p-4">
         <AnimatePresence mode="wait">
           <MotionArray
             key={localArray.join(",")}
@@ -197,14 +197,14 @@ export default function EnhancedArrayCanvas({
             onBarClick={enableInteraction ? handleBarClick : undefined}
             showLabels={showLabels}
             colorMode={colorMode}
-            className="w-full h-full"
+            className="h-full w-full"
           />
         </AnimatePresence>
       </div>
 
       {/* Status Bar */}
       <motion.div
-        className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t text-xs text-gray-600"
+        className="flex items-center justify-between border-t bg-gray-50 px-4 py-2 text-xs text-gray-600"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}

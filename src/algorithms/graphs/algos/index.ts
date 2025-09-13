@@ -297,5 +297,5 @@ def bfs(graph, start):
   },
 ];
 
-export { run as depthFirstSearch } from "./depthFirstSearch";
 export { run as breadthFirstSearch } from "./breadthFirstSearch";
+export { run as depthFirstSearch } from "./depthFirstSearch";

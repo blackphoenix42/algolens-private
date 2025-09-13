@@ -3,7 +3,7 @@
  * Provides lazy loading, modern format support, and performance optimization
  */
 
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 
 import { useIntersectionObserver } from "@/services/performance";
 import { cn } from "@/utils";
@@ -109,7 +109,7 @@ export function OptimizedImage({
         <img
           src={placeholder}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover filter blur-sm scale-110"
+          className="absolute inset-0 h-full w-full scale-110 object-cover blur-sm filter"
           aria-hidden="true"
         />
       )}
@@ -127,7 +127,7 @@ export function OptimizedImage({
           onLoad={handleLoad}
           onError={handleError}
           className={cn(
-            "w-full h-full object-cover transition-opacity duration-300",
+            "h-full w-full object-cover transition-opacity duration-300",
             isLoaded ? "opacity-100" : "opacity-0"
           )}
           {...props}
@@ -136,9 +136,9 @@ export function OptimizedImage({
 
       {/* Error fallback */}
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
           <div className="text-center">
-            <div className="text-2xl mb-2">🖼️</div>
+            <div className="mb-2 text-2xl">🖼️</div>
             <div className="text-sm">Failed to load image</div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export function OptimizedImage({
       {/* Loading state */}
       {shouldRender && !isLoaded && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div className="border-primary-600 h-8 w-8 animate-spin rounded-full border-b-2"></div>
         </div>
       )}
     </div>

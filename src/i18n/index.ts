@@ -67,7 +67,7 @@ export const supportedLanguages = Object.keys(resources) as Languages[];
 
 // Re-exports from other modules
 export { useI18n, useLanguages } from "./hooks";
-export { LanguageSwitcher } from "./LanguageSwitcher";
 export { I18nProvider } from "./I18nProvider";
 export { LanguageProvider, useLanguageContext } from "./LanguageContext";
-export { formatDifficultyI18n, formatAlgorithmCategory } from "./utils";
+export { LanguageSwitcher } from "./LanguageSwitcher";
+export { formatAlgorithmCategory, formatDifficultyI18n } from "./utils";

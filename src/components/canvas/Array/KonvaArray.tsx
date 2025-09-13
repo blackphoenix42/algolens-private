@@ -1,6 +1,6 @@
 import Konva from "konva";
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Stage, Layer, Rect, Text, Group, Line } from "react-konva";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 
 interface KonvaArrayProps {
   array: number[];

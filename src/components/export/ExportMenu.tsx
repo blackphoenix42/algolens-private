@@ -3,8 +3,8 @@
  * Provides UI for exporting visualizations in various formats
  */
 
-import { Download, Image, FileText, Film, Code, Settings } from "lucide-react";
-import React, { useState, useRef } from "react";
+import { Code, Download, FileText, Film, Image, Settings } from "lucide-react";
+import React, { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -155,7 +155,7 @@ export function ExportMenu({
       </Button>
 
       {isOpen && (
-        <Card className="absolute top-full right-0 mt-2 w-80 p-4 shadow-lg z-50 bg-white dark:bg-gray-800">
+        <Card className="absolute top-full right-0 z-50 mt-2 w-80 bg-white p-4 shadow-lg dark:bg-gray-800">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -177,68 +177,68 @@ export function ExportMenu({
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setExportFormat("png")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "png"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <Image className="h-4 w-4 mx-auto mb-1" />
+                  <Image className="mx-auto mb-1 h-4 w-4" />
                   PNG
                 </button>
                 <button
                   onClick={() => setExportFormat("svg")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "svg"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <FileText className="h-4 w-4 mx-auto mb-1" />
+                  <FileText className="mx-auto mb-1 h-4 w-4" />
                   SVG
                 </button>
                 <button
                   onClick={() => setExportFormat("pdf")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "pdf"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <FileText className="h-4 w-4 mx-auto mb-1" />
+                  <FileText className="mx-auto mb-1 h-4 w-4" />
                   PDF
                 </button>
                 <button
                   onClick={() => setExportFormat("gif")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "gif"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <Film className="h-4 w-4 mx-auto mb-1" />
+                  <Film className="mx-auto mb-1 h-4 w-4" />
                   GIF
                 </button>
                 <button
                   onClick={() => setExportFormat("mp4")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "mp4"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <Film className="h-4 w-4 mx-auto mb-1" />
+                  <Film className="mx-auto mb-1 h-4 w-4" />
                   MP4
                 </button>
                 <button
                   onClick={() => setExportFormat("code")}
-                  className={`p-2 text-xs rounded border text-center ${
+                  className={`rounded border p-2 text-center text-xs ${
                     exportFormat === "code"
-                      ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-600 dark:bg-blue-900 dark:text-blue-300"
                       : "border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  <Code className="h-4 w-4 mx-auto mb-1" />
+                  <Code className="mx-auto mb-1 h-4 w-4" />
                   Code
                 </button>
               </div>
@@ -267,7 +267,7 @@ export function ExportMenu({
                           quality: Number(e.target.value),
                         }))
                       }
-                      className="w-full p-2 text-sm border rounded dark:bg-gray-700 dark:border-gray-600"
+                      className="w-full rounded border p-2 text-sm dark:border-gray-600 dark:bg-gray-700"
                       title="Select export quality"
                       aria-label="Export quality scale factor"
                     >
@@ -333,7 +333,7 @@ export function ExportMenu({
             >
               {isExporting ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
                   Exporting...
                 </div>
               ) : (
@@ -438,7 +438,7 @@ export function QuickExportButton({
       title={`Export as ${format.toUpperCase()}`}
     >
       {isExporting ? (
-        <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
       ) : (
         <Download className="h-4 w-4" />
       )}
