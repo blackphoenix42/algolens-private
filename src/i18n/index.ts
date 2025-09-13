@@ -8,6 +8,7 @@ import enTranslations from "./en/common.json";
 import hiTranslations from "./hi/common.json";
 import jaTranslations from "./ja/common.json";
 import ruTranslations from "./ru/common.json";
+import zhTranslations from "./zh/common.json";
 
 const resources = {
   en: {
@@ -21,6 +22,9 @@ const resources = {
   },
   ja: {
     common: jaTranslations,
+  },
+  zh: {
+    common: zhTranslations,
   },
 } as const;
 

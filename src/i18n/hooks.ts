@@ -73,6 +73,7 @@ export const useLanguages = () => {
     { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
     { code: "ru", name: "Russian", nativeName: "Русский" },
     { code: "ja", name: "Japanese", nativeName: "日本語" },
+    { code: "zh", name: "Chinese", nativeName: "中文" },
   ];
 
   return languages;
