@@ -16,6 +16,12 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
 Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; img-src 'self' data: blob:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' https://\*.sentry.io https://www.google-analytics.com
 
+# --- Compression ---
+
+# Enable compression for text assets to improve performance
+
+X-Content-Encoding: br, gzip
+
 # --- Cache (HTML should revalidate) ---
 
 Cache-Control: public, max-age=0, must-revalidate
@@ -24,6 +30,22 @@ Cache-Control: public, max-age=0, must-revalidate
 
 /assets/\*
 Cache-Control: public, max-age=31536000, immutable
+Content-Encoding: br, gzip
+
+# JavaScript files compression
+
+/\*.js
+Content-Encoding: br, gzip
+
+# CSS files compression
+
+/\*.css
+Content-Encoding: br, gzip
+
+# JSON files compression
+
+/\*.json
+Content-Encoding: br, gzip
 
 # Fonts (allow CORS so they load cross-origin if embedded)
 

@@ -94,10 +94,42 @@
     <!-- PWA manifest (optional) -->
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Optional: preconnect to your font/CDN origins
+    <!-- Critical resource hints for performance optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://registry.npmjs.org" />
+
+    <!-- Preload critical resources in priority order -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link
+      rel="preload"
+      href="/brand/AlgoLens.webp"
+      as="image"
+      type="image/webp"
+    />
+    <link
+      rel="preload"
+      href="/brand/AlgoLens.avif"
+      as="image"
+      type="image/avif"
+    />
+
+    <!-- Preload critical CSS chunks -->
+    <link rel="preload" href="/src/styles/globals.css" as="style" />
+
+    <!-- Preload critical fonts for LCP optimization -->
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Prefetch likely navigation targets -->
+    <link rel="prefetch" href="/src/pages/VisualizerPage.tsx" />
+    <link rel="prefetch" href="/src/engine/registry.ts" />
 
     <!-- No-flash dark mode: run before paint -->
     <script>

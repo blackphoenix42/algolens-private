@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { ExpandIcon } from "@/components/ui/Icons";
-import Markdown from "@/components/ui/Markdown";
+import LazyMarkdown from "@/components/ui/LazyMarkdown";
 import Modal from "@/components/ui/Modal";
 import type { AlgoMeta } from "@/types/algorithms";
 
@@ -76,7 +76,7 @@ export default function AboutPanel({ meta }: { meta: AlgoMeta }) {
         <div id="about-body" className="space-y-3">
           {/* About content (markdown) or summary fallback */}
           {meta.about ? (
-            <Markdown>{meta.about}</Markdown>
+            <LazyMarkdown>{meta.about}</LazyMarkdown>
           ) : (
             <p className="text-slate-800 dark:text-slate-100">{meta.summary}</p>
           )}
@@ -192,7 +192,7 @@ function AboutPanelContent({ meta }: { meta: AlgoMeta }) {
   return (
     <div className="modal-body grid gap-4 text-sm">
       {meta.about ? (
-        <Markdown>{meta.about}</Markdown>
+        <LazyMarkdown>{meta.about}</LazyMarkdown>
       ) : (
         <p className="text-slate-800 dark:text-slate-100">{meta.summary}</p>
       )}

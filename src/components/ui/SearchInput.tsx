@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { cn, debounce } from "@/utils";
 import {
@@ -182,8 +188,8 @@ export function SearchInput({
     debouncedSearch(newValue);
   };
 
-  // Handle clear
-  const handleClear = () => {
+  // Handle clear - Memoized to prevent unnecessary re-renders
+  const handleClear = useCallback(() => {
     setInternalValue("");
     setShowDropdown(false);
     setSelectedIndex(-1);
@@ -192,35 +198,41 @@ export function SearchInput({
     onChange("");
     onClear?.();
     inputRef.current?.focus();
-  };
+  }, [onChange, onClear]);
 
-  // Handle suggestion or result selection
-  const handleItemClick = (item: string | SearchResult<SearchableItem>) => {
-    if (typeof item === "string") {
-      // Legacy suggestion
-      setInternalValue(item);
-      setShowDropdown(false);
-      setSelectedIndex(-1);
-      onChange(item);
-      onSearch?.(item);
-    } else {
-      // Advanced search result
-      const result = item as SearchResult<SearchableItem>;
-      setInternalValue(result.item.title);
-      setShowDropdown(false);
-      setSelectedIndex(-1);
-      onChange(result.item.title);
-      onSearch?.(result.item.title);
-      onResultSelect?.(result);
-    }
-  };
+  // Handle suggestion or result selection - Memoized
+  const handleItemClick = useCallback(
+    (item: string | SearchResult<SearchableItem>) => {
+      if (typeof item === "string") {
+        // Legacy suggestion
+        setInternalValue(item);
+        setShowDropdown(false);
+        setSelectedIndex(-1);
+        onChange(item);
+        onSearch?.(item);
+      } else {
+        // Advanced search result
+        const result = item as SearchResult<SearchableItem>;
+        setInternalValue(result.item.title);
+        setShowDropdown(false);
+        setSelectedIndex(-1);
+        onChange(result.item.title);
+        onSearch?.(result.item.title);
+        onResultSelect?.(result);
+      }
+    },
+    [onChange, onSearch, onResultSelect]
+  );
 
-  // Handle "Did you mean?" suggestion click
-  const handleDidYouMeanClick = (suggestion: string) => {
-    setInternalValue(suggestion);
-    setSelectedIndex(-1);
-    debouncedSearch(suggestion);
-  };
+  // Handle "Did you mean?" suggestion click - Memoized
+  const handleDidYouMeanClick = useCallback(
+    (suggestion: string) => {
+      setInternalValue(suggestion);
+      setSelectedIndex(-1);
+      debouncedSearch(suggestion);
+    },
+    [debouncedSearch]
+  );
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -272,12 +284,17 @@ export function SearchInput({
     }
   };
 
-  // Filter suggestions based on input (legacy mode)
-  const filteredSuggestions = useAdvancedSearch
-    ? []
-    : suggestions.filter((suggestion) =>
+  // Filter suggestions based on input (legacy mode) - Memoized for performance
+  const filteredSuggestions = useMemo(() => {
+    if (useAdvancedSearch) return [];
+    if (!internalValue.trim()) return suggestions.slice(0, 10);
+
+    return suggestions
+      .filter((suggestion) =>
         suggestion.toLowerCase().includes(internalValue.toLowerCase())
-      );
+      )
+      .slice(0, 10);
+  }, [useAdvancedSearch, suggestions, internalValue]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -25,6 +25,7 @@ import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
+import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
 
 export default function VisualizerPage() {
@@ -44,24 +45,43 @@ export default function VisualizerPage() {
     return () => componentLogger.unmount();
   }, [topic, slug, componentLogger]);
 
-  const meta = findAlgo(topic, slug);
+  const [meta, setMeta] = useState<AlgoMeta | null>(null);
+  const [_isLoadingMeta, setIsLoadingMeta] = useState(true);
 
-  // Log algorithm resolution
+  // Load algorithm metadata asynchronously
   useEffect(() => {
-    if (meta) {
-      logger.info(LogCategory.ALGORITHM, "Algorithm found", {
-        topic,
-        slug,
-        title: meta.title,
-        algoTopic: meta.topic,
-      });
-    } else {
-      logger.warn(LogCategory.ALGORITHM, "Algorithm not found", {
-        topic,
-        slug,
-      });
-    }
-  }, [meta, topic, slug]);
+    const loadMeta = async () => {
+      setIsLoadingMeta(true);
+      try {
+        const loadedMeta = await findAlgo(topic, slug);
+        setMeta(loadedMeta);
+
+        // Log algorithm resolution
+        if (loadedMeta) {
+          logger.info(LogCategory.ALGORITHM, "Algorithm found", {
+            topic,
+            slug,
+            title: loadedMeta.title,
+            algoTopic: loadedMeta.topic,
+          });
+        } else {
+          logger.warn(LogCategory.ALGORITHM, "Algorithm not found", {
+            topic,
+            slug,
+          });
+        }
+      } catch (error) {
+        logger.error(LogCategory.ALGORITHM, "Error loading algorithm", {
+          error,
+        });
+        setMeta(null);
+      } finally {
+        setIsLoadingMeta(false);
+      }
+    };
+
+    loadMeta();
+  }, [topic, slug]);
 
   const params = useMemo(() => {
     const urlParams = url.read();
@@ -467,7 +487,7 @@ export default function VisualizerPage() {
                   height: 360,
                 }))
               }
-              watermarkUrl="/brand/AlgoLens.png"
+              watermarkUrl="/brand/AlgoLens.webp"
             />
           </div>
         </div>

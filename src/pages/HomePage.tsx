@@ -11,11 +11,16 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import FloatingParticles from "@/components/ui/FloatingParticles";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { CATALOG } from "@/engine/registry";
+import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import { cn, formatDifficulty, scrollToElement } from "@/utils";
+import {
+  processInChunks,
+  runWhenIdle,
+  yieldToMain,
+} from "@/utils/taskScheduler";
 
 type SortKey = "relevance" | "title" | "difficulty" | "recent" | "popularity";
 
@@ -46,21 +51,52 @@ const TOPIC_META: Record<string, { icon: string; color: string }> = {
   "number-theory": { icon: "🔢", color: "amber" },
 };
 
-function useSafeCatalog(): Record<string, AlgoItem[]> {
-  return useMemo(() => {
-    const safe: Record<string, AlgoItem[]> = {};
-    for (const [topic, items] of Object.entries(CATALOG ?? {})) {
-      safe[topic] = Array.isArray(items) ? (items as AlgoItem[]) : [];
-    }
-    return safe;
+function useSafeCatalog(): {
+  catalog: Record<string, AlgoItem[]>;
+  isLoading: boolean;
+} {
+  const [catalog, setCatalog] = useState<Record<string, AlgoItem[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCatalog = async () => {
+      try {
+        const loadedCatalog = await loadAllTopics();
+        const safe: Record<string, AlgoItem[]> = {};
+
+        // Process topics in chunks to avoid blocking main thread
+        const topics = Object.entries(loadedCatalog);
+        await processInChunks(
+          topics,
+          async ([topic, items]) => {
+            // Yield to main thread for heavy processing
+            await yieldToMain();
+            safe[topic] = Array.isArray(items) ? (items as AlgoItem[]) : [];
+          },
+          2 // Process 2 topics at a time
+        );
+
+        setCatalog(safe);
+      } catch (error) {
+        console.error("Failed to load algorithm catalog:", error);
+        setCatalog({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Use idle callback for non-critical loading
+    runWhenIdle(loadCatalog);
   }, []);
+
+  return { catalog, isLoading };
 }
 
 export default function HomePage() {
   const { t } = useI18n();
   const componentLogger = useComponentLogger("HomePage");
   const navigate = useNavigate();
-  const catalog = useSafeCatalog();
+  const { catalog } = useSafeCatalog();
   const {
     shouldShowOnboardingTour,
     resetOnboardingTour,
@@ -499,15 +535,41 @@ export default function HomePage() {
   return (
     <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       {/* Liquid Glass Background Elements */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="liquid-glass-hero animate-float absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-30"></div>
+      <div
+        className="pointer-events-none fixed inset-0 overflow-hidden"
+        style={{ contain: "layout style" }}
+      >
         <div
-          className="liquid-glass-hero animate-float absolute right-1/4 bottom-1/4 h-72 w-72 rounded-full opacity-20"
-          style={{ animationDelay: "2s" }}
+          className="liquid-glass-hero animate-float absolute rounded-full opacity-30"
+          style={{
+            top: "25%",
+            left: "25%",
+            width: "384px",
+            height: "384px",
+            willChange: "transform",
+          }}
         ></div>
         <div
-          className="liquid-glass-hero animate-float absolute top-3/4 left-3/4 h-48 w-48 rounded-full opacity-25"
-          style={{ animationDelay: "4s" }}
+          className="liquid-glass-hero animate-float absolute rounded-full opacity-20"
+          style={{
+            right: "25%",
+            bottom: "25%",
+            width: "288px",
+            height: "288px",
+            animationDelay: "2s",
+            willChange: "transform",
+          }}
+        ></div>
+        <div
+          className="liquid-glass-hero animate-float absolute rounded-full opacity-25"
+          style={{
+            top: "75%",
+            left: "75%",
+            width: "192px",
+            height: "192px",
+            animationDelay: "4s",
+            willChange: "transform",
+          }}
         ></div>
       </div>
 
@@ -570,32 +632,32 @@ export default function HomePage() {
                 <div className="animate-shimmer mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 md:w-32"></div>
               </div>
 
-              {/* Enhanced Subtitle */}
+              {/* Enhanced Subtitle with fixed dimensions to prevent layout shift */}
               <div className="animate-fade-in-up animation-delay-200 mb-12 md:mb-16">
-                <p className="mx-auto mb-4 max-w-4xl px-4 text-lg leading-relaxed font-light text-white/90 sm:text-xl md:mb-6 md:text-2xl lg:text-3xl">
+                <p className="mx-auto mb-4 min-h-[2.5rem] max-w-4xl px-4 text-lg leading-relaxed font-light text-white/90 sm:min-h-[3rem] sm:text-xl md:mb-6 md:min-h-[4rem] md:text-2xl lg:min-h-[5rem] lg:text-3xl">
                   {t("app.tagline")}
                 </p>
-                <p className="mx-auto max-w-3xl px-4 text-sm leading-relaxed text-white/70 sm:text-base md:text-xl">
+                <p className="mx-auto min-h-[3rem] max-w-3xl px-4 text-sm leading-relaxed text-white/70 sm:min-h-[4rem] sm:text-base md:min-h-[5rem] md:text-xl">
                   {t("app.description")}
                 </p>
               </div>
 
-              {/* Enhanced Stats */}
+              {/* Enhanced Stats with fixed dimensions to prevent layout shift */}
               <div className="animate-fade-in-up animation-delay-400 mb-12 grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:gap-6 md:mb-16 md:gap-8">
                 <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
-                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-blue-200 sm:text-4xl md:text-5xl">
-                    {stats.algorithms}
+                  <div className="mb-2 flex min-h-[3rem] items-center justify-center text-3xl font-black text-white transition-colors group-hover:text-blue-200 sm:min-h-[3.5rem] sm:text-4xl md:min-h-[4rem] md:text-5xl">
+                    {stats.algorithms || "..."}
                   </div>
-                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
+                  <div className="flex min-h-[1.5rem] items-center justify-center text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
                     {t("navigation.algorithms")}
                   </div>
                   <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-blue-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
                 </div>
                 <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
-                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-purple-200 sm:text-4xl md:text-5xl">
-                    {stats.categories}
+                  <div className="mb-2 flex min-h-[3rem] items-center justify-center text-3xl font-black text-white transition-colors group-hover:text-purple-200 sm:min-h-[3.5rem] sm:text-4xl md:min-h-[4rem] md:text-5xl">
+                    {stats.categories || "..."}
                   </div>
-                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
+                  <div className="flex min-h-[1.5rem] items-center justify-center text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
                     Categories
                   </div>
                   <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-purple-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>

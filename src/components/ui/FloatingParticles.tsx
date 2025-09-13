@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import { runWithTimeSlicing } from "@/utils/taskScheduler";
+
 interface Particle {
   x: number;
   y: number;
@@ -30,14 +32,26 @@ export default function FloatingParticles({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size
+    let lastWidth = 0;
+    let lastHeight = 0;
+
+    // Optimized canvas resize with debouncing
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
+      const width = rect.width;
+      const height = rect.height;
+
+      // Only resize if dimensions actually changed
+      if (width === lastWidth && height === lastHeight) return;
+
+      lastWidth = width;
+      lastHeight = height;
+
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      canvas.style.width = rect.width + "px";
-      canvas.style.height = rect.height + "px";
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
     };
 
     // Initialize particles
@@ -53,8 +67,8 @@ export default function FloatingParticles({
 
       for (let i = 0; i < particleCount; i++) {
         particlesRef.current.push({
-          x: (Math.random() * canvas.width) / window.devicePixelRatio,
-          y: (Math.random() * canvas.height) / window.devicePixelRatio,
+          x: Math.random() * lastWidth,
+          y: Math.random() * lastHeight,
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
           size: Math.random() * 3 + 1,
@@ -64,81 +78,104 @@ export default function FloatingParticles({
       }
     };
 
-    // Animation loop
-    const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+    // Optimized animation loop with reduced reflows
+    const animate = async () => {
+      // Use cached dimensions to avoid getBoundingClientRect calls
+      const width = lastWidth;
+      const height = lastHeight;
 
-      ctx.clearRect(0, 0, width, height);
+      if (width === 0 || height === 0) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
 
-      particlesRef.current.forEach((particle) => {
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+      // Use time slicing for heavy operations
+      await runWithTimeSlicing(() => {
+        ctx.clearRect(0, 0, width, height);
 
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > width) {
-          particle.vx *= -1;
-          particle.x = Math.max(0, Math.min(width, particle.x));
-        }
-        if (particle.y < 0 || particle.y > height) {
-          particle.vy *= -1;
-          particle.y = Math.max(0, Math.min(height, particle.y));
-        }
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = particle.color;
-        ctx.fill();
-
-        // Add glow effect
+        // Batch shadow operations for better performance
         ctx.shadowBlur = 10;
-        ctx.shadowColor = particle.color;
-        ctx.fill();
+
+        particlesRef.current.forEach((particle) => {
+          // Update position
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+
+          // Bounce off edges
+          if (particle.x < 0 || particle.x > width) {
+            particle.vx *= -1;
+            particle.x = Math.max(0, Math.min(width, particle.x));
+          }
+          if (particle.y < 0 || particle.y > height) {
+            particle.vy *= -1;
+            particle.y = Math.max(0, Math.min(height, particle.y));
+          }
+
+          // Draw particle with optimized rendering
+          ctx.fillStyle = particle.color;
+          ctx.shadowColor = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Reset shadow for connections
         ctx.shadowBlur = 0;
-      });
+      }, 3); // 3ms budget
 
-      // Draw connections between nearby particles
-      for (let i = 0; i < particlesRef.current.length; i++) {
-        for (let j = i + 1; j < particlesRef.current.length; j++) {
-          const dx = particlesRef.current[i].x - particlesRef.current[j].x;
-          const dy = particlesRef.current[i].y - particlesRef.current[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+      // Draw connections in a separate time slice to prevent blocking
+      await runWithTimeSlicing(() => {
+        // Draw connections between nearby particles (optimized)
+        // Reduce connection checks by limiting to smaller subset
+        const maxConnections = Math.min(particlesRef.current.length, 25);
+        for (let i = 0; i < maxConnections; i++) {
+          for (let j = i + 1; j < maxConnections; j++) {
+            const dx = particlesRef.current[i].x - particlesRef.current[j].x;
+            const dy = particlesRef.current[i].y - particlesRef.current[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 100) {
-            const opacity = 0.1 * (1 - distance / 100);
-            ctx.beginPath();
-            ctx.moveTo(particlesRef.current[i].x, particlesRef.current[i].y);
-            ctx.lineTo(particlesRef.current[j].x, particlesRef.current[j].y);
-            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+            if (distance < 80) {
+              // Reduced distance for fewer connections
+              const opacity = 0.08 * (1 - distance / 80);
+              ctx.beginPath();
+              ctx.moveTo(particlesRef.current[i].x, particlesRef.current[i].y);
+              ctx.lineTo(particlesRef.current[j].x, particlesRef.current[j].y);
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
           }
         }
-      }
+      }, 2); // 2ms budget
 
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    // Initialize
+    // Simple debounce for resize events
+    let resizeTimeout: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resizeCanvas();
+        initParticles();
+      }, 100);
+    };
+
+    // Initial setup
     resizeCanvas();
     initParticles();
     animate();
 
-    // Handle resize
-    window.addEventListener("resize", () => {
-      resizeCanvas();
-      initParticles();
-    });
+    // Handle resize with debouncing
+    window.addEventListener("resize", debouncedResize);
 
     // Cleanup
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
-      window.removeEventListener("resize", resizeCanvas);
+      clearTimeout(resizeTimeout);
+      window.removeEventListener("resize", debouncedResize);
     };
   }, [particleCount]);
 

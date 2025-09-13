@@ -21,8 +21,6 @@ import {
 import { initAnalytics } from "./services/analytics/analytics";
 import { initWebVitals } from "./services/analytics/webVitals";
 
-// Remove lazy loading for now to debug the issue
-
 // Enhanced Error Boundary
 class AppErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -121,19 +119,22 @@ log.info("🚀 AlgoLens application starting...");
 // Preload critical resources for better performance
 preloadCriticalResources();
 
-// Initialize monitoring and analytics
+// Initialize Sentry first (critical for error tracking)
 logger.time("app-initialization");
 log.debug("Initializing Sentry...");
 initSentry();
 
-log.debug("Initializing analytics...");
-initAnalytics();
+// Defer heavy analytics initialization to reduce main thread blocking
+setTimeout(() => {
+  log.debug("Initializing analytics...");
+  initAnalytics();
 
-log.debug("Initializing web vitals monitoring...");
-initWebVitals();
+  log.debug("Initializing web vitals monitoring...");
+  initWebVitals();
 
-logger.timeEnd("app-initialization");
-log.info("Application initialization complete");
+  logger.timeEnd("app-initialization");
+  log.info("Background services initialized");
+}, 100);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

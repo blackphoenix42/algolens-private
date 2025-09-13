@@ -68,6 +68,9 @@ export default defineConfig({
     // Increased limit to accommodate our consolidated bundle strategy
     // This prevents warnings for our intentionally large vendor bundle
     chunkSizeWarningLimit: 2000,
+    // Enable compression at build time
+    minify: "esbuild",
+    target: ["es2020", "chrome80", "safari14", "firefox78", "edge88"],
     rollupOptions: {
       // Don't externalize anything - keep everything bundled
       external: () => false,
@@ -87,13 +90,13 @@ export default defineConfig({
         // Ensure proper module initialization order
         entryFileNames: "assets/[name]-[hash].js",
         chunkFileNames: "assets/[name]-[hash].js",
+        // Enable compression for assets
+        experimentalMinChunkSize: 20000,
       },
     },
     // Image optimization
     assetsInlineLimit: 4096, // inline assets < 4kb
     cssCodeSplit: true,
-    target: "esnext",
-    minify: "esbuild",
     // Help resolve module order issues
     commonjsOptions: {
       transformMixedEsModules: true,

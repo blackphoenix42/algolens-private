@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/react";
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import {
   createBrowserRouter,
   isRouteErrorResponse,
@@ -8,11 +8,23 @@ import {
   useRouteError,
 } from "react-router-dom";
 
-import HomePage from "@/pages/HomePage";
-import VisualizerPage from "@/pages/VisualizerPage";
 import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
 
 import { AppLayout } from "./AppLayout";
+
+// Lazy load pages to reduce initial bundle size
+const HomePage = React.lazy(() => import("@/pages/HomePage"));
+const VisualizerPage = React.lazy(() => import("@/pages/VisualizerPage"));
+
+// Loading component for lazy-loaded routes
+const RouteLoadingFallback = () => (
+  <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+    <div className="text-center">
+      <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+      <p className="text-sm text-slate-600 dark:text-slate-400">Loading...</p>
+    </div>
+  </div>
+);
 
 /** Used ONLY as errorElement (has access to useRouteError) */
 function ErrorBoundary() {
@@ -128,10 +140,21 @@ const router = createRouter([
     element: <AppLayout />,
     errorElement: <ErrorBoundary />,
     children: [
-      { index: true, element: <HomePage /> },
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
       {
         path: "viz/:topic/:slug",
-        element: <VisualizerPage />,
+        element: (
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <VisualizerPage />
+          </Suspense>
+        ),
       },
     ],
   },

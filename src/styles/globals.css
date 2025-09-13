@@ -7,9 +7,35 @@
    ========================= */
 
 /* Hardware acceleration for smooth animations */
-* {
+*,
+*::before,
+*::after {
   backface-visibility: hidden;
   perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Force GPU acceleration for animated elements */
+[class*="animate-"],
+.animate-fade-in,
+.animate-fade-in-up,
+.animate-fade-in-down,
+.animate-slide-in-right,
+.animate-slide-in-left,
+.animate-scale-in,
+.animate-bounce-subtle,
+.animate-pulse-soft,
+.animate-float,
+.animate-shimmer,
+.animate-wiggle,
+.animate-heartbeat {
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Standard transition properties with GPU acceleration */
+* {
   transition-duration: 200ms;
   transition-property:
     color, background-color, border-color, text-decoration-color, fill, stroke,
@@ -747,7 +773,10 @@ body,
       rgb(120 198 255 / 20%) 0%,
       transparent 50%
     );
+  contain: layout style paint;
   position: relative;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .liquid-glass-hero::before {
