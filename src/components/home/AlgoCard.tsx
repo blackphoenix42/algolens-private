@@ -61,7 +61,7 @@ function TinyBars({ seed = 1, accent }: { seed?: number; accent: string }) {
 function AlgoCard({
   topic,
   item,
-  titleMap: _titleMap, // eslint-disable-line @typescript-eslint/no-unused-vars
+  titleMap: _titleMap,
   accent,
   "data-tour": dataTour,
 }: {

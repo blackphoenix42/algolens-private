@@ -14,7 +14,7 @@ export function KeyboardShortcutsPanel({
   onClose,
 }: KeyboardShortcutsPanelProps) {
   const location = useLocation();
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
   // Add click-outside functionality
   useEffect(() => {

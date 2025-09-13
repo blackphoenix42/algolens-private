@@ -66,7 +66,7 @@ class URLStateHandler implements URLStateManager {
 
       // Remove version field and return state
       // Drop version key and return remainder of state
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       const { v: _omit, ...rest } = stateWithVersion;
       return rest as AlgorithmState;
     } catch (error) {

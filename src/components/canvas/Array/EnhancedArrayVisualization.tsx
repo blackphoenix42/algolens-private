@@ -122,8 +122,8 @@ const EnhancedArrayVisualization = forwardRef<
   const [dropTargetIdx, setDropTargetIdx] = useState<number | null>(null);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const rotatorRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const rotatorRef = useRef<HTMLDivElement | null>(null);
   const draggedIndexRef = useRef<number | null>(null);
   const currentDropTargetRef = useRef<number | null>(null);
   const isDragActiveRef = useRef<boolean>(false);

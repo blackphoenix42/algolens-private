@@ -67,7 +67,7 @@ export function useDebounce<T extends (...args: unknown[]) => unknown>(
   delay: number,
   immediate = false
 ): T {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
   const immediateRef = useRef(immediate);
 
@@ -80,7 +80,9 @@ export function useDebounce<T extends (...args: unknown[]) => unknown>(
     ((...args: Parameters<T>) => {
       const executeCallback = () => callbackRef.current(...args);
 
-      clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
       if (immediateRef.current && !timeoutRef.current) {
         executeCallback();
@@ -121,7 +123,7 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
 
 // Intersection Observer hook for lazy loading
 export function useIntersectionObserver(
-  elementRef: React.RefObject<Element>,
+  elementRef: React.RefObject<Element | null>,
   options: IntersectionObserverInit = {}
 ) {
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -180,7 +182,7 @@ export function useFPSMonitor() {
   const [fps, setFps] = useState(60);
   const frameCount = useRef(0);
   const lastTime = useRef(performance.now());
-  const animationFrame = useRef<number>();
+  const animationFrame = useRef<number | null>(null);
 
   useEffect(() => {
     const updateFPS = () => {
@@ -238,8 +240,8 @@ export function useOptimizedState<T>(initialState: T) {
 
 // RequestAnimationFrame hook for smooth animations
 export function useAnimationFrame(callback: (deltaTime: number) => void) {
-  const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
+  const previousTimeRef = useRef<number | null>(null);
   const callbackRef = useRef(callback);
 
   useEffect(() => {
@@ -247,7 +249,7 @@ export function useAnimationFrame(callback: (deltaTime: number) => void) {
   });
 
   const animate = useCallback((time: number) => {
-    if (previousTimeRef.current !== undefined) {
+    if (previousTimeRef.current !== null) {
       const deltaTime = time - previousTimeRef.current;
       callbackRef.current(deltaTime);
     }

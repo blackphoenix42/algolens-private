@@ -5,8 +5,8 @@ import type { ArrayCanvasHandle } from "./ArrayCanvas";
 import { useFullscreen } from "@/hooks/useFullscreen";
 
 type Props = {
-  surfaceRef: React.RefObject<HTMLDivElement>; // FULLSCREEN targets this whole surface
-  canvasHandle?: React.RefObject<ArrayCanvasHandle>;
+  surfaceRef: React.RefObject<HTMLDivElement | null>; // FULLSCREEN targets this whole surface
+  canvasHandle?: React.RefObject<ArrayCanvasHandle | null>;
   panMode: boolean;
   onPanMode: (on: boolean) => void;
   dragging: boolean;

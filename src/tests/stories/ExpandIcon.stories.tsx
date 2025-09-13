@@ -16,11 +16,9 @@ const meta: Meta<typeof ExpandIcon> = {
   },
   tags: ["autodocs"],
   decorators: [
-    (Story) => (
+    (Story: StoryFn, context) => (
       <ThemeProvider>
-        <div className="p-4">
-          <Story />
-        </div>
+        <div className="p-4">{Story(context.args, context)}</div>
       </ThemeProvider>
     ),
   ],
@@ -81,11 +79,11 @@ export const InDarkMode: Story = {
     backgrounds: { default: "dark" },
   },
   decorators: [
-    (Story: StoryFn) => (
+    (Story: StoryFn, context) => (
       <div className="dark">
         <ThemeProvider>
           <div className="p-4 bg-slate-900 min-h-[100px] flex items-center justify-center">
-            <Story />
+            {Story(context.args, context)}
           </div>
         </ThemeProvider>
       </div>

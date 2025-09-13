@@ -15,7 +15,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
     LogCategory | undefined
   >();
   const [autoScroll, setAutoScroll] = useState(true);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   // Handle click outside to close
   useEffect(() => {

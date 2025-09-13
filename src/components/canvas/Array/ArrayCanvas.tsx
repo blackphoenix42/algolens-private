@@ -74,8 +74,8 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
   },
   ref
 ) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const rotatorRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const rotatorRef = useRef<HTMLDivElement | null>(null);
   const didCenter = useRef(false);
   const userInteracted = useRef(false);
 

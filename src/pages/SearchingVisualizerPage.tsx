@@ -110,7 +110,7 @@ export default function SearchingVisualizerPage({
   const [vizMode, setVizMode] = useState<"simple" | "enhanced">("simple");
   const [showComplexity] = useState(false);
 
-  const exportTargetRef = useRef<HTMLDivElement>(null);
+  const exportTargetRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">

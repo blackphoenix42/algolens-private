@@ -34,7 +34,7 @@ export function ExportMenu({
     height: undefined as number | undefined,
   });
 
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const {
     exportImage,
     exportSVG,
