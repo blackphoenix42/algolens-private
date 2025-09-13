@@ -11,6 +11,7 @@ import {
 import React from "react";
 
 import { useI18n } from "@/i18n";
+import { LogCategory, logger } from "@/services/monitoring";
 import { cn } from "@/utils";
 
 import "./Transport.css";
@@ -99,7 +100,14 @@ export default function Transport(p: Props) {
 
         {/* Step Backward */}
         <button
-          onClick={onPrev}
+          onClick={() => {
+            logger.info(LogCategory.USER_INTERACTION, "Step backward clicked", {
+              currentStep: idx,
+              totalSteps: total,
+              timestamp: new Date().toISOString(),
+            });
+            onPrev();
+          }}
           disabled={idx === 0}
           className={cn(
             "p-2 rounded-lg transition-all duration-200",
@@ -117,7 +125,15 @@ export default function Transport(p: Props) {
 
         {/* Play Backward */}
         <button
-          onClick={onPlayBackward}
+          onClick={() => {
+            logger.info(LogCategory.USER_INTERACTION, "Play backward clicked", {
+              currentStep: idx,
+              totalSteps: total,
+              currentSpeed: speed,
+              timestamp: new Date().toISOString(),
+            });
+            onPlayBackward();
+          }}
           disabled={playing && direction === -1}
           className={cn(
             "p-2 rounded-lg transition-all duration-200",
@@ -137,7 +153,26 @@ export default function Transport(p: Props) {
 
         {/* Play/Pause */}
         <button
-          onClick={playing ? onPause : onPlayForward}
+          onClick={() => {
+            const action = playing ? "pause" : "play_forward";
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              `Transport ${action} clicked`,
+              {
+                currentStep: idx,
+                totalSteps: total,
+                currentSpeed: speed,
+                direction: playing ? direction : 1,
+                timestamp: new Date().toISOString(),
+              }
+            );
+
+            if (playing) {
+              onPause();
+            } else {
+              onPlayForward();
+            }
+          }}
           className={cn(
             "p-3 rounded-lg transition-all duration-200",
             "bg-primary-600 hover:bg-primary-700 text-white shadow-sm",

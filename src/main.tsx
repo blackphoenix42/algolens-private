@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 
 import { initAnalytics } from "./services/analytics/analytics";
 import { initWebVitals } from "./services/analytics/webVitals";
+import "./services/monitoring/sessionTracker"; // Initialize session tracking
 
 import AppRouter from "@/app/router";
 import { I18nProvider } from "@/i18n";

@@ -12,7 +12,7 @@ import { AppLayout } from "./AppLayout";
 
 import HomePage from "@/pages/HomePage";
 import VisualizerPage from "@/pages/VisualizerPage";
-import { LogCategory, logger } from "@/services/monitoring";
+import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
 
 /** Used ONLY as errorElement (has access to useRouteError) */
 function ErrorBoundary() {
@@ -141,5 +141,46 @@ const router = createRouter([
 
 export default function AppRouter() {
   logger.info(LogCategory.ROUTER, "Rendering AppRouter");
+
+  // Log page views
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      logger.info(LogCategory.ROUTER, "Route changed", {
+        path,
+        search: window.location.search,
+        hash: window.location.hash,
+        timestamp: new Date().toISOString(),
+      });
+
+      sessionTracker.logPageView(path);
+    };
+
+    // Log initial page view
+    handleLocationChange();
+
+    // Set up navigation listener
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function (...args) {
+      originalPushState.apply(history, args);
+      setTimeout(handleLocationChange, 0);
+    };
+
+    history.replaceState = function (...args) {
+      originalReplaceState.apply(history, args);
+      setTimeout(handleLocationChange, 0);
+    };
+
+    window.addEventListener("popstate", handleLocationChange);
+
+    return () => {
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+      window.removeEventListener("popstate", handleLocationChange);
+    };
+  }, []);
+
   return <RouterProvider router={router} />;
 }

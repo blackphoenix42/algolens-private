@@ -43,21 +43,29 @@ class Logger {
   private logLevel: LogLevel;
   private enabledCategories: Set<LogCategory>;
   private logs: LogEntry[] = [];
-  private maxLogEntries = 1000;
+  private maxLogEntries = 5000; // Increased capacity
+  private storageKey = "algolens_debug_logs";
+  private isInitialized = false;
 
   private constructor() {
     // Determine log level from environment
     this.logLevel = this.getLogLevelFromEnv();
     this.enabledCategories = this.getCategoriesFromEnv();
 
+    // Load persisted logs
+    this.loadPersistedLogs();
+
     // Log initialization
     if (this.shouldLog(LogLevel.INFO, LogCategory.GENERAL)) {
       console.log("🔍 AlgoLens Debug Logger initialized", {
         level: LogLevel[this.logLevel],
         categories: Array.from(this.enabledCategories),
+        persistedLogs: this.logs.length,
         isDev: import.meta.env.DEV,
       });
     }
+
+    this.isInitialized = true;
   }
 
   public static getInstance(): Logger {
@@ -106,6 +114,41 @@ class Logger {
   private shouldLog(level: LogLevel, category: LogCategory): boolean {
     return level <= this.logLevel && this.enabledCategories.has(category);
   }
+
+  private loadPersistedLogs(): void {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        const parsedLogs = JSON.parse(stored) as LogEntry[];
+        if (Array.isArray(parsedLogs)) {
+          // Keep only recent logs to prevent memory issues
+          this.logs = parsedLogs.slice(-this.maxLogEntries);
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load persisted debug logs:", error);
+      this.logs = [];
+    }
+  }
+
+  private persistLogs(): void {
+    try {
+      // Only persist if we have logs and are initialized
+      if (this.logs.length > 0 && this.isInitialized) {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.logs));
+      }
+    } catch (error) {
+      console.warn("Failed to persist debug logs:", error);
+    }
+  }
+
+  private savePersistentLog = (() => {
+    let timeout: NodeJS.Timeout | null = null;
+    return () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => this.persistLogs(), 1000); // Debounce saves
+    };
+  })();
 
   private formatMessage(
     level: LogLevel,
@@ -175,6 +218,9 @@ class Logger {
     if (this.logs.length > this.maxLogEntries) {
       this.logs = this.logs.slice(-this.maxLogEntries);
     }
+
+    // Persist logs to localStorage (debounced)
+    this.savePersistentLog();
   }
 
   public error(
@@ -302,6 +348,12 @@ class Logger {
 
   public clearLogs(): void {
     this.logs = [];
+    // Clear persisted logs as well
+    try {
+      localStorage.removeItem(this.storageKey);
+    } catch (error) {
+      console.warn("Failed to clear persisted logs:", error);
+    }
     this.info(LogCategory.GENERAL, "Log history cleared");
   }
 
