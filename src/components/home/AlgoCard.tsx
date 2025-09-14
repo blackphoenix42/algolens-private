@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Card } from "@/components/ui/Card";
-import { useI18n } from "@/i18n";
 import { cn, formatDifficulty, getDifficultyColor } from "@/utils";
+import { getRelevantTags } from "@/utils/algorithmTags";
 
 export type AlgoItem = {
   slug: string;
@@ -63,15 +63,18 @@ function AlgoCard({
   item,
   titleMap: _titleMap,
   accent,
+  showTags = true,
+  onTagClick,
   "data-tour": dataTour,
 }: {
   topic: string;
   item: AlgoItem;
   titleMap: Record<string, { title: string; topic: string }>;
   accent?: string;
+  showTags?: boolean;
+  onTagClick?: (tag: string) => void;
   "data-tour"?: string;
 }) {
-  const { t } = useI18n();
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const seed = [...item.slug].reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -171,73 +174,37 @@ function AlgoCard({
         </p>
 
         {/* Enhanced tags */}
-        {item.tags?.length ? (
+        {showTags && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {item.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "liquid-glass-filter px-2 py-1 text-xs font-medium",
-                  "text-slate-700 dark:text-slate-300",
-                  "transition-all duration-200 hover:scale-105",
-                  "hover:text-primary-700 dark:hover:text-primary-300"
-                )}
-              >
-                {tag}
-              </span>
-            ))}
-            {item.tags.length > 3 && (
-              <span
-                className={cn(
-                  "liquid-glass-filter px-2 py-1 text-xs font-medium",
-                  "text-slate-500 dark:text-slate-400"
-                )}
-              >
-                +{item.tags.length - 3}
-              </span>
-            )}
+            {/* Use existing tags if available, otherwise generate relevant tags */}
+            {(item.tags?.length
+              ? item.tags
+              : getRelevantTags(item.slug, item.title, topic)
+            )
+              .slice(0, 4)
+              .map((tag) => (
+                <button
+                  key={tag}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onTagClick) {
+                      onTagClick(tag);
+                    }
+                  }}
+                  className={cn(
+                    "liquid-glass-filter cursor-pointer px-2 py-1 text-xs font-medium",
+                    "text-slate-700 dark:text-slate-300",
+                    "transition-all duration-200 hover:scale-105",
+                    "hover:text-primary-700 dark:hover:text-primary-300",
+                    "hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                  )}
+                  title={`Filter by ${tag}`}
+                >
+                  {tag}
+                </button>
+              ))}
           </div>
-        ) : null}
-
-        {/* Quick action buttons */}
-        <div
-          className={cn(
-            "flex translate-y-2 transform items-center justify-between pt-2 opacity-0",
-            "transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-          )}
-        >
-          <div className="flex items-center space-x-2">
-            <button
-              className={cn(
-                "flex items-center space-x-1 rounded-md px-2 py-1 text-xs",
-                "hover:text-primary-600 dark:hover:text-primary-400 text-slate-600 dark:text-slate-400",
-                "transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800",
-                "touch-target min-h-[44px]"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                // Navigate to visualizer with autostart
-                navigate(`/viz/${topic}/${item.slug}?autostart=true`);
-              }}
-            >
-              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{t("common.tryNow", { defaultValue: "Try Now" })}</span>
-            </button>
-          </div>
-
-          <div className="flex items-center space-x-1">
-            <div className="animate-pulse-soft h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {t("common.ready", { defaultValue: "Ready" })}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </Card>
   );

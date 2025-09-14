@@ -203,8 +203,9 @@ export function PerformanceMonitor({
         variant="ghost"
         size="sm"
         onClick={onToggle}
-        className={`fixed right-4 bottom-4 z-50 border border-white/20 bg-black/80 text-white backdrop-blur-sm hover:bg-black/90 ${className}`}
+        className={`fixed right-4 bottom-4 z-[100] border border-white/20 bg-black/80 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/90 ${className}`}
         title="Show performance monitor (Ctrl+Shift+P)"
+        style={{ position: "fixed", bottom: "1rem", right: "1rem" }}
       >
         <Activity className="h-4 w-4" />
       </Button>
@@ -269,7 +270,8 @@ export function PerformanceMonitor({
   return (
     <Card
       ref={containerRef}
-      className={`fixed right-4 bottom-4 z-50 border border-gray-200 bg-white/95 shadow-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95 ${className}`}
+      className={`fixed right-4 bottom-4 z-[100] border border-gray-200 bg-white/95 shadow-2xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95 ${className}`}
+      style={{ position: "fixed", bottom: "1rem", right: "1rem" }}
     >
       <div className="max-h-[700px] min-h-[600px] w-[400px] overflow-y-auto p-4">
         {/* Fixed dimensions to prevent resizing */}

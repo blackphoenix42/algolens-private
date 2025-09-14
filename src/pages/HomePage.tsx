@@ -15,7 +15,9 @@ import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
+import type { AlgoMeta } from "@/types/algorithms";
 import { cn, formatDifficulty, scrollToElement } from "@/utils";
+import { getAllAlgorithmTags } from "@/utils/algorithmTags";
 import {
   processInChunks,
   runWhenIdle,
@@ -53,9 +55,13 @@ const TOPIC_META: Record<string, { icon: string; color: string }> = {
 
 function useSafeCatalog(): {
   catalog: Record<string, AlgoItem[]>;
+  metaCatalog: Record<string, AlgoMeta[]>;
   isLoading: boolean;
 } {
   const [catalog, setCatalog] = useState<Record<string, AlgoItem[]>>({});
+  const [metaCatalog, setMetaCatalog] = useState<Record<string, AlgoMeta[]>>(
+    {}
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -63,6 +69,9 @@ function useSafeCatalog(): {
       try {
         const loadedCatalog = await loadAllTopics();
         const safe: Record<string, AlgoItem[]> = {};
+
+        // Store the full metadata catalog for search functionality
+        setMetaCatalog(loadedCatalog);
 
         // Process topics in chunks to avoid blocking main thread
         const topics = Object.entries(loadedCatalog);
@@ -80,6 +89,7 @@ function useSafeCatalog(): {
       } catch (error) {
         console.error("Failed to load algorithm catalog:", error);
         setCatalog({});
+        setMetaCatalog({});
       } finally {
         setIsLoading(false);
       }
@@ -89,14 +99,14 @@ function useSafeCatalog(): {
     runWhenIdle(loadCatalog);
   }, []);
 
-  return { catalog, isLoading };
+  return { catalog, metaCatalog, isLoading };
 }
 
 export default function HomePage() {
   const { t } = useI18n();
   const componentLogger = useComponentLogger("HomePage");
   const navigate = useNavigate();
-  const { catalog } = useSafeCatalog();
+  const { catalog, metaCatalog } = useSafeCatalog();
   const {
     shouldShowOnboardingTour,
     resetOnboardingTour,
@@ -133,6 +143,7 @@ export default function HomePage() {
   );
   const [sortKey, setSortKey] = useState<SortKey>("relevance");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTagsOnCards, setShowTagsOnCards] = useState(true);
 
   // Hero section visibility from preferences
   const { preferences, toggleHeroSection } = usePreferences();
@@ -163,7 +174,13 @@ export default function HomePage() {
 
   const tagUniverse = useMemo(() => {
     const s = new Set<string>();
-    allItems.forEach(({ item }) => item.tags?.forEach((t) => s.add(t)));
+    allItems.forEach(({ topic, item }) => {
+      // Add original tags
+      item.tags?.forEach((t) => s.add(t));
+      // Add generated tags
+      const allTags = getAllAlgorithmTags(item, topic);
+      allTags.forEach((t) => s.add(t));
+    });
     return Array.from(s).sort((a, b) => a.localeCompare(b));
   }, [allItems]);
 
@@ -192,13 +209,27 @@ export default function HomePage() {
       let s = 0;
       const title = it.title.toLowerCase();
       const summary = (it.summary || "").toLowerCase();
-      const tags = (it.tags || []).join(" ").toLowerCase();
+      const originalTags = (it.tags || []).join(" ").toLowerCase();
+
+      // Get all tags (original + generated) for comprehensive search
+      const allTags = getAllAlgorithmTags(it, t);
+      const allTagsText = allTags.join(" ").toLowerCase();
+
+      // Exact matches get highest scores
       if (title === ql) s += 500;
+      if (allTags.some((tag) => tag.toLowerCase() === ql)) s += 450; // Exact tag match
+
+      // Prefix matches
       if (title.startsWith(ql)) s += 250;
+      if (allTags.some((tag) => tag.toLowerCase().startsWith(ql))) s += 200; // Tag prefix match
+
+      // Contains matches
       if (title.includes(ql)) s += 120;
       if (summary.includes(ql)) s += 60;
-      if (tags.includes(ql)) s += 80;
-      if (t.toLowerCase().includes(ql)) s += 20;
+      if (allTagsText.includes(ql)) s += 100; // Higher score for tag matches
+      if (originalTags.includes(ql)) s += 80; // Still score original tags for backward compatibility
+      if (t.toLowerCase().includes(ql)) s += 20; // Topic match
+
       return s;
     };
 
@@ -216,13 +247,24 @@ export default function HomePage() {
       const keep = pool.filter((it) => {
         if (!allow(it.difficulty)) return false;
         if (activeTagSet.size) {
-          const t = new Set(it.tags || []);
-          for (const tag of activeTagSet) if (!t.has(tag)) return false;
+          // Get all tags for this algorithm (original + generated)
+          const allTags = getAllAlgorithmTags(it, topic);
+          const algorithmTagSet = new Set(allTags);
+
+          // Check if all selected tags are present in the algorithm's tags
+          for (const tag of activeTagSet) {
+            if (!algorithmTagSet.has(tag)) return false;
+          }
         }
         if (!ql) return true;
+
+        // Get all tags for comprehensive search
+        const allTags = getAllAlgorithmTags(it, topic);
+        const allTagsText = allTags.join(" ").toLowerCase();
+
         const hay = `${it.title} ${it.summary} ${(it.tags || []).join(
           " "
-        )} ${topic}`.toLowerCase();
+        )} ${allTagsText} ${topic}`.toLowerCase();
         return hay.includes(ql);
       });
 
@@ -324,6 +366,28 @@ export default function HomePage() {
     sortKey,
     totalShown,
   ]);
+
+  const handleTagClick = useCallback(
+    (tag: string) => {
+      // Toggle the tag in selected tags if not already selected, or just select it
+      setSelectedTags((prev) => {
+        if (prev.includes(tag)) {
+          return prev; // Already selected, don't change
+        } else {
+          return [...prev, tag]; // Add to selection
+        }
+      });
+
+      logger.info(LogCategory.USER_INTERACTION, "Tag clicked from card", {
+        tag,
+        selectedTags: selectedTags.includes(tag)
+          ? selectedTags
+          : [...selectedTags, tag],
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [selectedTags]
+  );
 
   // Home page keyboard shortcuts
   useEffect(() => {
@@ -857,6 +921,10 @@ export default function HomePage() {
         sortKey={sortKey}
         setSortKey={setSortKey}
         onClear={clearFilters}
+        catalog={metaCatalog}
+        showTagsOnCards={showTagsOnCards}
+        setShowTagsOnCards={setShowTagsOnCards}
+        onTagClick={handleTagClick}
       />
 
       {/* Enhanced Featured Algorithms */}
@@ -1062,20 +1130,40 @@ export default function HomePage() {
                 {/* Helpful suggestions */}
                 <div className="liquid-glass-card mb-6 p-4">
                   <p className="mb-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Try searching for:
+                    Try searching for algorithms, tags, or concepts:
                   </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {["sorting", "search", "graph", "tree", "dynamic"].map(
-                      (suggestion) => (
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {["sorting", "search", "graph", "tree", "dynamic"].map(
+                        (suggestion) => (
+                          <button
+                            key={suggestion}
+                            onClick={() => setQ(suggestion)}
+                            className="liquid-glass-filter hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all duration-200 hover:scale-105 dark:text-slate-300"
+                          >
+                            {suggestion}
+                          </button>
+                        )
+                      )}
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {[
+                        "comparison",
+                        "in-place",
+                        "stable",
+                        "logarithmic",
+                        "divide-conquer",
+                        "recursive",
+                      ].map((suggestion) => (
                         <button
                           key={suggestion}
                           onClick={() => setQ(suggestion)}
-                          className="liquid-glass-filter hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all duration-200 hover:scale-105 dark:text-slate-300"
+                          className="liquid-glass-filter hover:text-secondary-600 dark:hover:text-secondary-400 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-200 hover:scale-105 dark:text-slate-400"
                         >
-                          {suggestion}
+                          #{suggestion}
                         </button>
-                      )
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1141,6 +1229,8 @@ export default function HomePage() {
                           item={item}
                           titleMap={titleMap}
                           accent={TOPIC_META[topic]?.color}
+                          showTags={showTagsOnCards}
+                          onTagClick={handleTagClick}
                           data-tour={index === 0 ? "algorithm-card" : undefined}
                         />
                       </div>

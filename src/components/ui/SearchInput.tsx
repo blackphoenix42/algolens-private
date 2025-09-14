@@ -8,11 +8,11 @@ import React, {
 
 import { cn, debounce } from "@/utils";
 import {
-  advancedSearch,
   getDidYouMeanSuggestions,
   type SearchableItem,
   type SearchOptions,
   type SearchResult,
+  smartSearch,
 } from "@/utils/searchUtils";
 
 import { Input } from "./Input";
@@ -88,7 +88,7 @@ export function SearchInput({
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Determine if we're using advanced search or legacy mode
-  const useAdvancedSearch = searchableItems.length > 0;
+  const useAdvancedSearch = searchableItems && searchableItems.length > 0;
 
   // Debounced search function (for actual search logic)
   const debouncedSearch = debounce((searchValue: string) => {
@@ -98,8 +98,8 @@ export function SearchInput({
       // Use setTimeout to allow UI to update with loading state
       setTimeout(() => {
         try {
-          // Perform advanced search
-          const results = advancedSearch(searchValue, searchableItems, {
+          // Perform smart search with all advanced features
+          const results = smartSearch(searchValue, searchableItems, {
             maxResults: maxDisplayedResults,
             suggestTypos: enableTypoCorrection,
             fuzzyThreshold: enableFuzzySearch ? 0.6 : 0.9,
@@ -395,7 +395,7 @@ export function SearchInput({
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+          className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
         >
           {useAdvancedSearch ? (
             <div className="py-2">

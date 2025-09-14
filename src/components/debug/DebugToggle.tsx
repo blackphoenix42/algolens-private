@@ -55,9 +55,10 @@ export default function DebugToggle() {
           );
           setIsOpen(true);
         }}
-        className="fixed bottom-4 left-4 z-40 rounded-full bg-red-500 p-2 text-white shadow-lg hover:bg-red-600"
+        className="fixed bottom-4 left-4 z-[100] rounded-full bg-red-500 p-2 text-white shadow-lg transition-all duration-200 hover:bg-red-600"
         title="Open Debug Panel (Ctrl+Shift+D)"
         aria-label="Open debug panel"
+        style={{ position: "fixed", bottom: "1rem", left: "1rem" }}
       >
         🐛
       </button>
