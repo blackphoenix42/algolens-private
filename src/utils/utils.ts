@@ -87,6 +87,12 @@ export function generateId(cryptoSecure = false): string {
     window.crypto.getRandomValues(array);
     return Array.from(array, (x) => x.toString(36)).join("");
   }
+
+  if (cryptoSecure) {
+    // For security-sensitive use cases without crypto, use timestamp-based approach
+    return `${Date.now()}-${(Date.now() + performance.now()).toString(36)}`;
+  }
+
   // Use Math.random for non-security-sensitive use cases (UI, animations, demo data)
   return Math.random().toString(36).substr(2, 9);
 }

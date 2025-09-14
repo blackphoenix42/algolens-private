@@ -88,7 +88,12 @@ class URLStateHandler implements URLStateManager {
       }
 
       const method = replace ? "replaceState" : "pushState";
-      window.history[method]({}, "", url.toString());
+      // Use explicit method calls instead of dynamic method invocation
+      if (method === "replaceState") {
+        window.history.replaceState({}, "", url.toString());
+      } else {
+        window.history.pushState({}, "", url.toString());
+      }
     } catch (error) {
       console.error("Failed to update URL:", error);
     }

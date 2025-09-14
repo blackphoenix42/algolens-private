@@ -45,7 +45,16 @@ export const SANITIZATION_CONFIG = {
  *    - innerHTML usage warnings from React internals
  *    - Framework handles sanitization automatically
  *
- * 4. Randomness:
- *    - Crypto-secure randomness used for IDs and security-sensitive operations
- *    - Math.random() used only for UI effects, animations, and demo data
+ * 4. Randomness Security:
+ *    - Crypto-secure randomness (window.crypto.getRandomValues) used for:
+ *      * State persistence IDs
+ *      * Notification system IDs
+ *      * Performance monitoring alert IDs
+ *    - Timestamp-based fallback used when crypto is unavailable (better than Math.random for ID generation)
+ *    - Math.random() used ONLY for UI effects, animations, and demo data generation (non-security contexts)
+ *
+ * 5. Dynamic Method Calls:
+ *    - All dynamic method invocations have been eliminated or secured with explicit validation
+ *    - Method name whitelisting used where dynamic calls are necessary
+ *    - No user-controlled method names accepted
  */

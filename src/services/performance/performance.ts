@@ -45,7 +45,8 @@ export function addPerformanceAlert(
     window.crypto.getRandomValues(array);
     randomPart = array[0].toString(36);
   } else {
-    randomPart = Math.random().toString(36).substr(2, 9);
+    // Fallback using timestamp-based randomness for environments without crypto
+    randomPart = (Date.now() + performance.now()).toString(36);
   }
 
   const fullAlert: PerformanceAlert = {

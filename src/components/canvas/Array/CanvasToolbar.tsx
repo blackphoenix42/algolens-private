@@ -50,7 +50,18 @@ export default function CanvasToolbar({
   const call = (fn: NoArgKeys) => {
     const h = canvasHandle?.current;
     if (!h) return;
-    h[fn](); // typed as () => void
+    // Explicitly validate method names to prevent dynamic method injection
+    const allowedMethods: Set<string> = new Set([
+      "zoomIn",
+      "zoomOut",
+      "resetView",
+      "toggleGrid",
+      "toggleSnap",
+      "rotate90",
+    ]);
+    if (allowedMethods.has(fn)) {
+      h[fn](); // typed as () => void
+    }
   };
   // collapse / expand
   const [open, setOpen] = useState(true);

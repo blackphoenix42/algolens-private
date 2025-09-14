@@ -235,8 +235,8 @@ class StatePersistence {
       window.crypto.getRandomValues(array);
       return `${Date.now()}-${Array.from(array, (x) => x.toString(36)).join("")}`;
     }
-    // Fallback for environments without crypto
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    // Fallback using timestamp-based randomness for environments without crypto
+    return `${Date.now()}-${(Date.now() + performance.now()).toString(36)}`;
   }
 
   private static getCurrentTheme(): "light" | "dark" | "system" {

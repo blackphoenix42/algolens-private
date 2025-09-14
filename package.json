@@ -55,7 +55,7 @@
     "lhci": "npm run build && lhci autorun --config=lhci/lighthouserc.json",
     "a11y": "pa11y-ci -c pa11y-ci.json",
     "a11y:report": "pa11y-ci -c pa11y-ci.json --json > reports/a11y/report.json",
-    "a11y:ci": "npm run build && start-server-and-test \"vite preview --port 4173 --strictPort\" http://127.0.0.1:4173 \"npm run a11y\"",
+    "a11y:ci": "npm run build && start-server-and-test \"vite preview --port 4173 --strictPort --host 127.0.0.1\" \"http-get://127.0.0.1:4173/algolens-private/\" \"npm run a11y\"",
     "postbuild": "node scripts/postbuild.mjs",
     "licenses": "node scripts/check-licenses.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs --base https://algolens.app --out public/sitemap.xml",

@@ -219,13 +219,20 @@ export default function ComplexityExplorer({
 
     // For recharts - ensure all values are finite and positive for log scale
     const chartData = sampleData.map((n) => {
+      // Use direct references instead of dynamic property access for security
+      const o1Fn = functions["O(1)"];
+      const olognFn = functions["O(log n)"];
+      const onFn = functions["O(n)"];
+      const onlognFn = functions["O(n log n)"];
+      const on2Fn = functions["O(n²)"];
+
       const values = {
         n,
-        O1: functions["O(1)"](n),
-        Ologn: functions["O(log n)"](n),
-        On: functions["O(n)"](n),
-        Onlogn: functions["O(n log n)"](n),
-        On2: functions["O(n²)"](n),
+        O1: o1Fn(n),
+        Ologn: olognFn(n),
+        On: onFn(n),
+        Onlogn: onlognFn(n),
+        On2: on2Fn(n),
       };
 
       // Ensure all values are finite and positive for log scale

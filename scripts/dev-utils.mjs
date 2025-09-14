@@ -245,7 +245,31 @@ async function main() {
     return;
   }
 
-  await commands[command]();
+  // Validate command exists and execute securely
+  const validCommands = ['clean', 'reset', 'info', 'deps', 'help'];
+  if (!validCommands.includes(command)) {
+    console.error(`\n❌ Unknown command: ${command}`);
+    process.exit(1);
+  }
+
+  // Execute the validated command
+  switch (command) {
+    case 'clean':
+      await cleanProject();
+      break;
+    case 'reset':
+      await resetProject();
+      break;
+    case 'info':
+      await showProjectInfo();
+      break;
+    case 'deps':
+      await showDependencies();
+      break;
+    case 'help':
+      await showHelp();
+      break;
+  }
 }
 
 main().catch((error) => {
