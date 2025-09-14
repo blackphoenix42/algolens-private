@@ -198,18 +198,7 @@ export function PerformanceMonitor({
   }
 
   if (!isVisible) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggle}
-        className={`fixed right-4 bottom-4 z-[100] border border-white/20 bg-black/80 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/90 ${className}`}
-        title="Show performance monitor (Ctrl+Shift+P)"
-        style={{ position: "fixed", bottom: "1rem", right: "1rem" }}
-      >
-        <Activity className="h-4 w-4" />
-      </Button>
-    );
+    return null;
   }
 
   const getPerformanceLevel = (

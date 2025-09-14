@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import DebugPanel from "@/components/debug/DebugPanel";
+import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
 import AlgoCard, { AlgoItem } from "@/components/home/AlgoCard";
 import FilterBar from "@/components/home/FilterBar";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
@@ -11,13 +12,19 @@ import { AlgorithmIcon } from "@/components/ui/AlgorithmIcon";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import FloatingParticles from "@/components/ui/FloatingParticles";
+import { SearchInput } from "@/components/ui/SearchInput";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
-import { cn, formatDifficulty, scrollToElement } from "@/utils";
+import {
+  cn,
+  createSearchableFromAlgoMeta,
+  formatDifficulty,
+  scrollToElement,
+} from "@/utils";
 import { getAllAlgorithmTags } from "@/utils/algorithmTags";
 import {
   processInChunks,
@@ -148,6 +155,9 @@ export default function HomePage() {
   const [showFeaturedAlgorithms, setShowFeaturedAlgorithms] = useState(true);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
 
+  // Performance Monitor
+  const performanceMonitor = usePerformanceMonitor();
+
   // Hero section visibility from preferences
   const { preferences, toggleHeroSection } = usePreferences();
   const showHero = preferences.showHeroSection;
@@ -254,6 +264,12 @@ export default function HomePage() {
       ),
     [catalog]
   );
+
+  // Create searchable algorithm data for mini search dropdown
+  const searchableItems = useMemo(() => {
+    const allAlgorithms = Object.values(metaCatalog).flat();
+    return createSearchableFromAlgoMeta(allAlgorithms);
+  }, [metaCatalog]);
 
   const tagUniverse = useMemo(() => {
     const s = new Set<string>();
@@ -680,10 +696,10 @@ export default function HomePage() {
   }, [allItems.length, catalog, tagUniverse.length]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-      {/* Liquid Glass Background Elements */}
+    <div className="grid h-screen grid-rows-[auto,1fr] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Background sits behind everything */}
       <div
-        className="pointer-events-none fixed inset-0 overflow-hidden"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         style={{ contain: "layout style" }}
       >
         <div
@@ -719,213 +735,15 @@ export default function HomePage() {
           }}
         ></div>
       </div>
-      {/* Hero Section */}
-      {showHero && (
-        <section
-          data-tour="hero-section"
-          className="liquid-glass-hero relative flex min-h-[100vh] items-center overflow-hidden"
-        >
-          {/* Animated Background */}
-          <div className="absolute inset-0">
-            {/* Floating Particles */}
-            <FloatingParticles particleCount={60} />
-
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-
-            {/* Animated Background Pattern */}
-            <div className="animate-pulse-soft absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+PC9zdmc+')] opacity-30"></div>
-
-            {/* Glowing Orbs */}
-            <div className="animate-float animation-delay-1000 absolute top-1/4 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-3xl"></div>
-            <div className="animate-float animation-delay-2000 absolute right-1/4 bottom-1/4 h-40 w-40 rounded-full bg-gradient-to-r from-orange-400/20 to-pink-400/20 blur-3xl"></div>
-
-            {/* Algorithm-themed floating icons */}
-            <div className="animate-float animation-delay-500 absolute top-20 left-20 hidden sm:block">
-              <AlgorithmIcon
-                variant="sorting"
-                className="h-12 w-12 opacity-20"
-              />
-            </div>
-            <div className="animate-float animation-delay-1500 absolute top-32 right-32 hidden md:block">
-              <AlgorithmIcon variant="graph" className="h-10 w-10 opacity-15" />
-            </div>
-            <div className="animate-float animation-delay-2500 absolute bottom-40 left-16 hidden lg:block">
-              <AlgorithmIcon variant="tree" className="h-14 w-14 opacity-25" />
-            </div>
-            <div className="animate-float animation-delay-3000 absolute right-20 bottom-20 hidden sm:block">
-              <AlgorithmIcon variant="array" className="h-11 w-11 opacity-20" />
-            </div>
-
-            {/* Mobile-friendly smaller icons */}
-            <div className="animate-float animation-delay-500 absolute top-16 right-8 block sm:hidden">
-              <AlgorithmIcon variant="sorting" className="h-8 w-8 opacity-15" />
-            </div>
-            <div className="animate-float animation-delay-2000 absolute bottom-32 left-8 block sm:hidden">
-              <AlgorithmIcon variant="graph" className="h-7 w-7 opacity-20" />
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-24 lg:px-8 lg:py-32">
-            <div className="text-center">
-              {/* Enhanced Main Title */}
-              <div className="animate-fade-in-up mb-8 md:mb-12">
-                <h1 className="mb-4 text-4xl leading-tight font-black sm:text-5xl md:mb-6 md:text-7xl lg:text-8xl">
-                  <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent drop-shadow-2xl">
-                    {t("app.name")}
-                  </span>
-                </h1>
-                <div className="animate-shimmer mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 md:w-32"></div>
-              </div>
-
-              {/* Enhanced Subtitle with fixed dimensions to prevent layout shift */}
-              <div className="animate-fade-in-up animation-delay-200 mb-12 md:mb-16">
-                <p className="mx-auto mb-4 min-h-[2.5rem] max-w-4xl px-4 text-lg leading-relaxed font-light text-white/90 sm:min-h-[3rem] sm:text-xl md:mb-6 md:min-h-[4rem] md:text-2xl lg:min-h-[5rem] lg:text-3xl">
-                  {t("app.tagline")}
-                </p>
-                <p className="mx-auto min-h-[3rem] max-w-3xl px-4 text-sm leading-relaxed text-white/70 sm:min-h-[4rem] sm:text-base md:min-h-[5rem] md:text-xl">
-                  {t("app.description")}
-                </p>
-              </div>
-
-              {/* Enhanced Stats with fixed dimensions to prevent layout shift */}
-              <div className="animate-fade-in-up animation-delay-400 mb-12 grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:gap-6 md:mb-16 md:gap-8">
-                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
-                  <div className="mb-2 flex min-h-[3rem] items-center justify-center text-3xl font-black text-white transition-colors group-hover:text-blue-200 sm:min-h-[3.5rem] sm:text-4xl md:min-h-[4rem] md:text-5xl">
-                    {stats.algorithms || "..."}
-                  </div>
-                  <div className="flex min-h-[1.5rem] items-center justify-center text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
-                    {t("navigation.algorithms")}
-                  </div>
-                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-blue-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
-                </div>
-                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:p-6">
-                  <div className="mb-2 flex min-h-[3rem] items-center justify-center text-3xl font-black text-white transition-colors group-hover:text-purple-200 sm:min-h-[3.5rem] sm:text-4xl md:min-h-[4rem] md:text-5xl">
-                    {stats.categories || "..."}
-                  </div>
-                  <div className="flex min-h-[1.5rem] items-center justify-center text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
-                    Categories
-                  </div>
-                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-purple-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
-                </div>
-                <div className="group liquid-glass-card hover:liquid-glass-glow p-4 text-center transition-all duration-300 hover:scale-105 sm:col-span-3 sm:p-6 md:col-span-1">
-                  <div className="mb-2 text-3xl font-black text-white transition-colors group-hover:text-orange-200 sm:text-4xl md:text-5xl">
-                    {stats.tags}
-                  </div>
-                  <div className="text-xs font-medium tracking-wider text-white/80 uppercase sm:text-sm md:text-base">
-                    {t("navigation.algorithms")}{" "}
-                    {t("common.topics", { defaultValue: "Topics" })}
-                  </div>
-                  <div className="mx-auto mt-2 h-0.5 w-8 bg-gradient-to-r from-orange-400 to-transparent opacity-0 transition-opacity group-hover:opacity-100 sm:w-12"></div>
-                </div>
-              </div>
-
-              {/* Enhanced CTA Buttons */}
-              <div className="animate-fade-in-up animation-delay-600 flex flex-col justify-center gap-4 px-4 sm:flex-row sm:gap-6">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  onClick={() => {
-                    logger.info(
-                      LogCategory.USER_INTERACTION,
-                      "Hero explore button clicked",
-                      {
-                        action: "scroll_to_algorithms",
-                        heroVisible: showHero,
-                        timestamp: new Date().toISOString(),
-                      }
-                    );
-
-                    toggleHeroSection();
-                    const mainElement = document.querySelector("main");
-                    if (mainElement) {
-                      scrollToElement(mainElement, 100);
-                    }
-                  }}
-                  className="group liquid-glass-button w-full px-6 py-3 text-base font-semibold text-slate-900 hover:scale-105 sm:w-auto sm:px-8 sm:py-4 sm:text-lg dark:text-white"
-                >
-                  <span className="group-hover:animate-bounce-subtle mr-2 text-lg sm:text-xl">
-                    🚀
-                  </span>
-                  <span className="truncate">
-                    {t("home.exploreAlgorithms")}
-                  </span>
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => {
-                    // Create an about section or navigate to docs
-                    const aboutSection = document.querySelector(
-                      "[data-about-section]"
-                    );
-                    if (aboutSection) {
-                      scrollToElement(aboutSection as Element, 100);
-                    } else {
-                      // Navigate to documentation or feature section
-                      const featuresSection = document.querySelector(
-                        ".grid.gap-6.sm\\:grid-cols-2.lg\\:grid-cols-4"
-                      );
-                      if (featuresSection) {
-                        scrollToElement(featuresSection as Element, 100);
-                      } else {
-                        // Fallback - navigate to GitHub docs
-                        window.open(
-                          "https://github.com/blackphoenix42/AlgoLens#readme",
-                          "_blank"
-                        );
-                      }
-                    }
-                  }}
-                  className="group liquid-glass-button w-full px-6 py-3 text-base font-semibold text-white hover:scale-105 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
-                >
-                  <span className="mr-2 text-lg group-hover:animate-pulse sm:text-xl">
-                    📚
-                  </span>
-                  <span className="truncate">
-                    {t("common.learnMore", { defaultValue: "Learn More" })}
-                  </span>
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Close Hero Button */}
-          <button
-            onClick={() => toggleHeroSection()}
-            className="group absolute top-6 right-6 rounded-full border border-white/20 bg-white/10 p-3 text-white/60 backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/20 hover:text-white"
-            title="Close hero section"
-          >
-            <svg
-              className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </section>
-      )}
-      {/* Enhanced Navigation Header */}
+      {/* Header now lives in row 1 and sticks at top */}
       <header
         className={cn(
-          "liquid-glass-header fixed top-0 right-0 left-0 z-50 border-b border-white/10 shadow-sm",
+          "liquid-glass-header sticky top-0 z-50 border-b border-white/10 shadow-sm",
+          "backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60",
           "transition-all duration-300"
         )}
       >
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 pt-0 pb-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Left Section - Brand & Navigation */}
             <div className="flex items-center gap-4 lg:gap-6">
@@ -966,6 +784,25 @@ export default function HomePage() {
                     {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
                   </span>
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    resetOnboardingTour();
+                    setShowOnboarding(true);
+                  }}
+                  className="group text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white"
+                  title={t("common.quickTour", {
+                    defaultValue: "Show quick tour",
+                  })}
+                >
+                  <span className="group-hover:animate-bounce-subtle mr-1.5 text-sm">
+                    🎯
+                  </span>
+                  <span className="hidden text-sm lg:inline">
+                    {t("common.quickTour", { defaultValue: "Tour" })}
+                  </span>
+                </Button>
               </div>
             </div>
 
@@ -993,25 +830,28 @@ export default function HomePage() {
                   </Button>
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    resetOnboardingTour();
-                    setShowOnboarding(true);
-                  }}
-                  className="group text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white"
-                  title={t("common.quickTour", {
-                    defaultValue: "Show quick tour",
-                  })}
-                >
-                  <span className="group-hover:animate-bounce-subtle mr-1.5 text-sm">
-                    🎯
-                  </span>
-                  <span className="hidden text-sm sm:inline">
-                    {t("common.quickTour", { defaultValue: "Tour" })}
-                  </span>
-                </Button>
+                {/* Mini Search Input */}
+                <div className="hidden sm:block">
+                  <SearchInput
+                    value={q}
+                    onChange={(value) => setQ(value)}
+                    placeholder="Quick search..."
+                    className="w-48 text-sm"
+                    // Enable dropdown with algorithm suggestions
+                    searchableItems={searchableItems}
+                    enableFuzzySearch={true}
+                    showCategories={false}
+                    maxDisplayedResults={6}
+                    searchOptions={{
+                      fuzzyThreshold: 0.3,
+                      maxResults: 10,
+                      minScore: 0.1,
+                      highlightMatches: true,
+                      enableSemanticSearch: false, // Disable for faster mini search
+                      enablePhoneticSearch: false, // Disable for faster mini search
+                    }}
+                  />
+                </div>
 
                 {/* Language & Theme Controls */}
                 <div className="flex items-center gap-1">
@@ -1064,12 +904,251 @@ export default function HomePage() {
                   {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
                 </span>
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  resetOnboardingTour();
+                  setShowOnboarding(true);
+                  // Hide mobile menu
+                  document
+                    .querySelector("[data-mobile-nav]")
+                    ?.classList.add("hidden");
+                }}
+                className="group text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white"
+                title={t("common.quickTour", {
+                  defaultValue: "Show quick tour",
+                })}
+              >
+                <span className="group-hover:animate-bounce-subtle mr-1.5 text-sm">
+                  🎯
+                </span>
+                <span className="text-sm">
+                  {t("common.quickTour", { defaultValue: "Tour" })}
+                </span>
+              </Button>
             </div>
           </div>
         </div>
       </header>
-      {/* Content wrapper with fixed header spacing */}
-      <div className="pt-20">
+      {/* Row 2: the only scrollable area */}
+      <div className="relative overflow-y-auto">
+        {/* Enhanced Hero Section with better visuals */}
+        {showHero && (
+          <section
+            data-tour="hero-section"
+            className="liquid-glass-hero relative flex min-h-[100vh] items-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
+          >
+            {/* Enhanced Animated Background */}
+            <div className="absolute inset-0">
+              {/* Floating Particles */}
+              <FloatingParticles particleCount={80} />
+
+              {/* Multi-layered Gradient Overlays */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-pink-900/30"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+
+              {/* Enhanced Animated Background Pattern */}
+              <div className="animate-pulse-soft absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+PC9zdmc+')] opacity-40"></div>
+
+              {/* Enhanced Glowing Orbs with better colors and sizes */}
+              <div className="animate-float animation-delay-1000 absolute top-1/4 left-1/4 h-40 w-40 rounded-full bg-gradient-to-r from-blue-500/30 to-cyan-500/20 blur-3xl"></div>
+              <div className="animate-float animation-delay-2000 absolute right-1/4 bottom-1/3 h-48 w-48 rounded-full bg-gradient-to-r from-purple-500/25 to-pink-500/30 blur-3xl"></div>
+              <div className="animate-float animation-delay-3500 absolute top-1/3 right-1/3 h-36 w-36 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/25 blur-3xl"></div>
+
+              {/* Additional depth orbs */}
+              <div className="animate-float animation-delay-4000 absolute bottom-1/4 left-1/3 h-32 w-32 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/15 blur-2xl"></div>
+              <div className="animate-float animation-delay-1500 absolute top-1/2 left-1/2 h-28 w-28 rounded-full bg-gradient-to-r from-indigo-500/25 to-purple-500/20 blur-2xl"></div>
+
+              {/* Enhanced Algorithm-themed floating icons */}
+              <div className="animate-float animation-delay-500 absolute top-20 left-20 hidden sm:block">
+                <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
+                  <AlgorithmIcon
+                    variant="sorting"
+                    className="h-12 w-12 text-blue-400/60"
+                  />
+                </div>
+              </div>
+              <div className="animate-float animation-delay-1500 absolute top-32 right-32 hidden md:block">
+                <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
+                  <AlgorithmIcon
+                    variant="graph"
+                    className="h-16 w-16 text-purple-400/60"
+                  />
+                </div>
+              </div>
+              <div className="animate-float animation-delay-3000 absolute bottom-32 left-1/3 hidden lg:block">
+                <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
+                  <AlgorithmIcon
+                    variant="array"
+                    className="h-10 w-10 text-pink-400/60"
+                  />
+                </div>
+              </div>
+              <div className="animate-float animation-delay-2500 absolute top-2/3 right-20 hidden lg:block">
+                <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
+                  <AlgorithmIcon
+                    variant="tree"
+                    className="h-12 w-12 text-emerald-400/60"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Hero Content */}
+            <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+              {/* Hero Header */}
+              <div className="mb-12 space-y-8">
+                {/* Enhanced Title with better visual effects */}
+                <div className="animate-fade-in-up space-y-4">
+                  <h1 className="text-5xl leading-tight font-extrabold tracking-tight text-gray-900 sm:text-6xl md:text-7xl lg:text-8xl dark:text-white">
+                    <span className="relative inline-block">
+                      <span className="animate-gradient-x bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                        AlgoLens
+                      </span>
+                      {/* Glowing underline effect */}
+                      <div className="absolute -bottom-2 left-1/2 h-1 w-24 -translate-x-1/2 animate-pulse rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-60 blur-sm md:w-32"></div>
+                    </span>
+                  </h1>
+                  {/* Subtitle tagline */}
+                  <p className="text-lg font-medium text-gray-700 opacity-90 sm:text-xl md:text-2xl dark:text-gray-200">
+                    Visualize • Learn • Master
+                  </p>
+                </div>
+
+                <p className="animate-fade-in-up animation-delay-300 mx-auto max-w-3xl text-xl leading-relaxed text-gray-600 sm:text-2xl md:text-3xl dark:text-gray-300">
+                  {t("hero.subtitle")}
+                </p>
+                <div className="animate-fade-in-up animation-delay-600 mx-auto max-w-4xl">
+                  <p className="text-lg leading-relaxed text-gray-500 sm:text-xl dark:text-gray-400">
+                    {t("hero.description")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Enhanced CTA Buttons */}
+              <div className="animate-fade-in-up animation-delay-900 flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
+                <Button
+                  onClick={() => scrollToElement("search-container")}
+                  size="lg"
+                  className="group hover:shadow-3xl relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-10 py-5 text-lg font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-110 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    <span className="text-2xl group-hover:animate-bounce">
+                      🚀
+                    </span>
+                    <span>{t("hero.cta.explore")}</span>
+                    <svg
+                      className="h-5 w-5 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </span>
+                  {/* Animated shimmer effect */}
+                  <div className="group-hover:animate-shimmer absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"></div>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => toggleHeroSection()}
+                  className="group relative overflow-hidden rounded-2xl border-2 border-white/30 bg-white/10 px-10 py-5 text-lg font-semibold text-white backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/50 hover:bg-white/20 hover:shadow-xl"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-2xl group-hover:animate-pulse">
+                      ✨
+                    </span>
+                    <span>{t("hero.cta.skip")}</span>
+                  </span>
+                  {/* Subtle glow effect */}
+                  <div className="absolute inset-0 rounded-2xl bg-white/5 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                </Button>
+              </div>
+
+              {/* Enhanced Stats Section */}
+              <div className="animate-fade-in-up animation-delay-1200 mt-20 rounded-3xl border border-white/20 bg-white/5 p-8 backdrop-blur-md">
+                <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 lg:gap-8">
+                  <div className="group text-center transition-transform hover:scale-105">
+                    <div className="mb-3 flex justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/30 backdrop-blur-sm">
+                        <span className="text-2xl">📊</span>
+                      </div>
+                    </div>
+                    <div className="mb-2 text-3xl font-bold text-blue-400 transition-colors group-hover:text-blue-300 sm:text-4xl">
+                      {allItems.length}
+                    </div>
+                    <div className="text-sm font-medium text-gray-300 opacity-80">
+                      {t("hero.stats.algorithms")}
+                    </div>
+                  </div>
+
+                  <div className="group text-center transition-transform hover:scale-105">
+                    <div className="mb-3 flex justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/30 backdrop-blur-sm">
+                        <span className="text-2xl">🗂️</span>
+                      </div>
+                    </div>
+                    <div className="mb-2 text-3xl font-bold text-purple-400 transition-colors group-hover:text-purple-300 sm:text-4xl">
+                      {topics.length}
+                    </div>
+                    <div className="text-sm font-medium text-gray-300 opacity-80">
+                      {t("hero.stats.categories")}
+                    </div>
+                  </div>
+
+                  <div className="group text-center transition-transform hover:scale-105">
+                    <div className="mb-3 flex justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/20 to-pink-600/30 backdrop-blur-sm">
+                        <span className="text-2xl">🏷️</span>
+                      </div>
+                    </div>
+                    <div className="mb-2 text-3xl font-bold text-pink-400 transition-colors group-hover:text-pink-300 sm:text-4xl">
+                      {tagUniverse.length}
+                    </div>
+                    <div className="text-sm font-medium text-gray-300 opacity-80">
+                      {t("hero.stats.topics")}
+                    </div>
+                  </div>
+
+                  <div className="group text-center transition-transform hover:scale-105">
+                    <div className="mb-3 flex justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 backdrop-blur-sm">
+                        <span className="text-2xl">🌟</span>
+                      </div>
+                    </div>
+                    <div className="mb-2 text-3xl font-bold text-emerald-400 transition-colors group-hover:text-emerald-300 sm:text-4xl">
+                      ∞
+                    </div>
+                    <div className="text-sm font-medium text-gray-300 opacity-80">
+                      {t("hero.stats.possibilities")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Close Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleHeroSection()}
+              className="group absolute top-6 right-6 z-20 rounded-full border border-white/20 bg-white/10 p-3 text-white/70 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-white/40 hover:bg-white/20 hover:text-white"
+              aria-label="Close hero section"
+            >
+              <X className="h-6 w-6 transition-transform group-hover:rotate-90" />
+            </Button>
+          </section>
+        )}
+
         {/* Enhanced Filter Bar */}
         <FilterBar
           data-tour="search-bar"
@@ -1553,6 +1632,9 @@ export default function HomePage() {
           />
         )}
 
+        {/* Performance Monitor (Dev Mode) */}
+        {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
+
         {/* Onboarding Tour */}
         <OnboardingTour
           isOpen={showOnboarding}
@@ -1563,44 +1645,61 @@ export default function HomePage() {
           }}
           tourType="homepage"
         />
-
-        {/* Floating Action Buttons - Fixed to viewport */}
-        {/* Keyboard Shortcuts Button - Bottom position */}
-        <KeyboardShortcutsButton />
-
-        {/* Debug Tools (Dev Mode) */}
-        {import.meta.env.DEV && (
-          <>
-            {/* Debug Toggle Button */}
-            <div className="fixed right-6 bottom-[180px] z-50">
-              <div className="relative">
-                <button
-                  className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
-                  title="Debug Panel (Dev) - Ctrl+Shift+D"
-                  onClick={() => {
-                    logger.info(
-                      LogCategory.USER_INTERACTION,
-                      "Debug panel opened via floating button",
-                      {
-                        method: "floating_button_click",
-                        timestamp: new Date().toISOString(),
-                      }
-                    );
-                    setShowDebugPanel(true);
-                  }}
-                >
-                  🐛
-                  <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
-                    Debug
-                  </span>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
-                </button>
-              </div>
-            </div>
-          </>
-        )}
       </div>{" "}
-      {/* Close content wrapper */}
+      {/* end scroll area */}
+      {/* Keep "fixed" floating buttons outside the scroll area so they anchor to the viewport */}
+      {/* Floating Action Buttons - Fixed to viewport */}
+      {/* Performance Monitor Button */}
+      {import.meta.env.DEV && (
+        <div className="fixed right-6 bottom-[100px] z-50">
+          <div className="relative">
+            <button
+              className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl active:scale-95"
+              title="Performance Monitor (Dev) - Ctrl+Shift+P"
+              onClick={performanceMonitor.toggle}
+            >
+              ⚡
+              <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                Performance
+              </span>
+              <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-emerald-400"></div>
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Keyboard Shortcuts Button - Bottom position */}
+      <KeyboardShortcutsButton />
+      {/* Debug Tools (Dev Mode) */}
+      {import.meta.env.DEV && (
+        <>
+          {/* Debug Toggle Button */}
+          <div className="fixed right-6 bottom-[160px] z-50">
+            <div className="relative">
+              <button
+                className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
+                title="Debug Panel (Dev) - Ctrl+Shift+D"
+                onClick={() => {
+                  logger.info(
+                    LogCategory.USER_INTERACTION,
+                    "Debug panel opened via floating button",
+                    {
+                      method: "floating_button_click",
+                      timestamp: new Date().toISOString(),
+                    }
+                  );
+                  setShowDebugPanel(true);
+                }}
+              >
+                🐛
+                <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                  Debug
+                </span>
+                <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default function DebugPanel({ isOpen, onClose }: DebugPanelProps) {
     LogCategory | undefined
   >();
   const [searchQuery, setSearchQuery] = useState("");
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [autoScroll, setAutoScroll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
