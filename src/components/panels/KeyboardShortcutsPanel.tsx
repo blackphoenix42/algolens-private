@@ -54,83 +54,119 @@ export function KeyboardShortcutsPanel({
     if (isVisualizerPage) {
       return {
         "Visualizer Controls": [
-          { key: "Space", description: "Play/Pause animation" },
-          { key: "→", description: "Step forward" },
-          { key: "←", description: "Step backward" },
-          { key: "↑", description: "Increase speed" },
-          { key: "↓", description: "Decrease speed" },
-          { key: "R", description: "Reset animation" },
-          { key: "Ctrl+Home", description: "Go to start" },
-          { key: "Ctrl+End", description: "Go to end" },
+          { key: "Space", description: "Play/Pause animation", icon: "⏯️" },
+          { key: "→", description: "Step forward", icon: "⏩" },
+          { key: "←", description: "Step backward", icon: "⏪" },
+          { key: "↑", description: "Increase speed", icon: "⚡" },
+          { key: "↓", description: "Decrease speed", icon: "🐌" },
+          { key: "R", description: "Reset animation", icon: "🔄" },
+          { key: "Ctrl+Home", description: "Go to start", icon: "⏮️" },
+          { key: "Ctrl+End", description: "Go to end", icon: "⏭️" },
         ],
         "Speed Presets": [
-          { key: "1", description: "Set speed to 0.25×" },
-          { key: "2", description: "Set speed to 0.5×" },
-          { key: "3", description: "Set speed to 1×" },
-          { key: "4", description: "Set speed to 2×" },
-          { key: "5", description: "Set speed to 4×" },
+          { key: "1", description: "Set speed to 0.25×", icon: "🐌" },
+          { key: "2", description: "Set speed to 0.5×", icon: "🚶" },
+          { key: "3", description: "Set speed to 1×", icon: "🏃" },
+          { key: "4", description: "Set speed to 2×", icon: "🏃‍♂️" },
+          { key: "5", description: "Set speed to 4×", icon: "⚡" },
         ],
         Navigation: [
-          { key: "H", description: "Go to homepage" },
-          { key: "Esc", description: "Exit/close panels" },
+          { key: "H", description: "Go to homepage", icon: "🏠" },
+          { key: "Esc", description: "Exit/close panels", icon: "❌" },
         ],
         Interface: [
-          { key: "T", description: "Toggle theme" },
-          { key: "F", description: "Toggle fullscreen" },
-          { key: "?", description: "Show/hide shortcuts" },
+          { key: "T", description: "Toggle theme", icon: "🌓" },
+          { key: "F", description: "Toggle fullscreen", icon: "⛶" },
+          { key: "?", description: "Show/hide shortcuts", icon: "❓" },
         ],
       };
     } else if (isHomePage) {
       return {
         "Search & Navigation": [
-          { key: "/", description: "Focus search bar" },
-          { key: "Ctrl+K", description: "Quick search" },
-          { key: "Esc", description: "Clear search/close panels" },
-          { key: "V", description: "Go to visualizer" },
-          { key: "Enter", description: "Search with current query" },
+          { key: "/", description: "Focus search bar", icon: "🔍" },
+          { key: "Ctrl+K", description: "Quick search", icon: "⚡" },
+          { key: "Esc", description: "Clear search/close panels", icon: "❌" },
+          { key: "V", description: "Go to visualizer", icon: "🎯" },
+          { key: "Enter", description: "Search with current query", icon: "⏎" },
         ],
         "Filter Management": [
-          { key: "Ctrl+Shift+C", description: "Clear all filters" },
-          { key: "Ctrl+Shift+F", description: "Show featured algorithms" },
-          { key: "Ctrl+Shift+E", description: "Toggle filter bar" },
-          { key: "Alt+1", description: "Filter by Easy difficulty" },
-          { key: "Alt+2", description: "Filter by Medium difficulty" },
-          { key: "Alt+3", description: "Filter by Hard difficulty" },
+          { key: "Ctrl+Shift+C", description: "Clear all filters", icon: "🧹" },
+          {
+            key: "Ctrl+Shift+F",
+            description: "Show featured algorithms",
+            icon: "⭐",
+          },
+          { key: "Ctrl+Shift+E", description: "Toggle filter bar", icon: "🎛️" },
+          {
+            key: "Alt+1",
+            description: "Filter by Easy difficulty",
+            icon: "🟢",
+          },
+          {
+            key: "Alt+2",
+            description: "Filter by Medium difficulty",
+            icon: "🟡",
+          },
+          {
+            key: "Alt+3",
+            description: "Filter by Hard difficulty",
+            icon: "🔴",
+          },
         ],
         "Quick Access": [
-          { key: "Ctrl+1", description: "Go to Sorting algorithms" },
-          { key: "Ctrl+2", description: "Go to Searching algorithms" },
-          { key: "Ctrl+3", description: "Go to Graph algorithms" },
-          { key: "Ctrl+4", description: "Go to Tree algorithms" },
-          { key: "Ctrl+0", description: "Reset to all algorithms" },
+          {
+            key: "Ctrl+1",
+            description: "Go to Sorting algorithms",
+            icon: "🔀",
+          },
+          {
+            key: "Ctrl+2",
+            description: "Go to Searching algorithms",
+            icon: "🔍",
+          },
+          { key: "Ctrl+3", description: "Go to Graph algorithms", icon: "🕸️" },
+          { key: "Ctrl+4", description: "Go to Tree algorithms", icon: "🌳" },
+          { key: "Ctrl+0", description: "Reset to all algorithms", icon: "🔄" },
         ],
         "Page Controls": [
-          { key: "Ctrl+H", description: "Toggle hero section" },
-          { key: "Ctrl+T", description: "Start guided tour" },
-          { key: "Ctrl+R", description: "Refresh algorithm catalog" },
-          { key: "PageDown", description: "Scroll to next section" },
-          { key: "PageUp", description: "Scroll to previous section" },
+          { key: "Ctrl+H", description: "Toggle hero section", icon: "🎭" },
+          { key: "Ctrl+T", description: "Start guided tour", icon: "🗺️" },
+          {
+            key: "Ctrl+R",
+            description: "Refresh algorithm catalog",
+            icon: "♻️",
+          },
+          {
+            key: "PageDown",
+            description: "Scroll to next section",
+            icon: "⬇️",
+          },
+          {
+            key: "PageUp",
+            description: "Scroll to previous section",
+            icon: "⬆️",
+          },
         ],
         Interface: [
-          { key: "T", description: "Toggle theme" },
-          { key: "F", description: "Toggle fullscreen" },
-          { key: "?", description: "Show/hide shortcuts" },
-          { key: "F1", description: "Show help" },
+          { key: "T", description: "Toggle theme", icon: "🌓" },
+          { key: "F", description: "Toggle fullscreen", icon: "⛶" },
+          { key: "?", description: "Show/hide shortcuts", icon: "❓" },
+          { key: "F1", description: "Show help", icon: "💡" },
         ],
       };
     } else {
       return {
         Navigation: [
-          { key: "H", description: "Go to homepage" },
-          { key: "V", description: "Go to visualizer" },
-          { key: "/", description: "Focus search" },
-          { key: "Ctrl+K", description: "Quick search" },
+          { key: "H", description: "Go to homepage", icon: "🏠" },
+          { key: "V", description: "Go to visualizer", icon: "🎯" },
+          { key: "/", description: "Focus search", icon: "🔍" },
+          { key: "Ctrl+K", description: "Quick search", icon: "⚡" },
         ],
         Interface: [
-          { key: "T", description: "Toggle theme" },
-          { key: "F", description: "Toggle fullscreen" },
-          { key: "?", description: "Show/hide shortcuts" },
-          { key: "Esc", description: "Exit/close panels" },
+          { key: "T", description: "Toggle theme", icon: "🌓" },
+          { key: "F", description: "Toggle fullscreen", icon: "⛶" },
+          { key: "?", description: "Show/hide shortcuts", icon: "❓" },
+          { key: "Esc", description: "Exit/close panels", icon: "❌" },
         ],
       };
     }
@@ -206,7 +242,11 @@ export function KeyboardShortcutsPanel({
               <div className="space-y-2">
                 {categoryShortcuts.map(
                   (
-                    shortcut: { key: string; description: string },
+                    shortcut: {
+                      key: string;
+                      description: string;
+                      icon?: string;
+                    },
                     index: number
                   ) => (
                     <div
@@ -220,9 +260,16 @@ export function KeyboardShortcutsPanel({
                         "hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
                       )}
                     >
-                      <span className="text-sm font-medium text-slate-700 transition-colors group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-slate-100">
-                        {shortcut.description}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        {shortcut.icon && (
+                          <span className="flex-shrink-0 text-lg">
+                            {shortcut.icon}
+                          </span>
+                        )}
+                        <span className="text-sm font-medium text-slate-700 transition-colors group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-slate-100">
+                          {shortcut.description}
+                        </span>
+                      </div>
                       <kbd
                         className={cn(
                           "rounded-lg px-3 py-2 font-mono text-xs font-bold",

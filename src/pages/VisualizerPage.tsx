@@ -1,6 +1,6 @@
 // src/pages/VisualizerPage.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import ArrayCanvas, {
   ArrayCanvasHandle,
@@ -34,6 +34,7 @@ import { cn, makeRandomArray } from "@/utils";
 export default function VisualizerPage() {
   const { t } = useI18n();
   const componentLogger = useComponentLogger("VisualizerPage");
+  const navigate = useNavigate();
   const { topic = "", slug = "" } = useParams();
 
   // Mobile orientation detection
@@ -231,6 +232,235 @@ export default function VisualizerPage() {
       theme: document.documentElement.getAttribute("data-theme") || undefined,
     });
   }, [runner.idx, runner.speed, input.length, initialSeed]);
+
+  // Keyboard shortcuts for visualizer controls
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if we're not in an input field
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Prevent default for handled shortcuts
+      switch (event.key) {
+        // Play/Pause with Space
+        case " ":
+          event.preventDefault();
+          if (runner.playing) {
+            runner.pause();
+          } else {
+            runner.playForward();
+          }
+          logger.info(LogCategory.USER_INTERACTION, "Play/pause via keyboard", {
+            action: runner.playing ? "pause" : "play",
+            source: "keyboard_shortcut",
+          });
+          break;
+
+        // Step controls
+        case "ArrowRight":
+          event.preventDefault();
+          runner.stepNext();
+          logger.info(
+            LogCategory.USER_INTERACTION,
+            "Step forward via keyboard"
+          );
+          break;
+
+        case "ArrowLeft":
+          event.preventDefault();
+          runner.stepPrev();
+          logger.info(
+            LogCategory.USER_INTERACTION,
+            "Step backward via keyboard"
+          );
+          break;
+
+        // Speed controls
+        case "ArrowUp":
+          event.preventDefault();
+          runner.setSpeed(Math.min(runner.speed * 1.5, 8));
+          logger.info(
+            LogCategory.USER_INTERACTION,
+            "Speed increased via keyboard",
+            {
+              newSpeed: Math.min(runner.speed * 1.5, 8),
+            }
+          );
+          break;
+
+        case "ArrowDown":
+          event.preventDefault();
+          runner.setSpeed(Math.max(runner.speed / 1.5, 0.1));
+          logger.info(
+            LogCategory.USER_INTERACTION,
+            "Speed decreased via keyboard",
+            {
+              newSpeed: Math.max(runner.speed / 1.5, 0.1),
+            }
+          );
+          break;
+
+        // Reset animation
+        case "r":
+        case "R":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.toStart();
+            runner.pause();
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Animation reset via keyboard"
+            );
+          }
+          break;
+
+        // Jump to start/end with Ctrl+Home/End
+        case "Home":
+          if (event.ctrlKey) {
+            event.preventDefault();
+            runner.toStart();
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Jump to start via keyboard"
+            );
+          }
+          break;
+
+        case "End":
+          if (event.ctrlKey) {
+            event.preventDefault();
+            runner.toEnd();
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Jump to end via keyboard"
+            );
+          }
+          break;
+
+        // Speed presets (1-5)
+        case "1":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.setSpeed(0.25);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Speed preset 0.25× via keyboard"
+            );
+          }
+          break;
+
+        case "2":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.setSpeed(0.5);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Speed preset 0.5× via keyboard"
+            );
+          }
+          break;
+
+        case "3":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.setSpeed(1);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Speed preset 1× via keyboard"
+            );
+          }
+          break;
+
+        case "4":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.setSpeed(2);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Speed preset 2× via keyboard"
+            );
+          }
+          break;
+
+        case "5":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            runner.setSpeed(4);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Speed preset 4× via keyboard"
+            );
+          }
+          break;
+
+        // Navigation shortcuts
+        case "h":
+        case "H":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            navigate("/");
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Navigate to homepage via keyboard"
+            );
+          }
+          break;
+
+        // Theme toggle
+        case "t":
+        case "T":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            const currentTheme =
+              document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              "Theme toggled via keyboard",
+              {
+                from: currentTheme,
+                to: newTheme,
+              }
+            );
+          }
+          break;
+
+        // Fullscreen toggle
+        case "f":
+        case "F":
+          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+            event.preventDefault();
+            if (document.fullscreenElement) {
+              document.exitFullscreen();
+              logger.info(
+                LogCategory.USER_INTERACTION,
+                "Exit fullscreen via keyboard"
+              );
+            } else {
+              document.documentElement.requestFullscreen();
+              logger.info(
+                LogCategory.USER_INTERACTION,
+                "Enter fullscreen via keyboard"
+              );
+            }
+          }
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [runner, navigate]);
 
   // Show loading state while algorithm is being loaded
   if (isLoadingMeta) {
