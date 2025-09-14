@@ -12,7 +12,8 @@ import EnhancedArrayVisualization, {
 import ArrayViewPanel from "@/components/controls/ArrayViewPanel";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
-import DebugToggle from "@/components/debug/DebugToggle";
+import DebugPanel from "@/components/debug/DebugPanel";
+import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
 import AboutPanel from "@/components/panels/AboutPanel";
 import CodePanel from "@/components/panels/CodePanel";
 import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
@@ -46,7 +47,13 @@ export default function VisualizerPage() {
   }, [topic, slug, componentLogger]);
 
   const [meta, setMeta] = useState<AlgoMeta | null>(null);
-  const [_isLoadingMeta, setIsLoadingMeta] = useState(true);
+  const [isLoadingMeta, setIsLoadingMeta] = useState(true);
+
+  // Debug panel state (Dev Mode)
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Performance monitor hook (Dev Mode)
+  const performanceMonitor = usePerformanceMonitor();
 
   // Load algorithm metadata asynchronously
   useEffect(() => {
@@ -218,14 +225,58 @@ export default function VisualizerPage() {
     });
   }, [runner.idx, runner.speed, input.length, initialSeed]);
 
-  if (!meta)
+  // Show loading state while algorithm is being loaded
+  if (isLoadingMeta) {
     return (
-      <div className="p-4">
-        {t("errors.algorithmNotFound", {
-          defaultValue: "Algorithm not found.",
-        })}
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {t("loading.algorithm", { defaultValue: "Loading algorithm..." })}
+          </p>
+        </div>
       </div>
     );
+  }
+
+  // Show error state if algorithm is not found after loading
+  if (!meta) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-red-100 p-4 dark:bg-red-900/20">
+            <svg
+              className="h-8 w-8 text-red-600 dark:text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+              />
+            </svg>
+          </div>
+          <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {t("errors.algorithmNotFound", {
+              defaultValue: "Algorithm not found",
+            })}
+          </h2>
+          <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+            The algorithm "{topic}/{slug}" could not be found.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-900"
+          >
+            {t("navigation.goBack", { defaultValue: "Go Back" })}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid max-h-screen min-h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden p-3">
@@ -493,9 +544,73 @@ export default function VisualizerPage() {
         </div>
       </div>
 
-      {/* Debug and Keyboard Shortcuts */}
-      {import.meta.env.DEV && <DebugToggle />}
+      {/* Debug Panel (Dev Mode) */}
+      {import.meta.env.DEV && (
+        <DebugPanel
+          isOpen={showDebugPanel}
+          onClose={() => {
+            logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
+              timestamp: new Date().toISOString(),
+            });
+            setShowDebugPanel(false);
+          }}
+        />
+      )}
+
+      {/* Performance Monitor (Dev Mode) */}
+      {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
+
+      {/* Keyboard Shortcuts */}
       <KeyboardShortcutsButton />
+
+      {/* Floating Debug Tools (Dev Mode) */}
+      {import.meta.env.DEV && (
+        <>
+          {/* Performance Monitor Button */}
+          <div className="fixed right-6 bottom-[100px] z-50">
+            <div className="relative">
+              <button
+                className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl active:scale-95"
+                title="Performance Monitor (Dev) - Ctrl+Shift+P"
+                onClick={performanceMonitor.toggle}
+              >
+                ⚡
+                <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                  Performance
+                </span>
+                <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-emerald-400"></div>
+              </button>
+            </div>
+          </div>
+
+          {/* Debug Toggle Button */}
+          <div className="fixed right-6 bottom-[160px] z-50">
+            <div className="relative">
+              <button
+                className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
+                title="Debug Panel (Dev) - Ctrl+Shift+D"
+                onClick={() => {
+                  logger.info(
+                    LogCategory.USER_INTERACTION,
+                    "Debug panel opened via floating button",
+                    {
+                      method: "floating_button_click",
+                      timestamp: new Date().toISOString(),
+                    }
+                  );
+                  setShowDebugPanel(true);
+                }}
+              >
+                🐛
+                <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                  Debug
+                </span>
+                <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
