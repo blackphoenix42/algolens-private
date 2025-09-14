@@ -75,6 +75,7 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@react-spring/web": "10.0.2",
+    "axios": "^1.12.2",
     "@sentry/react": "10.11.0",
     "@sentry/replay": "^7.116.0",
     "@types/d3": "7.4.3",
@@ -187,5 +188,10 @@
     "vite": "^7.1.5",
     "vite-bundle-analyzer": "1.2.3",
     "vitest": "3.2.4"
+  },
+  "overrides": {
+    "tmp": "^0.2.5",
+    "inquirer": "^12.9.6",
+    "external-editor": "^3.1.0"
   }
 }
