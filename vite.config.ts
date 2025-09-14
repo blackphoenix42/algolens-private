@@ -13,7 +13,15 @@ const hasSentry =
   !!process.env.SENTRY_PROJECT;
 const enableSentry = isCI && hasSentry;
 
+// GitHub Pages configuration
+const isGitHubPages =
+  process.env.GITHUB_PAGES === "true" || process.env.GITHUB_ACTIONS === "true";
+const repoName =
+  process.env.GITHUB_REPOSITORY?.split("/")[1] || "algolens-private";
+const baseUrl = isGitHubPages ? `/${repoName}/` : "/";
+
 export default defineConfig({
+  base: baseUrl,
   plugins: [
     react(),
     tailwindcss(),

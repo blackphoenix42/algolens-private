@@ -124,6 +124,21 @@ export const createRouter: typeof createBrowserRouter = hasWrap(Sentry)
   ? Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
   : createBrowserRouter;
 
+// Configure base path for GitHub Pages
+const getBasename = () => {
+  // Check if running on GitHub Pages
+  if (typeof window !== "undefined") {
+    const { hostname, pathname } = window.location;
+    if (
+      hostname === "blackphoenix42.github.io" &&
+      pathname.startsWith("/algolens-private")
+    ) {
+      return "/algolens-private";
+    }
+  }
+  return "/";
+};
+
 // Log router creation
 logger.debug(LogCategory.ROUTER, "Creating application router", {
   sentryIntegration: hasWrap(Sentry),
@@ -134,33 +149,38 @@ logger.debug(LogCategory.ROUTER, "Creating application router", {
   ],
 });
 
-const router = createRouter([
+const router = createRouter(
+  [
+    {
+      path: "/",
+      element: <AppLayout />,
+      errorElement: <ErrorBoundary />,
+      children: [
+        {
+          index: true,
+          element: (
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <HomePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "viz/:topic/:slug",
+          element: (
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <VisualizerPage />
+            </Suspense>
+          ),
+        },
+      ],
+    },
+    // Catch-all: use the static 404 page
+    { path: "*", element: <Static404 /> },
+  ],
   {
-    path: "/",
-    element: <AppLayout />,
-    errorElement: <ErrorBoundary />,
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<RouteLoadingFallback />}>
-            <HomePage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "viz/:topic/:slug",
-        element: (
-          <Suspense fallback={<RouteLoadingFallback />}>
-            <VisualizerPage />
-          </Suspense>
-        ),
-      },
-    ],
-  },
-  // Catch-all: use the static 404 page
-  { path: "*", element: <Static404 /> },
-]);
+    basename: getBasename(),
+  }
+);
 
 export default function AppRouter() {
   logger.info(LogCategory.ROUTER, "Rendering AppRouter");

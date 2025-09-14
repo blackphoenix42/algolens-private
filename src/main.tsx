@@ -189,6 +189,23 @@ setTimeout(() => {
   log.info("Background services initialized");
 }, 100);
 
+// Handle GitHub Pages SPA routing
+try {
+  const redirectPath = sessionStorage.getItem("ALGO_REDIRECT_PATH");
+  if (redirectPath && redirectPath !== "/") {
+    sessionStorage.removeItem("ALGO_REDIRECT_PATH");
+    // Use history.replaceState to avoid adding to history
+    window.history.replaceState(null, "", redirectPath);
+    logger.info(LogCategory.ROUTER, "Restored GitHub Pages redirect path", {
+      path: redirectPath,
+    });
+  }
+} catch (error) {
+  logger.warn(LogCategory.ROUTER, "Failed to handle GitHub Pages redirect", {
+    error: error instanceof Error ? error.message : String(error),
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AppErrorBoundary>
