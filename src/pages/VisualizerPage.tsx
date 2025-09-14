@@ -20,10 +20,12 @@ import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
 import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
 import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
+import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
+import { useMobileOrientation } from "@/hooks/useOrientation";
 import { LanguageSwitcher, useI18n } from "@/i18n";
 import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
@@ -34,17 +36,22 @@ export default function VisualizerPage() {
   const componentLogger = useComponentLogger("VisualizerPage");
   const { topic = "", slug = "" } = useParams();
 
+  // Mobile orientation detection
+  const { isMobile, isMobilePortrait } = useMobileOrientation();
+
   // Log page navigation
   useEffect(() => {
     logger.info(LogCategory.ROUTER, "VisualizerPage accessed", {
       topic,
       slug,
       url: window.location.href,
+      isMobile,
+      orientation: isMobilePortrait ? "portrait" : "landscape",
     });
     componentLogger.mount();
 
     return () => componentLogger.unmount();
-  }, [topic, slug, componentLogger]);
+  }, [topic, slug, componentLogger, isMobile, isMobilePortrait]);
 
   const [meta, setMeta] = useState<AlgoMeta | null>(null);
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
@@ -279,338 +286,456 @@ export default function VisualizerPage() {
   }
 
   return (
-    <div className="grid max-h-screen min-h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden p-3">
-      {/* Top bar */}
-      <div className="flex shrink-0 items-center justify-between">
-        <HomeButton />
-        <h1 className="text-2xl font-bold tracking-tight">
-          {meta.title ||
-            t("navigation.visualizer", { defaultValue: "Visualizer" })}
-        </h1>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher variant="dropdown" />
-          <ThemeToggle />
-        </div>
-      </div>
+    <>
+      {/* Portrait Warning Overlay for Mobile */}
+      <MobilePortraitWarning isVisible={isMobilePortrait} />
 
-      {/* 3-column surface. Single row; center stretches. */}
       <div
-        ref={surfaceRef}
-        className="viz-surface grid min-h-0 grid-cols-[320px_minmax(0,1fr)_360px] items-stretch gap-3 overflow-hidden"
+        className={cn(
+          "grid min-h-screen",
+          // Mobile responsive: allow scrolling, remove overflow-hidden
+          isMobile
+            ? "grid-rows-[auto_1fr] gap-2 p-2"
+            : "max-h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden p-3"
+        )}
       >
-        {/* LEFT COLUMN (panels scroll, player pinned bottom) */}
-        <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-          {/* scrollable stack */}
-          <div className="grid min-h-0 content-start gap-3 overflow-auto pr-1">
-            <DatasetPanel
-              value={input}
-              onChange={(a) => {
-                setInput(a);
-                runner.toStart();
-              }}
-            />
-
-            {/* Search Target Control for searching algorithms */}
-            {meta?.topic === "searching" && (
-              <div className="card p-4">
-                <div className="mb-3">
-                  <h3 className="font-medium text-slate-900 dark:text-slate-100">
-                    Search Target
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Value to search for in the array
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <input
-                    type="number"
-                    value={searchTarget}
-                    onChange={(e) => {
-                      setSearchTarget(Number(e.target.value));
-                      runner.toStart();
-                    }}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-                    min={5}
-                    max={99}
-                    placeholder="Enter target value"
-                    title="Target value to search for"
-                  />
-                  {meta.slug === "binary-search" && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Array is automatically sorted for binary search
-                    </p>
-                  )}
-                </div>
-              </div>
+        {/* Top bar */}
+        <div
+          className={cn(
+            "flex shrink-0 items-center justify-between",
+            isMobile ? "px-1" : "px-0"
+          )}
+        >
+          <HomeButton />
+          <h1
+            className={cn(
+              "font-bold tracking-tight",
+              isMobile ? "text-lg sm:text-xl" : "text-2xl"
             )}
-            <ArrayViewPanel
-              view={view}
-              onView={setView}
-              colorMode={colorMode}
-              onColorMode={setColorMode}
-              colors={colors}
-              onColorsChange={setColors}
-              showLabels={showLabels}
-              onShowLabels={setShowLabels}
-              showPlane={showPlane}
-              onShowPlane={setShowPlane}
-            />
-            <CanvasToolbar
-              surfaceRef={surfaceRef}
-              canvasHandle={enhancedMode ? enhancedCanvasHandle : canvasHandle}
-              panMode={panMode}
-              onPanMode={setPanMode}
-              dragging={dragging}
-              onDragging={setDragging}
-              gridOn={gridOn}
-              snapOn={snapOn}
-            />
-          </div>
-
-          {/* player pinned at the very bottom of LEFT */}
-          <div className="shrink-0 pt-3">
-            <Transport
-              playing={runner.playing}
-              direction={runner.direction}
-              onPlayForward={runner.playForward}
-              onPlayBackward={runner.playBackward}
-              onPause={runner.pause}
-              onPrev={runner.stepPrev}
-              onNext={runner.stepNext}
-              onToStart={runner.toStart}
-              onToEnd={runner.toEnd}
-              speed={runner.speed}
-              onSpeedChange={runner.setSpeed}
-              idx={runner.idx}
-              total={total}
-              onSeek={runner.setIdx}
-            />
+          >
+            {meta.title ||
+              t("navigation.visualizer", { defaultValue: "Visualizer" })}
+          </h1>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher variant="dropdown" />
+            <ThemeToggle />
           </div>
         </div>
 
-        {/* CENTER (canvas/complexity with tabs) */}
-        <div className="flex min-h-0 flex-col">
-          {/* Tab Navigation */}
-          <div className="flex rounded-t-xl border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <button
-              onClick={() => setActiveTab("canvas")}
+        {/* 3-column surface. Single row; center stretches. */}
+        <div
+          ref={surfaceRef}
+          className={cn(
+            "viz-surface min-h-0 items-stretch",
+            isMobile
+              ? // Mobile: Single column, scrollable without height constraints, add bottom padding
+                "flex flex-col gap-3 overflow-y-auto pb-6"
+              : // Desktop: 3-column layout with overflow hidden
+                "grid grid-cols-[320px_minmax(0,1fr)_360px] gap-3 overflow-hidden"
+          )}
+        >
+          {/* LEFT COLUMN (panels scroll, player pinned bottom) */}
+          <div
+            className={cn(
+              "flex min-h-0 min-w-0 flex-col",
+              isMobile
+                ? "order-2 flex-shrink-0" // On mobile, show after canvas, natural height
+                : "overflow-hidden"
+            )}
+          >
+            {/* scrollable stack */}
+            <div
               className={cn(
-                "flex-1 rounded-tl-xl px-4 py-3 text-sm font-medium transition-colors",
-                activeTab === "canvas"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
-                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                "grid min-h-0 content-start gap-3 pr-1",
+                isMobile
+                  ? "gap-2" // Smaller gaps on mobile, no overflow constraints
+                  : "overflow-auto"
               )}
             >
-              🎨 Visualization
-            </button>
-            <button
-              onClick={() => setActiveTab("complexity")}
+              <DatasetPanel
+                value={input}
+                onChange={(a) => {
+                  setInput(a);
+                  runner.toStart();
+                }}
+              />
+
+              {/* Search Target Control for searching algorithms */}
+              {meta?.topic === "searching" && (
+                <div className={cn("card p-4", isMobile && "p-3")}>
+                  <div className="mb-3">
+                    <h3
+                      className={cn(
+                        "font-medium text-slate-900 dark:text-slate-100",
+                        isMobile && "text-sm"
+                      )}
+                    >
+                      Search Target
+                    </h3>
+                    <p
+                      className={cn(
+                        "mt-1 text-sm text-slate-600 dark:text-slate-400",
+                        isMobile && "text-xs"
+                      )}
+                    >
+                      Value to search for in the array
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="number"
+                      value={searchTarget}
+                      onChange={(e) => {
+                        setSearchTarget(Number(e.target.value));
+                        runner.toStart();
+                      }}
+                      className={cn(
+                        "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
+                        isMobile && "text-sm" // Smaller text on mobile
+                      )}
+                      min={5}
+                      max={99}
+                      placeholder="Enter target value"
+                      title="Target value to search for"
+                    />
+                    {meta.slug === "binary-search" && (
+                      <p
+                        className={cn(
+                          "text-xs text-slate-500 dark:text-slate-400",
+                          isMobile && "text-xs" // Already small
+                        )}
+                      >
+                        Array is automatically sorted for binary search
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              <ArrayViewPanel
+                view={view}
+                onView={setView}
+                colorMode={colorMode}
+                onColorMode={setColorMode}
+                colors={colors}
+                onColorsChange={setColors}
+                showLabels={showLabels}
+                onShowLabels={setShowLabels}
+                showPlane={showPlane}
+                onShowPlane={setShowPlane}
+              />
+              <CanvasToolbar
+                surfaceRef={surfaceRef}
+                canvasHandle={
+                  enhancedMode ? enhancedCanvasHandle : canvasHandle
+                }
+                panMode={panMode}
+                onPanMode={setPanMode}
+                dragging={dragging}
+                onDragging={setDragging}
+                gridOn={gridOn}
+                snapOn={snapOn}
+              />
+            </div>
+
+            {/* player pinned at the very bottom of LEFT */}
+            <div
               className={cn(
-                "flex-1 rounded-tr-xl px-4 py-3 text-sm font-medium transition-colors",
-                activeTab === "complexity"
-                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
-                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                "shrink-0 pt-3",
+                isMobile && "pt-2" // Smaller top padding on mobile
               )}
             >
-              📊 Complexity Analysis
-            </button>
+              <Transport
+                playing={runner.playing}
+                direction={runner.direction}
+                onPlayForward={runner.playForward}
+                onPlayBackward={runner.playBackward}
+                onPause={runner.pause}
+                onPrev={runner.stepPrev}
+                onNext={runner.stepNext}
+                onToStart={runner.toStart}
+                onToEnd={runner.toEnd}
+                speed={runner.speed}
+                onSpeedChange={runner.setSpeed}
+                idx={runner.idx}
+                total={total}
+                onSeek={runner.setIdx}
+              />
+            </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="flex min-h-0 flex-1 flex-col rounded-b-xl bg-white dark:bg-slate-900">
-            {activeTab === "canvas" ? (
-              <>
-                {/* Enhanced Visualization Toggle */}
-                <div className="flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-700">
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Visualization Mode
-                  </div>
-                  <button
-                    onClick={() => setEnhancedMode(!enhancedMode)}
+          {/* CENTER (canvas/complexity with tabs) */}
+          <div
+            className={cn(
+              "flex min-h-0 flex-col",
+              isMobile
+                ? "order-1 min-h-[50vh] flex-shrink-0" // On mobile, minimum height but allow growth
+                : ""
+            )}
+          >
+            {/* Tab Navigation */}
+            <div className="flex rounded-t-xl border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+              <button
+                onClick={() => setActiveTab("canvas")}
+                className={cn(
+                  "flex-1 rounded-tl-xl px-4 py-3 text-sm font-medium transition-colors",
+                  // Mobile: smaller padding and text
+                  isMobile && "px-3 py-2 text-xs",
+                  activeTab === "canvas"
+                    ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                )}
+              >
+                {isMobile ? "🎨 Viz" : "🎨 Visualization"}
+              </button>
+              <button
+                onClick={() => setActiveTab("complexity")}
+                className={cn(
+                  "flex-1 rounded-tr-xl px-4 py-3 text-sm font-medium transition-colors",
+                  // Mobile: smaller padding and text
+                  isMobile && "px-3 py-2 text-xs",
+                  activeTab === "complexity"
+                    ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border-primary-500 border-b-2"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                )}
+              >
+                {isMobile ? "📊 Analysis" : "📊 Complexity Analysis"}
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex min-h-0 flex-1 flex-col rounded-b-xl bg-white dark:bg-slate-900">
+              {activeTab === "canvas" ? (
+                <>
+                  {/* Enhanced Visualization Toggle */}
+                  <div
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                      enhancedMode
-                        ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
-                        : "bg-slate-100 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
+                      "flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-700",
+                      isMobile && "p-2" // Smaller padding on mobile
                     )}
                   >
-                    {enhancedMode ? "📊" : "🎨"}
-                    {enhancedMode ? "Enhanced Charts" : "Classic Canvas"}
-                  </button>
-                </div>
+                    <div
+                      className={cn(
+                        "text-sm text-slate-600 dark:text-slate-400",
+                        isMobile && "text-xs" // Smaller text on mobile
+                      )}
+                    >
+                      {isMobile ? "Mode" : "Visualization Mode"}
+                    </div>
+                    <button
+                      onClick={() => setEnhancedMode(!enhancedMode)}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                        isMobile && "gap-1 px-2 py-1 text-xs", // Smaller on mobile
+                        enhancedMode
+                          ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
+                          : "bg-slate-100 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
+                      )}
+                    >
+                      {enhancedMode ? "📊" : "🎨"}
+                      {isMobile
+                        ? enhancedMode
+                          ? "Enhanced"
+                          : "Classic"
+                        : enhancedMode
+                          ? "Enhanced Charts"
+                          : "Classic Canvas"}
+                    </button>
+                  </div>
 
-                {/* Visualization Content */}
-                <div className="min-h-0 flex-1">
-                  {enhancedMode ? (
-                    <EnhancedArrayVisualization
-                      ref={enhancedCanvasHandle}
-                      array={frame.array ?? input}
-                      highlights={frame.highlights}
-                      viewMode={view}
-                      colorMode={colorMode}
-                      colors={colors}
-                      showLabels={showLabels}
-                      height="100%"
-                      className="h-full"
-                      onReorder={(next) => {
-                        setInput(next);
-                        runner.toStart();
-                      }}
-                      panModeExternal={panMode}
-                      dragEnabled={dragging}
-                      onViewChange={(s) => {
-                        setGridOn(s.grid);
-                        setSnapOn(s.snap);
-                      }}
-                      showPlane={showPlane}
-                    />
-                  ) : (
-                    <ArrayCanvas
-                      ref={canvasHandle}
-                      array={frame.array ?? input}
-                      highlights={frame.highlights}
-                      onReorder={(next: number[]) => {
-                        setInput(next);
-                        runner.toStart();
-                      }}
-                      height="100%"
-                      colors={colors}
-                      panModeExternal={panMode}
-                      dragEnabled={dragging}
-                      onViewChange={(s: { grid: boolean; snap: boolean }) => {
-                        setGridOn(s.grid);
-                        setSnapOn(s.snap);
-                      }}
-                      viewMode={view}
-                      colorMode={colorMode}
-                      showPlane={showPlane}
-                      showLabels={showLabels}
-                    />
-                  )}
+                  {/* Visualization Content */}
+                  <div className="min-h-0 flex-1">
+                    {enhancedMode ? (
+                      <EnhancedArrayVisualization
+                        ref={enhancedCanvasHandle}
+                        array={frame.array ?? input}
+                        highlights={frame.highlights}
+                        viewMode={view}
+                        colorMode={colorMode}
+                        colors={colors}
+                        showLabels={showLabels}
+                        height="100%"
+                        className="h-full"
+                        onReorder={(next) => {
+                          setInput(next);
+                          runner.toStart();
+                        }}
+                        panModeExternal={panMode}
+                        dragEnabled={dragging}
+                        onViewChange={(s) => {
+                          setGridOn(s.grid);
+                          setSnapOn(s.snap);
+                        }}
+                        showPlane={showPlane}
+                      />
+                    ) : (
+                      <ArrayCanvas
+                        ref={canvasHandle}
+                        array={frame.array ?? input}
+                        highlights={frame.highlights}
+                        onReorder={(next: number[]) => {
+                          setInput(next);
+                          runner.toStart();
+                        }}
+                        height="100%"
+                        colors={colors}
+                        panModeExternal={panMode}
+                        dragEnabled={dragging}
+                        onViewChange={(s: { grid: boolean; snap: boolean }) => {
+                          setGridOn(s.grid);
+                          setSnapOn(s.snap);
+                        }}
+                        viewMode={view}
+                        colorMode={colorMode}
+                        showPlane={showPlane}
+                        showLabels={showLabels}
+                      />
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="h-full overflow-auto p-6">
+                  <ComplexityExplorer
+                    algorithmName={meta.title}
+                    complexity={{
+                      time: meta.complexity.time,
+                      space: meta.complexity.space,
+                      stable: meta.complexity.stable,
+                      inPlace: meta.complexity.inPlace,
+                    }}
+                  />
                 </div>
-              </>
-            ) : (
-              <div className="h-full overflow-auto p-6">
-                <ComplexityExplorer
-                  algorithmName={meta.title}
-                  complexity={{
-                    time: meta.complexity.time,
-                    space: meta.complexity.space,
-                    stable: meta.complexity.stable,
-                    inPlace: meta.complexity.inPlace,
-                  }}
-                />
-              </div>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div
+            className={cn(
+              "flex min-h-0 flex-col gap-3",
+              isMobile
+                ? "order-3 flex-shrink-0 gap-2" // On mobile, show last, natural height
+                : "overflow-hidden"
             )}
+          >
+            <div
+              className={cn(
+                "shrink-0",
+                isMobile
+                  ? "max-h-[30vh] overflow-auto" // Scrollable on mobile
+                  : "max-h-[65vh] overflow-auto"
+              )}
+            >
+              <CodePanel
+                meta={meta}
+                activePcLine={frame.pcLine}
+                explain={frame.explain}
+                fillHeight={false}
+              />
+            </div>
+            {/* ExportPanel moved below AboutPanel and made collapsible */}
+            <div
+              className={cn(
+                "grid content-start gap-3",
+                isMobile
+                  ? "min-h-0 gap-2" // Remove flex-1 constraints on mobile
+                  : "min-h-0 flex-1 overflow-auto"
+              )}
+            >
+              <AboutPanel meta={meta} />
+              <CollapsibleExportPanel
+                array={frame.array ?? input}
+                view={view}
+                colorMode={colorMode}
+                colors={colors}
+                showPlane={showPlane}
+                showLabels={showLabels}
+                framesProvider={() =>
+                  (frames as Frame[]).map((f: Frame) => ({
+                    array: f.array ?? input,
+                    highlights: f.highlights,
+                    view,
+                    colorMode,
+                    colors,
+                    showPlane,
+                    showLabels,
+                    width: 1200,
+                    height: 360,
+                  }))
+                }
+                watermarkUrl="/brand/AlgoLens.webp"
+              />
+            </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
-        <div className="flex min-h-0 flex-col gap-3 overflow-hidden">
-          <div className="max-h-[65vh] shrink-0 overflow-auto">
-            <CodePanel
-              meta={meta}
-              activePcLine={frame.pcLine}
-              explain={frame.explain}
-              fillHeight={false}
-            />
-          </div>
-          {/* ExportPanel moved below AboutPanel and made collapsible */}
-          <div className="grid min-h-0 flex-1 content-start gap-3 overflow-auto">
-            <AboutPanel meta={meta} />
-            <CollapsibleExportPanel
-              array={frame.array ?? input}
-              view={view}
-              colorMode={colorMode}
-              colors={colors}
-              showPlane={showPlane}
-              showLabels={showLabels}
-              framesProvider={() =>
-                (frames as Frame[]).map((f: Frame) => ({
-                  array: f.array ?? input,
-                  highlights: f.highlights,
-                  view,
-                  colorMode,
-                  colors,
-                  showPlane,
-                  showLabels,
-                  width: 1200,
-                  height: 360,
-                }))
-              }
-              watermarkUrl="/brand/AlgoLens.webp"
-            />
-          </div>
-        </div>
+        {/* Debug Panel (Dev Mode) */}
+        {import.meta.env.DEV && (
+          <DebugPanel
+            isOpen={showDebugPanel}
+            onClose={() => {
+              logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
+                timestamp: new Date().toISOString(),
+              });
+              setShowDebugPanel(false);
+            }}
+          />
+        )}
+
+        {/* Performance Monitor (Dev Mode) */}
+        {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
+
+        {/* Keyboard Shortcuts - Hidden on mobile */}
+        {!isMobile && <KeyboardShortcutsButton />}
+
+        {/* Floating Debug Tools (Dev Mode) */}
+        {import.meta.env.DEV && !isMobile && (
+          <>
+            {/* Performance Monitor Button */}
+            <div className="fixed right-6 bottom-[100px] z-50">
+              <div className="relative">
+                <button
+                  className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl active:scale-95"
+                  title="Performance Monitor (Dev) - Ctrl+Shift+P"
+                  onClick={performanceMonitor.toggle}
+                >
+                  ⚡
+                  <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                    Performance
+                  </span>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-emerald-400"></div>
+                </button>
+              </div>
+            </div>
+
+            {/* Debug Toggle Button */}
+            <div className="fixed right-6 bottom-[160px] z-50">
+              <div className="relative">
+                <button
+                  className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
+                  title="Debug Panel (Dev) - Ctrl+Shift+D"
+                  onClick={() => {
+                    logger.info(
+                      LogCategory.USER_INTERACTION,
+                      "Debug panel opened via floating button",
+                      {
+                        method: "floating_button_click",
+                        timestamp: new Date().toISOString(),
+                      }
+                    );
+                    setShowDebugPanel(true);
+                  }}
+                >
+                  🐛
+                  <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                    Debug
+                  </span>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Debug Panel (Dev Mode) */}
-      {import.meta.env.DEV && (
-        <DebugPanel
-          isOpen={showDebugPanel}
-          onClose={() => {
-            logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
-              timestamp: new Date().toISOString(),
-            });
-            setShowDebugPanel(false);
-          }}
-        />
-      )}
-
-      {/* Performance Monitor (Dev Mode) */}
-      {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
-
-      {/* Keyboard Shortcuts */}
-      <KeyboardShortcutsButton />
-
-      {/* Floating Debug Tools (Dev Mode) */}
-      {import.meta.env.DEV && (
-        <>
-          {/* Performance Monitor Button */}
-          <div className="fixed right-6 bottom-[100px] z-50">
-            <div className="relative">
-              <button
-                className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl active:scale-95"
-                title="Performance Monitor (Dev) - Ctrl+Shift+P"
-                onClick={performanceMonitor.toggle}
-              >
-                ⚡
-                <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
-                  Performance
-                </span>
-                <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-emerald-400"></div>
-              </button>
-            </div>
-          </div>
-
-          {/* Debug Toggle Button */}
-          <div className="fixed right-6 bottom-[160px] z-50">
-            <div className="relative">
-              <button
-                className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
-                title="Debug Panel (Dev) - Ctrl+Shift+D"
-                onClick={() => {
-                  logger.info(
-                    LogCategory.USER_INTERACTION,
-                    "Debug panel opened via floating button",
-                    {
-                      method: "floating_button_click",
-                      timestamp: new Date().toISOString(),
-                    }
-                  );
-                  setShowDebugPanel(true);
-                }}
-              >
-                🐛
-                <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
-                  Debug
-                </span>
-                <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    </>
   );
 }

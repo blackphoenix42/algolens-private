@@ -67,12 +67,12 @@ function WrapIcon({ className = "w-4 h-4" }: { className?: string }) {
     </svg>
   );
 }
-function Chevron({ open }: { open: boolean }) {
+function ChevronDownIcon({ open }: { open: boolean }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className={`h-4 w-4 transition-transform ${
-        open ? "-rotate-180" : "rotate-0"
+      className={`h-4 w-4 transition-transform duration-200 ${
+        open ? "rotate-180" : "rotate-0"
       }`}
       aria-hidden
     >
@@ -136,17 +136,7 @@ export default function CodePanel({
     >
       {/* Header bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex items-center gap-2">
-          <button
-            className="rounded border border-slate-200 bg-white px-1.5 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
-            onClick={() => setCollapsed((v) => !v)}
-            aria-expanded={!collapsed}
-            aria-controls="codepanel-body"
-            title={collapsed ? "Expand" : "Collapse"}
-          >
-            <Chevron open={!collapsed} />
-          </button>
-
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="flex gap-2">
             <button
               className={`rounded px-2 py-1 ${
@@ -169,20 +159,29 @@ export default function CodePanel({
               Code
             </button>
           </div>
+          {!collapsed && tab === "code" && (
+            <select
+              className="ml-4 w-20 rounded border border-slate-200 bg-white px-1 py-1 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              value={lang}
+              onChange={(e) => setLang(e.target.value as Lang)}
+            >
+              <option value="cpp">C++</option>
+              <option value="java">Java</option>
+              <option value="python">Python</option>
+              <option value="javascript">JS</option>
+            </select>
+          )}
         </div>
-
-        {!collapsed && tab === "code" && (
-          <select
-            className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-            value={lang}
-            onChange={(e) => setLang(e.target.value as Lang)}
-          >
-            <option value="cpp">C++</option>
-            <option value="java">Java</option>
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
-          </select>
-        )}
+        <button
+          className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
+          onClick={() => setCollapsed((v) => !v)}
+          aria-expanded={!collapsed}
+          aria-controls="codepanel-body"
+          title={collapsed ? "Expand" : "Collapse"}
+        >
+          <ChevronDownIcon open={!collapsed} />
+          <span className="sr-only">{collapsed ? "Expand" : "Collapse"}</span>
+        </button>
       </div>
 
       {/* Body (collapsible) */}
