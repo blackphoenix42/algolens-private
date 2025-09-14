@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Workaround npm optional-deps quirk for Rollup on Linux
+      - name: Patch Rollup native binary (Linux)
+        if: runner.os == 'Linux'
+        run: npm i --no-save --no-package-lock @rollup/rollup-linux-x64-gnu@^4
+
       # Install Playwright browsers and system dependencies
       - name: Install Playwright browsers
         run: npx playwright install --with-deps

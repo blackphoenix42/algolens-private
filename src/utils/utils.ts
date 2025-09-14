@@ -70,7 +70,24 @@ export function formatNumber(num: number): string {
 /**
  * Generate a unique ID
  */
-export function generateId(): string {
+/**
+ * Generate a random ID with optional cryptographic strength
+ * @param cryptoSecure - Whether to use cryptographically secure randomness
+ * @returns A random string ID
+ */
+export function generateId(cryptoSecure = false): string {
+  if (
+    cryptoSecure &&
+    typeof window !== "undefined" &&
+    window.crypto &&
+    window.crypto.getRandomValues
+  ) {
+    // Use cryptographically secure randomness
+    const array = new Uint32Array(2);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, (x) => x.toString(36)).join("");
+  }
+  // Use Math.random for non-security-sensitive use cases (UI, animations, demo data)
   return Math.random().toString(36).substr(2, 9);
 }
 
@@ -218,26 +235,18 @@ export function getContrastColor(hexColor: string): string {
 /**
  * Generate random color
  */
-export function generateRandomColor(): string {
+export function getRandomColor(): string {
   const colors = [
-    "#ef4444",
-    "#f97316",
-    "#f59e0b",
-    "#eab308",
-    "#84cc16",
-    "#22c55e",
-    "#10b981",
-    "#14b8a6",
-    "#06b6d4",
-    "#0ea5e9",
-    "#3b82f6",
-    "#6366f1",
-    "#8b5cf6",
-    "#a855f7",
-    "#d946ef",
-    "#ec4899",
-    "#f43f5e",
+    "#3b82f6", // blue
+    "#ef4444", // red
+    "#10b981", // emerald
+    "#f59e0b", // amber
+    "#8b5cf6", // violet
+    "#06b6d4", // cyan
+    "#84cc16", // lime
+    "#ec4899", // pink
   ];
+  // Using Math.random for UI color selection - no security requirement
   return colors[Math.floor(Math.random() * colors.length)];
 }
 

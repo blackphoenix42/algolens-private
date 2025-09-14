@@ -231,7 +231,20 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
   const addNotification = (notification: Omit<NotificationProps, "id">) => {
-    const id = `notification-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    // Use crypto-secure randomness for notification IDs
+    let randomPart: string;
+    if (
+      typeof window !== "undefined" &&
+      window.crypto &&
+      window.crypto.getRandomValues
+    ) {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      randomPart = array[0].toString(36);
+    } else {
+      randomPart = Math.random().toString(36).substring(2, 15);
+    }
+    const id = `notification-${Date.now()}-${randomPart}`;
     const fullNotification = { ...notification, id };
 
     setNotifications((prev) => [...prev, fullNotification]);

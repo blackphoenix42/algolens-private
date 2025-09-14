@@ -141,6 +141,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
   const previewText = useMemo(() => value.join(", "), [value]);
 
   function nextRandomSeed() {
+    // Using Math.random for demo data generation - no security requirement
     return Math.floor(Math.random() * 1_000_000_000);
   }
 

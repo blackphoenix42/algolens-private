@@ -36,7 +36,12 @@ export async function loadTopic(topic: string): Promise<AlgoMeta[]> {
     CATALOG[topic] = algos; // Update the global catalog
     return algos;
   } catch (error) {
-    console.error(`Failed to load ${topic} algorithms:`, error);
+    console.error(
+      "Failed to load algorithms for topic:",
+      topic,
+      "Error:",
+      error
+    );
     return [];
   }
 }

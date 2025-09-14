@@ -34,9 +34,23 @@ let alertCallbacks: ((alert: PerformanceAlert) => void)[] = [];
 export function addPerformanceAlert(
   alert: Omit<PerformanceAlert, "id" | "timestamp">
 ) {
+  // Use crypto-secure randomness for performance alert IDs
+  let randomPart: string;
+  if (
+    typeof window !== "undefined" &&
+    window.crypto &&
+    window.crypto.getRandomValues
+  ) {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    randomPart = array[0].toString(36);
+  } else {
+    randomPart = Math.random().toString(36).substr(2, 9);
+  }
+
   const fullAlert: PerformanceAlert = {
     ...alert,
-    id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `alert-${Date.now()}-${randomPart}`,
     timestamp: Date.now(),
   };
 

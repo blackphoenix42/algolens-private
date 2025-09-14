@@ -12,6 +12,8 @@ concurrency:
 jobs:
   pa11y:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -25,8 +27,17 @@ jobs:
           rm -rf node_modules package-lock.json
           npm install
 
+      # Workaround npm optional-deps quirk for Rollup on Linux
+      - name: Patch Rollup native binary (Linux)
+        if: runner.os == 'Linux'
+        run: npm i --no-save --no-package-lock @rollup/rollup-linux-x64-gnu@^4
+
+      # Install start-server-and-test for running the server and tests
+      - name: Install start-server-and-test
+        run: npm i --no-save --no-package-lock start-server-and-test
+
       - name: Start server and run pa11y-ci
-        run: npm run build && start-server-and-test "vite preview --port 4173 --strictPort --host 127.0.0.1" http://127.0.0.1:4173 "npm run a11y"
+        run: npm run a11y:ci
 
       - name: Save JSON report (optional)
         if: always()

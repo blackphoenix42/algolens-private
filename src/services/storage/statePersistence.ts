@@ -225,6 +225,17 @@ class StatePersistence {
 
   // Helper methods
   private static generateId(): string {
+    // Use crypto-secure randomness for state IDs
+    if (
+      typeof window !== "undefined" &&
+      window.crypto &&
+      window.crypto.getRandomValues
+    ) {
+      const array = new Uint32Array(2);
+      window.crypto.getRandomValues(array);
+      return `${Date.now()}-${Array.from(array, (x) => x.toString(36)).join("")}`;
+    }
+    // Fallback for environments without crypto
     return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
   }
 
