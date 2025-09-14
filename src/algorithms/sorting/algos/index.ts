@@ -71,10 +71,10 @@ export const sortingAlgos: AlgoMeta[] = [
 }`,
     },
     codeLineMap: {
-      javascript: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      python: [1, 2, 3, 4, 5, 6],
-      java: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-      cpp: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      javascript: [3, 4, 5, 6], // Maps pseudocode lines 0,1,2,3 to JS lines 3,4,5,6
+      python: [3, 4, 5, 6], // Maps pseudocode lines 0,1,2,3 to Python lines 3,4,5,6
+      java: [3, 4, 5, 6], // Maps pseudocode lines 0,1,2,3 to Java lines 3,4,5,6
+      cpp: [3, 4, 5, 6], // Maps pseudocode lines 0,1,2,3 to C++ lines 3,4,5,6
     },
     load: () => import("./bubbleSort"),
   },
@@ -161,10 +161,10 @@ export const sortingAlgos: AlgoMeta[] = [
 }`,
     },
     codeLineMap: {
-      javascript: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      python: [1, 2, 3, 4, 5, 6, 7, 8],
-      java: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      cpp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      javascript: [3, 4, 5, 6, 7, 10], // Maps pseudocode lines 0,1,2,3,4,5 to JS lines 3,4,5,6,7,10
+      python: [3, 4, 5, 6, 7, 8], // Maps pseudocode lines 0,1,2,3,4,5 to Python lines 3,4,5,6,7,8
+      java: [3, 4, 5, 6, 7, 10], // Maps pseudocode lines 0,1,2,3,4,5 to Java lines 3,4,5,6,7,10
+      cpp: [3, 4, 5, 6, 7, 9], // Maps pseudocode lines 0,1,2,3,4,5 to C++ lines 3,4,5,6,7,9
     },
     load: () => import("./selectionSort"),
   },
@@ -248,10 +248,10 @@ export const sortingAlgos: AlgoMeta[] = [
 }`,
     },
     codeLineMap: {
-      javascript: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-      python: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      java: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      cpp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      javascript: [2, 3, 4, 5, 6, 7, 9], // Maps pseudocode lines 0,1,2,3,4,5,6 to JS lines 2,3,4,5,6,7,9
+      python: [2, 3, 4, 5, 6, 7, 8], // Maps pseudocode lines 0,1,2,3,4,5,6 to Python lines 2,3,4,5,6,7,8
+      java: [2, 3, 4, 5, 6, 7, 9], // Maps pseudocode lines 0,1,2,3,4,5,6 to Java lines 2,3,4,5,6,7,9
+      cpp: [2, 3, 4, 5, 6, 7, 9], // Maps pseudocode lines 0,1,2,3,4,5,6 to C++ lines 2,3,4,5,6,7,9
     },
     load: () => import("./insertionSort"),
   },
@@ -288,18 +288,18 @@ export const sortingAlgos: AlgoMeta[] = [
     code: {
       javascript: `function mergeSort(arr) {
   if (arr.length <= 1) return arr;
-  
+
   const mid = Math.floor(arr.length / 2);
   const left = mergeSort(arr.slice(0, mid));
   const right = mergeSort(arr.slice(mid));
-  
+
   return merge(left, right);
 }
 
 function merge(left, right) {
   let result = [];
   let i = 0, j = 0;
-  
+
   while (i < left.length && j < right.length) {
     if (left[i] <= right[j]) {
       result.push(left[i++]);
@@ -307,23 +307,23 @@ function merge(left, right) {
       result.push(right[j++]);
     }
   }
-  
+
   return result.concat(left.slice(i)).concat(right.slice(j));
 }`,
       python: `def merge_sort(arr):
     if len(arr) <= 1:
         return arr
-    
+
     mid = len(arr) // 2
     left = merge_sort(arr[:mid])
     right = merge_sort(arr[mid:])
-    
+
     return merge(left, right)
 
 def merge(left, right):
     result = []
     i = j = 0
-    
+
     while i < len(left) and j < len(right):
         if left[i] <= right[j]:
             result.append(left[i])
@@ -331,7 +331,7 @@ def merge(left, right):
         else:
             result.append(right[j])
             j += 1
-    
+
     result.extend(left[i:])
     result.extend(right[j:])
     return result`,
@@ -347,7 +347,7 @@ def merge(left, right):
 public static void merge(int[] arr, int left, int mid, int right) {
     int[] temp = new int[right - left + 1];
     int i = left, j = mid + 1, k = 0;
-    
+
     while (i <= mid && j <= right) {
         if (arr[i] <= arr[j]) {
             temp[k++] = arr[i++];
@@ -355,10 +355,10 @@ public static void merge(int[] arr, int left, int mid, int right) {
             temp[k++] = arr[j++];
         }
     }
-    
+
     while (i <= mid) temp[k++] = arr[i++];
     while (j <= right) temp[k++] = arr[j++];
-    
+
     for (i = left; i <= right; i++) {
         arr[i] = temp[i - left];
     }
@@ -375,7 +375,7 @@ public static void merge(int[] arr, int left, int mid, int right) {
 void merge(vector<int>& arr, int left, int mid, int right) {
     vector<int> temp(right - left + 1);
     int i = left, j = mid + 1, k = 0;
-    
+
     while (i <= mid && j <= right) {
         if (arr[i] <= arr[j]) {
             temp[k++] = arr[i++];
@@ -383,10 +383,10 @@ void merge(vector<int>& arr, int left, int mid, int right) {
             temp[k++] = arr[j++];
         }
     }
-    
+
     while (i <= mid) temp[k++] = arr[i++];
     while (j <= right) temp[k++] = arr[j++];
-    
+
     for (i = left; i <= right; i++) {
         arr[i] = temp[i - left];
     }
@@ -455,37 +455,37 @@ void merge(vector<int>& arr, int left, int mid, int right) {
 function partition(arr, low, high) {
   const pivot = arr[high];
   let i = low - 1;
-  
+
   for (let j = low; j < high; j++) {
     if (arr[j] <= pivot) {
       i++;
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   }
-  
+
   [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
   return i + 1;
 }`,
       python: `def quick_sort(arr, low=0, high=None):
     if high is None:
         high = len(arr) - 1
-    
+
     if low < high:
         pivot_index = partition(arr, low, high)
         quick_sort(arr, low, pivot_index - 1)
         quick_sort(arr, pivot_index + 1, high)
-    
+
     return arr
 
 def partition(arr, low, high):
     pivot = arr[high]
     i = low - 1
-    
+
     for j in range(low, high):
         if arr[j] <= pivot:
             i += 1
             arr[i], arr[j] = arr[j], arr[i]
-    
+
     arr[i + 1], arr[high] = arr[high], arr[i + 1]
     return i + 1`,
       java: `public static void quickSort(int[] arr, int low, int high) {
@@ -499,7 +499,7 @@ def partition(arr, low, high):
 public static int partition(int[] arr, int low, int high) {
     int pivot = arr[high];
     int i = low - 1;
-    
+
     for (int j = low; j < high; j++) {
         if (arr[j] <= pivot) {
             i++;
@@ -508,7 +508,7 @@ public static int partition(int[] arr, int low, int high) {
             arr[j] = temp;
         }
     }
-    
+
     int temp = arr[i + 1];
     arr[i + 1] = arr[high];
     arr[high] = temp;
@@ -525,31 +525,23 @@ public static int partition(int[] arr, int low, int high) {
 int partition(vector<int>& arr, int low, int high) {
     int pivot = arr[high];
     int i = low - 1;
-    
+
     for (int j = low; j < high; j++) {
         if (arr[j] <= pivot) {
             i++;
             swap(arr[i], arr[j]);
         }
     }
-    
+
     swap(arr[i + 1], arr[high]);
     return i + 1;
 }`,
     },
     codeLineMap: {
-      javascript: [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        21,
-      ],
-      python: [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-      ],
-      java: [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        21, 22, 23,
-      ],
-      cpp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      javascript: [2, 3, 4, 5], // Maps pseudocode lines 0,1,2,3 to JS lines 2,3,4,5
+      python: [4, 5, 6, 7], // Maps pseudocode lines 0,1,2,3 to Python lines 4,5,6,7
+      java: [2, 3, 4, 5], // Maps pseudocode lines 0,1,2,3 to Java lines 2,3,4,5
+      cpp: [2, 3, 4, 5], // Maps pseudocode lines 0,1,2,3 to C++ lines 2,3,4,5
     },
     load: () => import("./quickSort"),
   },

@@ -205,8 +205,7 @@ export default function ComplexityExplorer({
 
   const commonComplexities = useMemo(() => {
     const functions = {
-      // All functions share (n:number)=>number except constant which needs no arg
-      "O(1)": () => 1,
+      "O(1)": (_x: number) => 1,
       "O(log n)": (x: number) => Math.log2(Math.max(x, 1)),
       "O(n)": (x: number) => x,
       "O(n log n)": (x: number) => x * Math.log2(Math.max(x, 1)),
@@ -218,15 +217,25 @@ export default function ComplexityExplorer({
       Object.entries(functions).map(([name, fn]) => [name, sampleData.map(fn)])
     );
 
-    // For recharts
-    const chartData = sampleData.map((n) => ({
-      n,
-      O1: functions["O(1)"](),
-      Ologn: functions["O(log n)"](n),
-      On: functions["O(n)"](n),
-      Onlogn: functions["O(n log n)"](n),
-      On2: functions["O(n²)"](n),
-    }));
+    // For recharts - ensure all values are finite and positive for log scale
+    const chartData = sampleData.map((n) => {
+      const values = {
+        n,
+        O1: functions["O(1)"](n),
+        Ologn: functions["O(log n)"](n),
+        On: functions["O(n)"](n),
+        Onlogn: functions["O(n log n)"](n),
+        On2: functions["O(n²)"](n),
+      };
+
+      // Ensure all values are finite and positive for log scale
+      return Object.fromEntries(
+        Object.entries(values).map(([key, value]) => [
+          key,
+          key === "n" ? value : Math.max(0.1, isFinite(value) ? value : 0.1),
+        ])
+      );
+    });
 
     return { simple, chartData };
   }, [sampleData]);
@@ -474,7 +483,7 @@ export default function ComplexityExplorer({
                     position: "insideLeft",
                   }}
                   scale="log"
-                  domain={["dataMin", "dataMax"]}
+                  domain={[0.1, "dataMax"]}
                   stroke="#64748b"
                 />
                 <Tooltip

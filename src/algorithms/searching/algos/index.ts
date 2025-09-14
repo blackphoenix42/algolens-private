@@ -60,10 +60,10 @@ export const searchingAlgos: AlgoMeta[] = [
 }`,
     },
     codeLineMap: {
-      javascript: [1, 2, 3, 4, 5, 6],
-      python: [1, 2, 3, 4, 5],
-      java: [1, 2, 3, 4, 5, 6, 7],
-      cpp: [1, 2, 3, 4, 5, 6, 7],
+      javascript: [2, 3, 4, 7], // Maps pseudocode lines 0,1,2,3 to JS lines 2,3,4,7
+      python: [2, 3, 4, 5], // Maps pseudocode lines 0,1,2,3 to Python lines 2,3,4,5
+      java: [2, 3, 4, 7], // Maps pseudocode lines 0,1,2,3 to Java lines 2,3,4,7
+      cpp: [2, 3, 4, 7], // Maps pseudocode lines 0,1,2,3 to C++ lines 2,3,4,7
     },
     load: () => import("./linearSearch"),
   },
@@ -105,10 +105,10 @@ export const searchingAlgos: AlgoMeta[] = [
       javascript: `function binarySearch(arr, target) {
   let left = 0;
   let right = arr.length - 1;
-  
+
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    
+
     if (arr[mid] === target) {
       return mid;
     } else if (arr[mid] < target) {
@@ -117,30 +117,30 @@ export const searchingAlgos: AlgoMeta[] = [
       right = mid - 1;
     }
   }
-  
+
   return -1;
 }`,
       python: `def binary_search(arr, target):
     left, right = 0, len(arr) - 1
-    
+
     while left <= right:
         mid = (left + right) // 2
-        
+
         if arr[mid] == target:
             return mid
         elif arr[mid] < target:
             left = mid + 1
         else:
             right = mid - 1
-    
+
     return -1`,
       java: `public static int binarySearch(int[] arr, int target) {
     int left = 0;
     int right = arr.length - 1;
-    
+
     while (left <= right) {
         int mid = left + (right - left) / 2;
-        
+
         if (arr[mid] == target) {
             return mid;
         } else if (arr[mid] < target) {
@@ -149,16 +149,16 @@ export const searchingAlgos: AlgoMeta[] = [
             right = mid - 1;
         }
     }
-    
+
     return -1;
 }`,
       cpp: `int binarySearch(vector<int>& arr, int target) {
     int left = 0;
     int right = arr.size() - 1;
-    
+
     while (left <= right) {
         int mid = left + (right - left) / 2;
-        
+
         if (arr[mid] == target) {
             return mid;
         } else if (arr[mid] < target) {
@@ -167,15 +167,15 @@ export const searchingAlgos: AlgoMeta[] = [
             right = mid - 1;
         }
     }
-    
+
     return -1;
 }`,
     },
     codeLineMap: {
-      javascript: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-      python: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      java: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-      cpp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      javascript: [2, 5, 6, 8, 9, 10, 11, 12, 13, 17], // Maps pseudocode lines 0,1,2,3,4,5,6,7,8,9 to key JS lines
+      python: [2, 4, 5, 7, 8, 9, 10, 11, 12, 14], // Maps pseudocode lines to key Python lines
+      java: [2, 4, 5, 7, 8, 9, 10, 11, 12, 15], // Maps pseudocode lines to key Java lines
+      cpp: [2, 4, 5, 7, 8, 9, 10, 11, 12, 14], // Maps pseudocode lines to key C++ lines
     },
     load: () => import("./binarySearch"),
   },
