@@ -25,11 +25,8 @@ jobs:
           rm -rf node_modules package-lock.json
           npm install
 
-      - name: Build site
-        run: npm run build --if-present || npx vite build
-
-      - name: Run pa11y-ci against preview
-        run: npm run a11y:ci
+      - name: Start server and run pa11y-ci
+        run: npm run build && start-server-and-test "vite preview --port 4173 --strictPort --host 127.0.0.1" http://127.0.0.1:4173 "npm run a11y"
 
       - name: Save JSON report (optional)
         if: always()
