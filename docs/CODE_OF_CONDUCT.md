@@ -20,7 +20,7 @@ This applies to all project spaces: GitHub issues/PRs, discussions, and any comm
 
 If you experience or witness unacceptable behavior:
 
-- Email **security@algolens.app** (private to maintainers), or
+- Email **<security@algolens.app>** (private to maintainers), or
 - DM a maintainer on GitHub.
 
 We aim to acknowledge reports within 3 business days.

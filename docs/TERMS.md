@@ -11,7 +11,7 @@ These Terms of Service ("Terms") govern your access to and use of **AlgoLens** (
 ## 1) Who we are
 
 **AlgoLens Maintainers** ("we", "us", "our").  
-Contact: **hello@algolens.app**  
+Contact: **<hello@algolens.app>**  
 Privacy: **/privacy.md**  
 Security: **/.well-known/security.txt**
 
@@ -155,9 +155,9 @@ We may update these Terms from time to time. If we make material changes, we wil
 ## 18) Contact
 
 Questions about these Terms?  
-Email: **hello@algolens.app**  
-Security: **security@algolens.app**  
-Privacy: **privacy@algolens.app**
+Email: **<hello@algolens.app>**  
+Security: **<security@algolens.app>**  
+Privacy: **<privacy@algolens.app>**
 
 ---
 

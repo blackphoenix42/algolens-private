@@ -12,8 +12,8 @@ This Privacy Policy explains how **AlgoLens** ("AlgoLens", "we", "our", or "us")
 
 **AlgoLens Maintainers**
 
-- Contact: **privacy@algolens.app**
-- Security reports: **security@algolens.app** (see `/.well-known/security.txt`)
+- Contact: **<privacy@algolens.app>**
+- Security reports: **<security@algolens.app>** (see `/.well-known/security.txt`)
 - Location: Bengaluru, India (IST)
 
 ---
@@ -116,7 +116,7 @@ You can:
 
 **California users (CCPA/CPRA):** You may have the right to know, delete, correct, and opt‑out of sale/share (we do **not** sell/share for cross‑context behavioral advertising). You have the right to non‑discrimination for exercising your rights.
 
-**India users (DPDP Act 2023):** You may have the right to access, correction, erasure, grievance redressal, and to nominate. You can contact us at **privacy@algolens.app** for requests.
+**India users (DPDP Act 2023):** You may have the right to access, correction, erasure, grievance redressal, and to nominate. You can contact us at **<privacy@algolens.app>** for requests.
 
 We will respond to verifiable requests as required by applicable law.
 
@@ -124,13 +124,13 @@ We will respond to verifiable requests as required by applicable law.
 
 ## 10) Security
 
-We use reasonable technical and organizational measures to protect information, including HTTPS, least‑privilege access, dependency scanning, and CI checks. No method of transmission or storage is 100% secure; please report vulnerabilities to **security@algolens.app**.
+We use reasonable technical and organizational measures to protect information, including HTTPS, least‑privilege access, dependency scanning, and CI checks. No method of transmission or storage is 100% secure; please report vulnerabilities to **<security@algolens.app>**.
 
 ---
 
 ## 11) Children’s privacy
 
-AlgoLens is intended for individuals 13+ (or the minimum age required in your jurisdiction). We do not knowingly collect personal data from children. If you believe a child provided us data, contact **privacy@algolens.app** so we can delete it.
+AlgoLens is intended for individuals 13+ (or the minimum age required in your jurisdiction). We do not knowingly collect personal data from children. If you believe a child provided us data, contact **<privacy@algolens.app>** so we can delete it.
 
 ---
 
@@ -144,8 +144,8 @@ We may update this policy to reflect technical, legal, or business changes. Mate
 
 Questions or requests about this policy or your data?
 
-- Email: **privacy@algolens.app**
-- Security: **security@algolens.app**
+- Email: **<privacy@algolens.app>**
+- Security: **<security@algolens.app>**
 - Postal: AlgoLens Maintainers, Bengaluru, India (IST)
 
 ---

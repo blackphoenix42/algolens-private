@@ -71,7 +71,7 @@ This enables `pre-commit` (lint/format) and `commit-msg` (commitlint).
 
 ## Security
 
-- Report vulnerabilities to **security@algolens.app**. Do **not** open public issues for sensitive reports.
+- Report vulnerabilities to **<security@algolens.app>**. Do **not** open public issues for sensitive reports.
 
 ## Releases
 
