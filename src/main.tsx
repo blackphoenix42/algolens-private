@@ -1,6 +1,59 @@
 // src/main.tsx
 // Validate environment variables first
 import "./config/env";
+
+// CRITICAL: Immediate mobile service worker cleanup before anything else
+(async () => {
+  // Enhanced mobile detection
+  const isMobile =
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(
+      navigator.userAgent
+    ) ||
+    /Mobi|Android/i.test(navigator.userAgent) ||
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0 ||
+    window.innerWidth <= 768;
+
+  if (isMobile && "serviceWorker" in navigator) {
+    try {
+      console.log(
+        "🔧 Mobile device detected - cleaning up service workers immediately"
+      );
+
+      // Get all registrations and unregister them
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(
+        registrations.map((reg) => {
+          console.log("Unregistering service worker:", reg.scope);
+          return reg.unregister();
+        })
+      );
+
+      // Clear all caches
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log("Deleting cache:", cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+
+      // Force reload once to ensure clean state (prevent infinite reload)
+      const hasReloaded = sessionStorage.getItem("mobile-sw-cleaned");
+      if (!hasReloaded) {
+        sessionStorage.setItem("mobile-sw-cleaned", "true");
+        console.log("🔄 Reloading for clean mobile state");
+        window.location.reload();
+        return;
+      }
+
+      console.log("✅ Mobile cleanup complete");
+    } catch (error) {
+      console.error("Mobile cleanup failed:", error);
+    }
+  }
+})();
+
 // Initialize axe for accessibility testing in development
 import "./config/axe";
 import "./services/monitoring/sessionTracker"; // Initialize session tracking

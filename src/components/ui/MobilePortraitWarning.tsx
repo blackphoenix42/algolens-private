@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { useI18n } from "@/i18n";
 
 interface MobilePortraitWarningProps {
@@ -13,11 +15,48 @@ export default function MobilePortraitWarning({
 }: MobilePortraitWarningProps) {
   const { t } = useI18n();
 
+  // Prevent body scrolling when warning is visible
+  useEffect(() => {
+    if (isVisible) {
+      // Store the current scroll position
+      const scrollY = window.scrollY;
+
+      // Prevent scrolling
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+
+      // Cleanup function to restore scrolling
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/95 backdrop-blur-sm">
-      <div className="mx-4 max-w-sm text-center">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden overscroll-none bg-slate-900/95 pt-16 backdrop-blur-sm"
+      style={{
+        touchAction: "none",
+        WebkitOverflowScrolling: "touch",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999,
+      }}
+      onTouchMove={(e) => e.preventDefault()}
+      onWheel={(e) => e.preventDefault()}
+    >
+      <div className="mx-4 max-w-sm overflow-hidden text-center">
         {/* Rotation Icon Animation */}
         <div className="bg-primary-100 dark:bg-primary-900/20 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full">
           <div className="animate-bounce">
@@ -43,10 +82,19 @@ export default function MobilePortraitWarning({
         </h2>
 
         {/* Description */}
-        <p className="mb-6 text-sm leading-relaxed text-slate-300">
+        <p className="mb-4 text-sm leading-relaxed text-slate-300">
           {t("mobile.landscapeRecommended", {
             defaultValue:
               "For the best visualization experience, please rotate your device to landscape mode.",
+          })}
+        </p>
+
+        {/* Desktop recommendation */}
+        <p className="mb-6 rounded-lg bg-slate-800 p-2 text-xs leading-relaxed text-slate-400">
+          🖥️{" "}
+          {t("mobile.desktopRecommended", {
+            defaultValue:
+              "For the optimal experience, use a desktop or laptop computer.",
           })}
         </p>
 
@@ -89,7 +137,7 @@ export default function MobilePortraitWarning({
         </div>
 
         {/* Additional tip */}
-        <div className="mt-6 rounded-lg bg-slate-800 p-3">
+        <div className="mt-4 rounded-lg bg-slate-800 p-3">
           <p className="text-xs text-slate-400">
             💡{" "}
             {t("mobile.tip", {

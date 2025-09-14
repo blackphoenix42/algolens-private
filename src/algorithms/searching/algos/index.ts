@@ -181,5 +181,5 @@ export const searchingAlgos: AlgoMeta[] = [
   },
 ];
 
-export { run as binarySearch } from "./binarySearch";
-export { run as linearSearch } from "./linearSearch";
+// Removed static exports to allow proper code splitting
+// Use dynamic imports via the AlgoMeta.load() method instead

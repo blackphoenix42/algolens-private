@@ -40,14 +40,14 @@ export const graphAlgos: AlgoMeta[] = [
   const visited = new Set();
   const stack = [start];
   const result = [];
-  
+
   while (stack.length > 0) {
     const node = stack.pop();
-    
+
     if (!visited.has(node)) {
       visited.add(node);
       result.push(node);
-      
+
       // Add neighbors in reverse order
       for (let i = graph[node].length - 1; i >= 0; i--) {
         const neighbor = graph[node][i];
@@ -57,41 +57,41 @@ export const graphAlgos: AlgoMeta[] = [
       }
     }
   }
-  
+
   return result;
 }`,
       python: `def dfs(graph, start):
     visited = set()
     stack = [start]
     result = []
-    
+
     while stack:
         node = stack.pop()
-        
+
         if node not in visited:
             visited.add(node)
             result.append(node)
-            
+
             # Add neighbors in reverse order
             for neighbor in reversed(graph[node]):
                 if neighbor not in visited:
                     stack.append(neighbor)
-    
+
     return result`,
       java: `public static List<Integer> dfs(List<List<Integer>> graph, int start) {
     Set<Integer> visited = new HashSet<>();
     Stack<Integer> stack = new Stack<>();
     List<Integer> result = new ArrayList<>();
-    
+
     stack.push(start);
-    
+
     while (!stack.isEmpty()) {
         int node = stack.pop();
-        
+
         if (!visited.contains(node)) {
             visited.add(node);
             result.add(node);
-            
+
             // Add neighbors in reverse order
             for (int i = graph.get(node).size() - 1; i >= 0; i--) {
                 int neighbor = graph.get(node).get(i);
@@ -101,24 +101,24 @@ export const graphAlgos: AlgoMeta[] = [
             }
         }
     }
-    
+
     return result;
 }`,
       cpp: `vector<int> dfs(vector<vector<int>>& graph, int start) {
     unordered_set<int> visited;
     stack<int> st;
     vector<int> result;
-    
+
     st.push(start);
-    
+
     while (!st.empty()) {
         int node = st.top();
         st.pop();
-        
+
         if (visited.find(node) == visited.end()) {
             visited.insert(node);
             result.push_back(node);
-            
+
             // Add neighbors in reverse order
             for (int i = graph[node].size() - 1; i >= 0; i--) {
                 int neighbor = graph[node][i];
@@ -128,7 +128,7 @@ export const graphAlgos: AlgoMeta[] = [
             }
         }
     }
-    
+
     return result;
 }`,
     },
@@ -188,14 +188,14 @@ export const graphAlgos: AlgoMeta[] = [
   const visited = new Set();
   const queue = [start];
   const result = [];
-  
+
   while (queue.length > 0) {
     const node = queue.shift();
-    
+
     if (!visited.has(node)) {
       visited.add(node);
       result.push(node);
-      
+
       // Add unvisited neighbors to queue
       for (const neighbor of graph[node]) {
         if (!visited.has(neighbor) && !queue.includes(neighbor)) {
@@ -204,7 +204,7 @@ export const graphAlgos: AlgoMeta[] = [
       }
     }
   }
-  
+
   return result;
 }`,
       python: `from collections import deque
@@ -213,34 +213,34 @@ def bfs(graph, start):
     visited = set()
     queue = deque([start])
     result = []
-    
+
     while queue:
         node = queue.popleft()
-        
+
         if node not in visited:
             visited.add(node)
             result.append(node)
-            
+
             # Add unvisited neighbors to queue
             for neighbor in graph[node]:
                 if neighbor not in visited and neighbor not in queue:
                     queue.append(neighbor)
-    
+
     return result`,
       java: `public static List<Integer> bfs(List<List<Integer>> graph, int start) {
     Set<Integer> visited = new HashSet<>();
     Queue<Integer> queue = new LinkedList<>();
     List<Integer> result = new ArrayList<>();
-    
+
     queue.offer(start);
-    
+
     while (!queue.isEmpty()) {
         int node = queue.poll();
-        
+
         if (!visited.contains(node)) {
             visited.add(node);
             result.add(node);
-            
+
             // Add unvisited neighbors to queue
             for (int neighbor : graph.get(node)) {
                 if (!visited.contains(neighbor) && !queue.contains(neighbor)) {
@@ -249,24 +249,24 @@ def bfs(graph, start):
             }
         }
     }
-    
+
     return result;
 }`,
       cpp: `vector<int> bfs(vector<vector<int>>& graph, int start) {
     unordered_set<int> visited;
     queue<int> q;
     vector<int> result;
-    
+
     q.push(start);
-    
+
     while (!q.empty()) {
         int node = q.front();
         q.pop();
-        
+
         if (visited.find(node) == visited.end()) {
             visited.insert(node);
             result.push_back(node);
-            
+
             // Add unvisited neighbors to queue
             for (int neighbor : graph[node]) {
                 if (visited.find(neighbor) == visited.end()) {
@@ -275,7 +275,7 @@ def bfs(graph, start):
             }
         }
     }
-    
+
     return result;
 }`,
     },
@@ -297,5 +297,5 @@ def bfs(graph, start):
   },
 ];
 
-export { run as breadthFirstSearch } from "./breadthFirstSearch";
-export { run as depthFirstSearch } from "./depthFirstSearch";
+// Removed static exports to allow proper code splitting
+// Use dynamic imports via the AlgoMeta.load() method instead

@@ -35,50 +35,50 @@ export const arrayAlgos: AlgoMeta[] = [
       javascript: `function findMaximum(arr) {
   let max = arr[0];
   let maxIndex = 0;
-  
+
   for (let i = 1; i < arr.length; i++) {
     if (arr[i] > max) {
       max = arr[i];
       maxIndex = i;
     }
   }
-  
+
   return { value: max, index: maxIndex };
 }`,
       python: `def find_maximum(arr):
     max_val = arr[0]
     max_index = 0
-    
+
     for i in range(1, len(arr)):
         if arr[i] > max_val:
             max_val = arr[i]
             max_index = i
-    
+
     return max_val, max_index`,
       java: `public static int[] findMaximum(int[] arr) {
     int max = arr[0];
     int maxIndex = 0;
-    
+
     for (int i = 1; i < arr.length; i++) {
         if (arr[i] > max) {
             max = arr[i];
             maxIndex = i;
         }
     }
-    
+
     return new int[]{max, maxIndex};
 }`,
       cpp: `pair<int, int> findMaximum(vector<int>& arr) {
     int max_val = arr[0];
     int max_index = 0;
-    
+
     for (int i = 1; i < arr.size(); i++) {
         if (arr[i] > max_val) {
             max_val = arr[i];
             max_index = i;
         }
     }
-    
+
     return make_pair(max_val, max_index);
 }`,
     },
@@ -121,30 +121,30 @@ export const arrayAlgos: AlgoMeta[] = [
       javascript: `function reverseArray(arr) {
   let left = 0;
   let right = arr.length - 1;
-  
+
   while (left < right) {
     // Swap elements
     [arr[left], arr[right]] = [arr[right], arr[left]];
     left++;
     right--;
   }
-  
+
   return arr;
 }`,
       python: `def reverse_array(arr):
     left, right = 0, len(arr) - 1
-    
+
     while left < right:
         # Swap elements
         arr[left], arr[right] = arr[right], arr[left]
         left += 1
         right -= 1
-    
+
     return arr`,
       java: `public static void reverseArray(int[] arr) {
     int left = 0;
     int right = arr.length - 1;
-    
+
     while (left < right) {
         // Swap elements
         int temp = arr[left];
@@ -157,7 +157,7 @@ export const arrayAlgos: AlgoMeta[] = [
       cpp: `void reverseArray(vector<int>& arr) {
     int left = 0;
     int right = arr.size() - 1;
-    
+
     while (left < right) {
         // Swap elements
         swap(arr[left], arr[right]);
@@ -176,5 +176,5 @@ export const arrayAlgos: AlgoMeta[] = [
   },
 ];
 
-export { run as findMaximum } from "./findMaximum";
-export { run as reverseArray } from "./reverseArray";
+// Removed static exports to allow proper code splitting
+// Use dynamic imports via the AlgoMeta.load() method instead

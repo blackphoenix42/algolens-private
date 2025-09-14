@@ -124,8 +124,17 @@ export function NotificationSystem({
       });
     };
 
-    // Listen for service worker update events
-    if ("serviceWorker" in navigator) {
+    // Listen for service worker update events (skip on mobile)
+    const isMobile =
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(
+        navigator.userAgent
+      ) ||
+      /Mobi|Android/i.test(navigator.userAgent) ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth <= 768;
+
+    if (!isMobile && "serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data && event.data.type === "UPDATE_AVAILABLE") {
           handleUpdateFound();

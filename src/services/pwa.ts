@@ -3,6 +3,8 @@
  * Enhanced service worker integration with offline algorithm caching
  */
 
+import React from "react";
+
 interface CacheConfig {
   algorithmCache: string;
   staticCache: string;
@@ -53,14 +55,60 @@ class PWAManager {
   private registration: ServiceWorkerRegistration | null = null;
   private isOnline = navigator.onLine;
   private onlineCallbacks: ((online: boolean) => void)[] = [];
+  private isMobile = this.detectMobileDevice();
+
+  // Enhanced mobile device detection
+  private detectMobileDevice(): boolean {
+    return (
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(
+        navigator.userAgent
+      ) ||
+      /Mobi|Android/i.test(navigator.userAgent) ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth <= 768
+    );
+  }
 
   constructor() {
-    this.setupOnlineListeners();
+    // Only setup online listeners on desktop
+    if (!this.isMobile) {
+      this.setupOnlineListeners();
+    } else {
+      // For mobile, always consider online to prevent false offline detection
+      this.isOnline = true;
+      console.log("Mobile device detected - PWA features disabled");
+    }
   }
 
   // Initialize PWA features
   async initialize(): Promise<boolean> {
     try {
+      if (this.isMobile) {
+        console.log(
+          "Mobile device detected - skipping service worker registration to prevent offline issues"
+        );
+
+        // Unregister any existing service workers on mobile
+        if ("serviceWorker" in navigator) {
+          const registrations =
+            await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log("Unregistered existing service worker on mobile");
+          }
+
+          // Clear all caches on mobile
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames.map((cacheName) => caches.delete(cacheName))
+          );
+          console.log("Cleared all caches on mobile");
+        }
+
+        return false; // Don't initialize PWA on mobile
+      }
+
       if ("serviceWorker" in navigator) {
         this.registration =
           await navigator.serviceWorker.register("/service-worker.js");
@@ -240,15 +288,34 @@ class PWAManager {
 
   // Handle offline/online status
   private setupOnlineListeners(): void {
-    window.addEventListener("online", () => {
-      this.isOnline = true;
-      this.notifyOnlineCallbacks(true);
+    window.addEventListener("online", async () => {
+      // Double-check with actual ping before declaring online
+      const actuallyOnline = await this.isActuallyOnline();
+      if (actuallyOnline) {
+        this.isOnline = true;
+        this.notifyOnlineCallbacks(true);
+      }
     });
 
-    window.addEventListener("offline", () => {
-      this.isOnline = false;
-      this.notifyOnlineCallbacks(false);
+    window.addEventListener("offline", async () => {
+      // Double-check with actual ping before declaring offline
+      const actuallyOnline = await this.isActuallyOnline();
+      this.isOnline = actuallyOnline;
+      this.notifyOnlineCallbacks(actuallyOnline);
     });
+  }
+
+  // Real connectivity check (more reliable than navigator.onLine)
+  private async isActuallyOnline(): Promise<boolean> {
+    try {
+      const response = await fetch("/manifest.json?ts=" + Date.now(), {
+        cache: "no-store",
+        mode: "cors",
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   private notifyOnlineCallbacks(online: boolean): void {
@@ -318,54 +385,84 @@ class PWAManager {
 // React hook for PWA features
 export function usePWA() {
   const [pwaManager] = React.useState(() => new PWAManager());
-  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
   const [canInstall, setCanInstall] = React.useState(false);
   const [isInstalled, setIsInstalled] = React.useState(false);
+
+  // Enhanced mobile device detection
+  const isMobile = React.useMemo(() => {
+    return (
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(
+        navigator.userAgent
+      ) ||
+      /Mobi|Android/i.test(navigator.userAgent) ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth <= 768
+    );
+  }, []);
+
+  // For mobile devices, always report as online to prevent offline errors
+  const [isOnline, setIsOnline] = React.useState(
+    isMobile ? true : navigator.onLine
+  );
 
   React.useEffect(() => {
     // Initialize PWA
     pwaManager.initialize();
 
-    // Setup connection listener
-    const cleanup = pwaManager.onConnectionChange(setIsOnline);
+    // Only setup connection listener on desktop
+    let cleanup = () => {};
+    if (!isMobile) {
+      cleanup = pwaManager.onConnectionChange(setIsOnline);
+    }
 
-    // Check install status
-    setCanInstall(pwaManager.canInstall());
+    // Check install status (only relevant for desktop)
+    if (!isMobile) {
+      setCanInstall(pwaManager.canInstall());
+      setIsInstalled(window.matchMedia("(display-mode: standalone)").matches);
 
-    // Check if app is installed
-    setIsInstalled(window.matchMedia("(display-mode: standalone)").matches);
+      // Listen for beforeinstallprompt
+      const handleBeforeInstallPrompt = (e: Event) => {
+        e.preventDefault();
+        window.deferredPrompt = e as BeforeInstallPromptEvent;
+        setCanInstall(true);
+      };
 
-    // Listen for beforeinstallprompt
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      window.deferredPrompt = e as BeforeInstallPromptEvent;
-      setCanInstall(true);
-    };
+      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      return () => {
+        cleanup();
+        window.removeEventListener(
+          "beforeinstallprompt",
+          handleBeforeInstallPrompt
+        );
+      };
+    }
 
-    return () => {
-      cleanup();
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-    };
-  }, [pwaManager]);
+    return cleanup;
+  }, [pwaManager, isMobile]);
 
   const cacheAlgorithm = async (algorithm: OfflineAlgorithm) => {
+    // Skip caching on mobile devices
+    if (isMobile) return true;
     return pwaManager.cacheAlgorithm(algorithm);
   };
 
   const getCachedAlgorithm = async (id: string) => {
+    // Skip cache lookup on mobile devices
+    if (isMobile) return null;
     return pwaManager.getCachedAlgorithm(id);
   };
 
   const getAllCachedAlgorithms = async () => {
+    // Skip cache lookup on mobile devices
+    if (isMobile) return [];
     return pwaManager.getAllCachedAlgorithms();
   };
 
   const showInstallPrompt = async () => {
+    // Skip install prompt on mobile devices
+    if (isMobile) return false;
     const result = await pwaManager.showInstallPrompt();
     if (result) {
       setCanInstall(false);
@@ -375,18 +472,33 @@ export function usePWA() {
   };
 
   const getCacheStats = async () => {
+    // Skip cache stats on mobile devices
+    if (isMobile) return null;
     return pwaManager.getCacheStats();
   };
 
   const clearExpiredCache = async () => {
+    // Skip cache operations on mobile devices
+    if (isMobile) return;
     return pwaManager.clearExpiredCache();
   };
 
   const getConnectionInfo = () => {
+    // For mobile, always return online status
+    if (isMobile) {
+      return {
+        isOnline: true,
+        connectionType: "4g", // Assume good mobile connection
+        downlink: null,
+        rtt: null,
+      };
+    }
     return pwaManager.getConnectionInfo();
   };
 
   const syncWhenOnline = async () => {
+    // Skip sync operations on mobile devices
+    if (isMobile) return;
     return pwaManager.syncWhenOnline();
   };
 
@@ -404,9 +516,6 @@ export function usePWA() {
     syncWhenOnline,
   };
 }
-
-// Import React for the hook
-import React from "react";
 
 export { PWAManager };
 export type { CacheConfig, OfflineAlgorithm };
