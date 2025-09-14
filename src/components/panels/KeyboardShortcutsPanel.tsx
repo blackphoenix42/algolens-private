@@ -362,7 +362,7 @@ export function KeyboardShortcutsButton() {
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "group fixed right-6 bottom-6 z-30",
+          "group fixed right-6 bottom-6 z-50",
           "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
           "rounded-2xl p-4 text-white shadow-xl hover:shadow-2xl",
           "transform transition-all duration-300 hover:scale-105 active:scale-95",

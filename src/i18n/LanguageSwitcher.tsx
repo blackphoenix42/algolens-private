@@ -1,6 +1,7 @@
 // src/i18n/LanguageSwitcher.tsx
 import { ChevronDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/utils";
 
@@ -22,6 +23,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const languages = useLanguages();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const portalDropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Get current language info
   const currentLang = languages.find((lang) => lang.code === currentLanguage);
@@ -29,9 +31,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(target) &&
+        portalDropdownRef.current &&
+        !portalDropdownRef.current.contains(target)
       ) {
         setIsOpen(false);
       }
@@ -48,8 +53,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   // Handle language selection
   const handleLanguageSelect = async (langCode: LanguageType) => {
-    await changeLanguage(langCode);
-    setIsOpen(false);
+    try {
+      console.log("Attempting to change language to:", langCode);
+      setIsOpen(false); // Close dropdown immediately
+      const success = await changeLanguage(langCode);
+      console.log("Language change result:", success);
+    } catch (error) {
+      console.error("Error changing language:", error);
+    }
   };
 
   // Handle keyboard navigation
@@ -96,7 +107,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }
 
   return (
-    <div className={cn("relative", className)} ref={dropdownRef}>
+    <div
+      className={cn("relative", className)}
+      ref={dropdownRef}
+      style={{ zIndex: 999999 }}
+    >
       {/* Dropdown Trigger */}
       <button
         type="button"
@@ -104,9 +119,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         onKeyDown={handleKeyDown}
         className={cn(
           "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
-          "border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800",
-          "text-slate-700 dark:text-slate-300",
-          "hover:border-slate-400 hover:bg-slate-50 dark:hover:border-slate-500 dark:hover:bg-slate-700",
+          "border border-slate-300 bg-white text-slate-700",
+          "hover:bg-slate-50",
+          "dark:border-white/20 dark:bg-white/10 dark:text-white dark:backdrop-blur-sm dark:hover:bg-white/20",
           "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-800",
           "transition-all duration-200 hover:scale-105 active:scale-95",
           "shadow-soft hover:shadow-medium",
@@ -118,7 +133,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         aria-expanded={isOpen}
       >
         <span className="flex items-center gap-2">
-          <span className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+          <span className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-white/80">
             {currentLanguage}
           </span>
           {showLabel && <span>{currentLang?.nativeName}</span>}
@@ -131,66 +146,73 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         />
       </button>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div
-          className={cn(
-            "fixed z-[9999] mt-2 w-48",
-            "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800",
-            "shadow-large rounded-xl dark:shadow-slate-900/50",
-            "overflow-hidden",
-            "animate-in slide-in-from-top-2 duration-200"
-          )}
-          style={{
-            top: dropdownRef.current
-              ? dropdownRef.current.getBoundingClientRect().bottom + 8
-              : "auto",
-            left: dropdownRef.current
-              ? dropdownRef.current.getBoundingClientRect().left
-              : "auto",
-          }}
-          role="listbox"
-        >
-          {languages.map((lang, index) => (
-            <button
-              key={lang.code}
-              type="button"
-              onClick={() => handleLanguageSelect(lang.code)}
-              className={cn(
-                "w-full px-4 py-3 text-left text-sm transition-colors duration-150",
-                "hover:bg-slate-100 dark:hover:bg-slate-700",
-                "focus:bg-slate-100 focus:outline-none dark:focus:bg-slate-700",
-                "flex items-center justify-between gap-3",
-                currentLanguage === lang.code &&
-                  "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300",
-                index === 0 && "rounded-t-xl",
-                index === languages.length - 1 && "rounded-b-xl"
-              )}
-              role="option"
-              aria-selected={currentLanguage === lang.code}
-              title={`Switch to ${lang.name}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col">
-                  <span className="font-medium">{lang.nativeName}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {lang.name}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold tracking-wide text-slate-400 uppercase">
-                  {lang.code}
-                </span>
-                {currentLanguage === lang.code && (
-                  <div className="bg-primary-600 h-2 w-2 rounded-full" />
+      {/* Dropdown Menu - Portal to body to escape header stacking context */}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={portalDropdownRef}
+            className={cn(
+              "fixed z-[999999] w-48",
+              "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800",
+              "shadow-large rounded-xl dark:shadow-slate-900/50",
+              "overflow-hidden",
+              "animate-in slide-in-from-top-2 duration-200"
+            )}
+            style={{
+              top: dropdownRef.current
+                ? dropdownRef.current.getBoundingClientRect().bottom + 8
+                : "auto",
+              left: dropdownRef.current
+                ? dropdownRef.current.getBoundingClientRect().left
+                : "auto",
+            }}
+            role="listbox"
+          >
+            {languages.map((lang, index) => (
+              <button
+                key={lang.code}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleLanguageSelect(lang.code);
+                }}
+                className={cn(
+                  "w-full px-4 py-3 text-left text-sm transition-colors duration-150",
+                  "hover:bg-slate-100 dark:hover:bg-slate-700",
+                  "focus:bg-slate-100 focus:outline-none dark:focus:bg-slate-700",
+                  "flex items-center justify-between gap-3",
+                  currentLanguage === lang.code &&
+                    "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300",
+                  index === 0 && "rounded-t-xl",
+                  index === languages.length - 1 && "rounded-b-xl"
                 )}
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+                role="option"
+                aria-selected={currentLanguage === lang.code}
+                title={`Switch to ${lang.name}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{lang.nativeName}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {lang.name}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold tracking-wide text-slate-400 uppercase">
+                    {lang.code}
+                  </span>
+                  {currentLanguage === lang.code && (
+                    <div className="bg-primary-600 h-2 w-2 rounded-full" />
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

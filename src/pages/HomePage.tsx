@@ -1,7 +1,8 @@
+import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import DebugToggle from "@/components/debug/DebugToggle";
+import DebugPanel from "@/components/debug/DebugPanel";
 import AlgoCard, { AlgoItem } from "@/components/home/AlgoCard";
 import FilterBar from "@/components/home/FilterBar";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
@@ -144,6 +145,8 @@ export default function HomePage() {
   const [sortKey, setSortKey] = useState<SortKey>("relevance");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTagsOnCards, setShowTagsOnCards] = useState(true);
+  const [showFeaturedAlgorithms, setShowFeaturedAlgorithms] = useState(true);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Hero section visibility from preferences
   const { preferences, toggleHeroSection } = usePreferences();
@@ -160,6 +163,86 @@ export default function HomePage() {
     preferences.showOnboardingTour,
     preferences.lastSeenOnboardingVersion,
   ]);
+
+  // Keyboard shortcut for toggling featured algorithms
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.ctrlKey &&
+        event.shiftKey &&
+        event.key === "F" &&
+        !event.altKey &&
+        !event.metaKey
+      ) {
+        // Check if we're not in an input field
+        const target = event.target as HTMLElement;
+        if (
+          target.tagName !== "INPUT" &&
+          target.tagName !== "TEXTAREA" &&
+          !target.isContentEditable
+        ) {
+          event.preventDefault();
+          setShowFeaturedAlgorithms((prev) => !prev);
+
+          // Log the action
+          logger.info(
+            LogCategory.USER_INTERACTION,
+            "Featured algorithms toggled via keyboard",
+            {
+              showFeatured: !showFeaturedAlgorithms,
+              source: "keyboard_shortcut",
+              shortcut: "Ctrl+Shift+F",
+              timestamp: new Date().toISOString(),
+            }
+          );
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showFeaturedAlgorithms]);
+
+  // Keyboard shortcut for toggling debug panel (Dev Mode)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.ctrlKey &&
+        event.shiftKey &&
+        event.key === "D" &&
+        !event.altKey &&
+        !event.metaKey
+      ) {
+        // Check if we're not in an input field
+        const target = event.target as HTMLElement;
+        if (
+          target.tagName !== "INPUT" &&
+          target.tagName !== "TEXTAREA" &&
+          !target.isContentEditable
+        ) {
+          event.preventDefault();
+          setShowDebugPanel((prev) => {
+            const newState = !prev;
+            logger.info(
+              LogCategory.USER_INTERACTION,
+              `Debug panel ${newState ? "opened" : "closed"} via keyboard shortcut`,
+              {
+                method: "keyboard_shortcut",
+                key: "Ctrl+Shift+D",
+                timestamp: new Date().toISOString(),
+              }
+            );
+            return newState;
+          });
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const topics = useMemo(() => Object.keys(catalog), [catalog]);
   const difficulties = ["Easy", "Medium", "Hard"];
@@ -597,7 +680,7 @@ export default function HomePage() {
   }, [allItems.length, catalog, tagUniverse.length]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       {/* Liquid Glass Background Elements */}
       <div
         className="pointer-events-none fixed inset-0 overflow-hidden"
@@ -636,7 +719,6 @@ export default function HomePage() {
           }}
         ></div>
       </div>
-
       {/* Hero Section */}
       {showHero && (
         <section
@@ -836,533 +918,689 @@ export default function HomePage() {
           </button>
         </section>
       )}
-
       {/* Enhanced Navigation Header */}
       <header
         className={cn(
-          "liquid-glass-header sticky top-0 z-30 shadow-sm",
+          "liquid-glass-header fixed top-0 right-0 left-0 z-50 border-b border-white/10 shadow-sm",
           "transition-all duration-300"
         )}
       >
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              <div className="group flex items-center gap-3">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Left Section - Brand & Navigation */}
+            <div className="flex items-center gap-4 lg:gap-6">
+              {/* Logo/Brand */}
+              <div className="group mr-2 flex items-center gap-3">
                 <div className="text-2xl transition-transform duration-300 group-hover:scale-110 md:text-3xl">
                   🔬
                 </div>
-                <h2 className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-xl font-black text-transparent md:text-2xl">
+                <h1 className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-xl font-black text-transparent md:text-2xl">
                   AlgoLens
-                </h2>
+                </h1>
               </div>
-              {!showHero && (
-                <button
-                  onClick={() => toggleHeroSection()}
-                  className="text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-800/30 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105"
+
+              {/* Navigation Controls */}
+              <div className="hidden items-center gap-2 sm:flex lg:gap-3">
+                {!showHero && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleHeroSection()}
+                    className="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                    title="Show hero section"
+                  >
+                    <span className="mr-1.5 text-sm">✨</span>
+                    <span className="hidden text-sm lg:inline">Show Hero</span>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFeaturedAlgorithms((prev) => !prev)}
+                  className="text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
+                  title={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms (Ctrl+Shift+F)`}
+                  aria-label={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms section`}
                 >
-                  <span className="text-xs">✨</span>
-                  Show Hero
-                </button>
-              )}
+                  <span className="mr-1.5 text-sm">⭐</span>
+                  <span className="hidden text-sm lg:inline">
+                    {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
+                  </span>
+                </Button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 md:gap-6">
-              <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 sm:flex dark:border-slate-700 dark:bg-slate-800">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                <div className="text-sm text-slate-700 dark:text-slate-300">
-                  <span className="text-primary-600 dark:text-primary-400 font-semibold">
-                    {totalShown}
+            {/* Right Section - Status & Controls */}
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Action Controls */}
+              <div className="flex items-center gap-2">
+                {/* Mobile Menu Toggle - only show navigation controls on mobile */}
+                <div className="sm:hidden">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      // Toggle mobile menu or show a simple inline menu
+                      const mobileNav =
+                        document.querySelector("[data-mobile-nav]");
+                      if (mobileNav) {
+                        mobileNav.classList.toggle("hidden");
+                      }
+                    }}
+                    className="p-2 text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-white/20"
+                    title="Show menu"
+                  >
+                    <span className="text-lg">☰</span>
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    resetOnboardingTour();
+                    setShowOnboarding(true);
+                  }}
+                  className="group text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white"
+                  title={t("common.quickTour", {
+                    defaultValue: "Show quick tour",
+                  })}
+                >
+                  <span className="group-hover:animate-bounce-subtle mr-1.5 text-sm">
+                    🎯
                   </span>
-                  <span className="ml-1 text-slate-500 dark:text-slate-400">
-                    algorithms
+                  <span className="hidden text-sm sm:inline">
+                    {t("common.quickTour", { defaultValue: "Tour" })}
                   </span>
+                </Button>
+
+                {/* Language & Theme Controls */}
+                <div className="flex items-center gap-1">
+                  <LanguageSwitcher variant="dropdown" />
+                  <ThemeToggle data-tour="theme-toggle" />
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Menu */}
+          <div
+            data-mobile-nav
+            className="mt-3 hidden border-t border-white/10 pt-3 sm:hidden"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              {!showHero && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    toggleHeroSection();
+                    // Hide mobile menu
+                    document
+                      .querySelector("[data-mobile-nav]")
+                      ?.classList.add("hidden");
+                  }}
+                  className="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                  title="Show hero section"
+                >
+                  <span className="mr-1.5 text-sm">✨</span>
+                  <span className="text-sm">Show Hero</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  resetOnboardingTour();
-                  setShowOnboarding(true);
+                  setShowFeaturedAlgorithms((prev) => !prev);
+                  // Hide mobile menu
+                  document
+                    .querySelector("[data-mobile-nav]")
+                    ?.classList.add("hidden");
                 }}
-                className="group text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200"
-                title={t("common.quickTour", {
-                  defaultValue: "Show quick tour",
-                })}
+                className="text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
+                title={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms (Ctrl+Shift+F)`}
               >
-                <span className="group-hover:animate-bounce-subtle mr-2">
-                  🎯
-                </span>
-                <span className="hidden sm:inline">
-                  {t("common.quickTour", { defaultValue: "Quick Tour" })}
+                <span className="mr-1.5 text-sm">⭐</span>
+                <span className="text-sm">
+                  {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
                 </span>
               </Button>
-              <LanguageSwitcher className="mr-2" variant="dropdown" />
-              <ThemeToggle data-tour="theme-toggle" />
             </div>
           </div>
         </div>
       </header>
+      {/* Content wrapper with fixed header spacing */}
+      <div className="pt-20">
+        {/* Enhanced Filter Bar */}
+        <FilterBar
+          data-tour="search-bar"
+          q={q}
+          setQ={setQ}
+          categories={topics}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+          tags={tagUniverse}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          difficulties={difficulties}
+          selectedDifficulties={selectedDifficulties}
+          setSelectedDifficulties={setSelectedDifficulties}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          onClear={clearFilters}
+          catalog={metaCatalog}
+          showTagsOnCards={showTagsOnCards}
+          setShowTagsOnCards={setShowTagsOnCards}
+          onTagClick={handleTagClick}
+        />
 
-      {/* Enhanced Filter Bar */}
-      <FilterBar
-        data-tour="search-bar"
-        q={q}
-        setQ={setQ}
-        categories={topics}
-        selectedCategories={selectedCategories}
-        setSelectedCategories={setSelectedCategories}
-        tags={tagUniverse}
-        selectedTags={selectedTags}
-        setSelectedTags={setSelectedTags}
-        difficulties={difficulties}
-        selectedDifficulties={selectedDifficulties}
-        setSelectedDifficulties={setSelectedDifficulties}
-        sortKey={sortKey}
-        setSortKey={setSortKey}
-        onClear={clearFilters}
-        catalog={metaCatalog}
-        showTagsOnCards={showTagsOnCards}
-        setShowTagsOnCards={setShowTagsOnCards}
-        onTagClick={handleTagClick}
-      />
-
-      {/* Enhanced Featured Algorithms */}
-      {!q &&
-        selectedCategories.length === 0 &&
-        selectedTags.length === 0 &&
-        selectedDifficulties.length === 0 && (
-          <section className="liquid-glass-section relative px-4 py-12">
-            <div className="mx-auto max-w-7xl">
-              <div
-                className="animate-fade-in-up mb-12 text-center"
-                data-about-section
-              >
-                <div className="liquid-glass-filter mb-6 inline-flex items-center gap-3 px-4 py-2">
-                  <span className="animate-bounce-subtle text-2xl">✨</span>
-                  <span className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-lg font-semibold text-transparent">
-                    Featured Algorithms
-                  </span>
-                </div>
-
-                <h3 className="mb-6 text-3xl leading-tight font-black text-slate-900 md:text-4xl dark:text-slate-100">
-                  Start Your Journey with
-                  <span className="from-primary-600 via-secondary-600 to-primary-700 bg-gradient-to-r bg-clip-text text-transparent">
-                    {" "}
-                    Popular Algorithms
-                  </span>
-                </h3>
-
-                <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-                  Discover the fundamental algorithms that every developer
-                  should master. Each one comes with
-                  <span className="text-primary-600 dark:text-primary-400 font-semibold">
-                    {" "}
-                    interactive visualizations
-                  </span>{" "}
-                  and
-                  <span className="text-secondary-600 dark:text-secondary-400 font-semibold">
-                    {" "}
-                    real-time analysis
-                  </span>
-                  .
-                </p>
-
-                {/* Enhanced Value Proposition Pills */}
-                <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <div className="group liquid-glass-filter text-primary-700 dark:text-primary-300 cursor-default px-4 py-2 transition-all duration-300 hover:scale-105">
-                    <span className="group-hover:animate-bounce-subtle mr-2">
-                      🚀
-                    </span>
-                    Interactive Learning
-                  </div>
-                  <div className="group liquid-glass-filter cursor-default px-4 py-2 text-green-700 transition-all duration-300 hover:scale-105 dark:text-green-300">
-                    <span className="group-hover:animate-bounce-subtle mr-2">
-                      📊
-                    </span>
-                    Step-by-Step Visualization
-                  </div>
-                  <div className="group liquid-glass-filter cursor-default px-4 py-2 text-purple-700 transition-all duration-300 hover:scale-105 dark:text-purple-300">
-                    <span className="group-hover:animate-bounce-subtle mr-2">
-                      ⚡
-                    </span>
-                    Performance Analysis
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                {featuredAlgorithms.map(({ topic, item }) => (
-                  <Card
-                    key={`${topic}/${item.slug}`}
-                    variant="elevated"
-                    className="group liquid-glass-card liquid-glass-glow relative cursor-pointer overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
-                    onClick={() => {
-                      logger.info(
-                        LogCategory.USER_INTERACTION,
-                        "Featured algorithm clicked",
-                        {
-                          algorithm: item.title,
-                          topic,
-                          slug: item.slug,
-                          difficulty: item.difficulty,
-                          section: "featured",
-                          timestamp: new Date().toISOString(),
-                        }
-                      );
-
-                      navigate(`/viz/${topic}/${item.slug}`);
-                    }}
+        {/* Enhanced Featured Algorithms */}
+        {!q &&
+          selectedCategories.length === 0 &&
+          selectedTags.length === 0 &&
+          selectedDifficulties.length === 0 &&
+          showFeaturedAlgorithms && (
+            <section className="liquid-glass-section relative px-4 py-12">
+              <div className="mx-auto max-w-7xl">
+                <div
+                  className="animate-fade-in-up mb-12 text-center"
+                  data-about-section
+                >
+                  {/* Close button in top-right corner */}
+                  <button
+                    onClick={() => setShowFeaturedAlgorithms(false)}
+                    className="absolute top-4 right-4 rounded-full p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                    title="Hide featured algorithms (Ctrl+Shift+F to show again)"
+                    aria-label="Hide featured algorithms section"
                   >
-                    {/* Gradient overlay */}
-                    <div className="to-primary-50/30 dark:to-primary-900/20 absolute inset-0 bg-gradient-to-br from-transparent via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <X className="h-5 w-5" />
+                  </button>
 
-                    <div className="relative p-6 text-center">
-                      <div className="mb-4 text-4xl filter transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-lg">
-                        {TOPIC_META[topic]?.icon ?? "📘"}
-                      </div>
+                  <div className="liquid-glass-filter mb-6 inline-flex items-center gap-3 px-4 py-2">
+                    <span className="animate-bounce-subtle text-2xl">✨</span>
+                    <span className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-lg font-semibold text-transparent">
+                      Featured Algorithms
+                    </span>
+                  </div>
 
-                      <h4 className="group-hover:text-primary-700 dark:group-hover:text-primary-300 mb-3 text-lg font-bold text-slate-900 transition-colors duration-300 dark:text-slate-100">
-                        {item.title}
-                      </h4>
+                  <h3 className="mb-6 text-3xl leading-tight font-black text-slate-900 md:text-4xl dark:text-slate-100">
+                    Start Your Journey with
+                    <span className="from-primary-600 via-secondary-600 to-primary-700 bg-gradient-to-r bg-clip-text text-transparent">
+                      {" "}
+                      Popular Algorithms
+                    </span>
+                  </h3>
 
-                      <p className="mb-6 min-h-[3rem] text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                        {item.summary ||
-                          `Master the fundamentals of ${pretty(topic)}`}
-                      </p>
+                  <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                    Discover the fundamental algorithms that every developer
+                    should master. Each one comes with
+                    <span className="text-primary-600 dark:text-primary-400 font-semibold">
+                      {" "}
+                      interactive visualizations
+                    </span>{" "}
+                    and
+                    <span className="text-secondary-600 dark:text-secondary-400 font-semibold">
+                      {" "}
+                      real-time analysis
+                    </span>
+                    .
+                  </p>
 
-                      <div className="space-y-3">
-                        {/* Difficulty Badge */}
-                        <div
-                          className={cn(
-                            "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
-                            item.difficulty === "Easy"
-                              ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
-                              : item.difficulty === "Medium"
-                                ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
-                                : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "h-2 w-2 rounded-full",
-                              item.difficulty === "Easy"
-                                ? "bg-green-500"
-                                : item.difficulty === "Medium"
-                                  ? "bg-yellow-500"
-                                  : "bg-red-500"
-                            )}
-                          />
-                          {formatDifficulty(item.difficulty)}
+                  {/* Enhanced Value Proposition Pills */}
+                  <div className="flex flex-wrap justify-center gap-4 text-sm">
+                    <div className="group liquid-glass-filter text-primary-700 dark:text-primary-300 cursor-default px-4 py-2 transition-all duration-300 hover:scale-105">
+                      <span className="group-hover:animate-bounce-subtle mr-2">
+                        🚀
+                      </span>
+                      Interactive Learning
+                    </div>
+                    <div className="group liquid-glass-filter cursor-default px-4 py-2 text-green-700 transition-all duration-300 hover:scale-105 dark:text-green-300">
+                      <span className="group-hover:animate-bounce-subtle mr-2">
+                        📊
+                      </span>
+                      Step-by-Step Visualization
+                    </div>
+                    <div className="group liquid-glass-filter cursor-default px-4 py-2 text-purple-700 transition-all duration-300 hover:scale-105 dark:text-purple-300">
+                      <span className="group-hover:animate-bounce-subtle mr-2">
+                        ⚡
+                      </span>
+                      Performance Analysis
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                  {featuredAlgorithms.map(({ topic, item }) => (
+                    <Card
+                      key={`${topic}/${item.slug}`}
+                      variant="elevated"
+                      className="group liquid-glass-card liquid-glass-glow relative cursor-pointer overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
+                      onClick={() => {
+                        logger.info(
+                          LogCategory.USER_INTERACTION,
+                          "Featured algorithm clicked",
+                          {
+                            algorithm: item.title,
+                            topic,
+                            slug: item.slug,
+                            difficulty: item.difficulty,
+                            section: "featured",
+                            timestamp: new Date().toISOString(),
+                          }
+                        );
+
+                        navigate(`/viz/${topic}/${item.slug}`);
+                      }}
+                    >
+                      {/* Gradient overlay */}
+                      <div className="to-primary-50/30 dark:to-primary-900/20 absolute inset-0 bg-gradient-to-br from-transparent via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                      <div className="relative p-6 text-center">
+                        <div className="mb-4 text-4xl filter transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-lg">
+                          {TOPIC_META[topic]?.icon ?? "📘"}
                         </div>
 
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          className="touch-target from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 min-h-[44px] w-full bg-gradient-to-r transition-all duration-300 group-hover:shadow-lg"
-                          onClick={(e) => {
-                            e.stopPropagation();
+                        <h4 className="group-hover:text-primary-700 dark:group-hover:text-primary-300 mb-3 text-lg font-bold text-slate-900 transition-colors duration-300 dark:text-slate-100">
+                          {item.title}
+                        </h4>
 
-                            logger.info(
-                              LogCategory.USER_INTERACTION,
-                              "Algorithm try now clicked",
-                              {
-                                algorithm: item.title,
-                                topic,
-                                slug: item.slug,
-                                difficulty: item.difficulty,
-                                autostart: true,
-                                source: "main_grid",
-                                timestamp: new Date().toISOString(),
-                              }
-                            );
+                        <p className="mb-6 min-h-[3rem] text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                          {item.summary ||
+                            `Master the fundamentals of ${pretty(topic)}`}
+                        </p>
 
-                            navigate(
-                              `/viz/${topic}/${item.slug}?autostart=true`
-                            );
-                          }}
-                        >
-                          <span className="mr-2">🎯</span>
-                          Try Now
-                          <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
-                            →
-                          </span>
-                        </Button>
+                        <div className="space-y-3">
+                          {/* Difficulty Badge */}
+                          <div
+                            className={cn(
+                              "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
+                              item.difficulty === "Easy"
+                                ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
+                                : item.difficulty === "Medium"
+                                  ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                                  : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "h-2 w-2 rounded-full",
+                                item.difficulty === "Easy"
+                                  ? "bg-green-500"
+                                  : item.difficulty === "Medium"
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500"
+                              )}
+                            />
+                            {formatDifficulty(item.difficulty)}
+                          </div>
+
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            className="touch-target from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 min-h-[44px] w-full bg-gradient-to-r transition-all duration-300 group-hover:shadow-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+
+                              logger.info(
+                                LogCategory.USER_INTERACTION,
+                                "Algorithm try now clicked",
+                                {
+                                  algorithm: item.title,
+                                  topic,
+                                  slug: item.slug,
+                                  difficulty: item.difficulty,
+                                  autostart: true,
+                                  source: "main_grid",
+                                  timestamp: new Date().toISOString(),
+                                }
+                              );
+
+                              navigate(
+                                `/viz/${topic}/${item.slug}?autostart=true`
+                              );
+                            }}
+                          >
+                            <span className="mr-2">🎯</span>
+                            Try Now
+                            <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
+                              →
+                            </span>
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-      {/* Main Content */}
-      <main className="px-4 py-8">
-        <div className="mx-auto max-w-7xl">
-          {Object.keys(filteredGrouped).length === 0 ? (
-            <div className="animate-fade-in-up py-16 text-center">
-              <div className="relative mb-8">
-                {/* Animated Search Illustration */}
-                <div className="animate-bounce-subtle mb-4 text-8xl">🔍</div>
-                <div className="animate-float animation-delay-500 absolute -top-2 -right-2 text-2xl">
-                  ✨
-                </div>
-                <div className="animate-float animation-delay-1000 absolute -bottom-2 -left-2 text-xl">
-                  💫
+                    </Card>
+                  ))}
                 </div>
               </div>
+            </section>
+          )}
 
-              <div className="mx-auto mb-8 max-w-md">
-                <h3 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">
-                  {t("common.noAlgorithmsFound", {
-                    defaultValue: "No algorithms found",
-                  })}
-                </h3>
+        {/* Main Content */}
+        <main className="px-4 py-8">
+          <div className="mx-auto max-w-7xl">
+            {Object.keys(filteredGrouped).length === 0 ? (
+              <div className="animate-fade-in-up py-16 text-center">
+                <div className="relative mb-8">
+                  {/* Animated Search Illustration */}
+                  <div className="animate-bounce-subtle mb-4 text-8xl">🔍</div>
+                  <div className="animate-float animation-delay-500 absolute -top-2 -right-2 text-2xl">
+                    ✨
+                  </div>
+                  <div className="animate-float animation-delay-1000 absolute -bottom-2 -left-2 text-xl">
+                    💫
+                  </div>
+                </div>
 
-                <p className="mb-6 leading-relaxed text-slate-600 dark:text-slate-400">
-                  {t("common.adjustSearchTerms", {
-                    defaultValue:
-                      "Don't worry! Try adjusting your search terms or filters to discover the perfect algorithm.",
-                  })}
-                </p>
+                <div className="mx-auto mb-8 max-w-md">
+                  <h3 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">
+                    {t("common.noAlgorithmsFound", {
+                      defaultValue: "No algorithms found",
+                    })}
+                  </h3>
 
-                {/* Helpful suggestions */}
-                <div className="liquid-glass-card mb-6 p-4">
-                  <p className="mb-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Try searching for algorithms, tags, or concepts:
+                  <p className="mb-6 leading-relaxed text-slate-600 dark:text-slate-400">
+                    {t("common.adjustSearchTerms", {
+                      defaultValue:
+                        "Don't worry! Try adjusting your search terms or filters to discover the perfect algorithm.",
+                    })}
                   </p>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {["sorting", "search", "graph", "tree", "dynamic"].map(
-                        (suggestion) => (
+
+                  {/* Helpful suggestions */}
+                  <div className="liquid-glass-card mb-6 p-4">
+                    <p className="mb-3 text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Try searching for algorithms, tags, or concepts:
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {["sorting", "search", "graph", "tree", "dynamic"].map(
+                          (suggestion) => (
+                            <button
+                              key={suggestion}
+                              onClick={() => setQ(suggestion)}
+                              className="liquid-glass-filter hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all duration-200 hover:scale-105 dark:text-slate-300"
+                            >
+                              {suggestion}
+                            </button>
+                          )
+                        )}
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {[
+                          "comparison",
+                          "in-place",
+                          "stable",
+                          "logarithmic",
+                          "divide-conquer",
+                          "recursive",
+                        ].map((suggestion) => (
                           <button
                             key={suggestion}
                             onClick={() => setQ(suggestion)}
-                            className="liquid-glass-filter hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all duration-200 hover:scale-105 dark:text-slate-300"
+                            className="liquid-glass-filter hover:text-secondary-600 dark:hover:text-secondary-400 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-200 hover:scale-105 dark:text-slate-400"
                           >
-                            {suggestion}
+                            #{suggestion}
                           </button>
-                        )
-                      )}
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {[
-                        "comparison",
-                        "in-place",
-                        "stable",
-                        "logarithmic",
-                        "divide-conquer",
-                        "recursive",
-                      ].map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          onClick={() => setQ(suggestion)}
-                          className="liquid-glass-filter hover:text-secondary-600 dark:hover:text-secondary-400 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all duration-200 hover:scale-105 dark:text-slate-400"
+                  </div>
+                </div>
+
+                <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                  <Button
+                    onClick={clearFilters}
+                    variant="primary"
+                    className="from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 bg-gradient-to-r shadow-lg transition-all duration-300 hover:shadow-xl"
+                  >
+                    <span className="mr-2">✨</span>
+                    {t("common.clearAllFilters", {
+                      defaultValue: "Clear All Filters",
+                    })}
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      clearFilters();
+                      const featuresSection = document.querySelector(
+                        "[data-about-section]"
+                      );
+                      if (featuresSection) {
+                        scrollToElement(featuresSection as Element, 100);
+                      }
+                    }}
+                    variant="outline"
+                    className="hover:border-primary-400 dark:hover:border-primary-500 border-slate-300 dark:border-slate-600"
+                  >
+                    <span className="mr-2">🎯</span>
+                    View Featured
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-16">
+                {Object.entries(filteredGrouped).map(([topic, rows]) => (
+                  <section key={topic} className="animate-fade-in-up">
+                    <div className="group mb-8 flex items-center gap-4">
+                      <div className="cursor-default text-3xl transition-transform duration-300 group-hover:scale-110">
+                        {TOPIC_META[topic]?.icon ?? "📘"}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="group-hover:text-primary-600 dark:group-hover:text-primary-400 text-2xl font-black text-slate-900 transition-colors duration-300 md:text-3xl dark:text-slate-100">
+                          {pretty(topic)}
+                        </h3>
+                        <div className="from-primary-500 to-secondary-500 mt-1 h-0.5 w-0 bg-gradient-to-r transition-all duration-500 group-hover:w-24"></div>
+                      </div>
+                      <div className="liquid-glass-card px-4 py-2 text-sm font-bold text-slate-700 shadow-sm dark:text-slate-300">
+                        {rows.length} algorithms
+                      </div>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {rows.map(({ item }, index) => (
+                        <div
+                          key={`${topic}/${item.slug}`}
+                          className="group animate-fade-in-up"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          #{suggestion}
-                        </button>
+                          <AlgoCard
+                            topic={topic}
+                            item={item}
+                            titleMap={titleMap}
+                            accent={TOPIC_META[topic]?.color}
+                            showTags={showTagsOnCards}
+                            onTagClick={handleTagClick}
+                            data-tour={
+                              index === 0 ? "algorithm-card" : undefined
+                            }
+                          />
+                        </div>
                       ))}
                     </div>
+                  </section>
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Enhanced Footer */}
+        <footer className="liquid-glass-section relative mt-16 overflow-hidden border-t border-white/20 dark:border-white/10">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZm9vdGVyR3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2Zvb3RlckdyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
+
+          {/* Gradient Overlays */}
+          <div className="from-primary-600/10 absolute top-0 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
+          <div className="from-secondary-600/10 absolute right-1/4 bottom-0 h-40 w-40 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
+
+          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
+              {/* Brand Section */}
+              <div className="text-center md:text-left">
+                <div className="mb-4 flex items-center justify-center gap-3 md:justify-start">
+                  <span className="text-3xl">🔬</span>
+                  <h3 className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-xl font-black text-transparent">
+                    AlgoLens
+                  </h3>
+                </div>
+                <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-400 md:mx-0">
+                  Making algorithms and data structures accessible through
+                  interactive visualizations and hands-on learning.
+                </p>
+              </div>
+
+              {/* Features Section */}
+              <div className="text-center">
+                <h4 className="mb-4 font-semibold text-white">What We Offer</h4>
+                <ul className="space-y-2 text-sm text-slate-400">
+                  <li className="flex items-center justify-center gap-2">
+                    <span className="text-primary-400">📊</span>
+                    Interactive Visualizations
+                  </li>
+                  <li className="flex items-center justify-center gap-2">
+                    <span className="text-secondary-400">⚡</span>
+                    Real-time Performance Analysis
+                  </li>
+                  <li className="flex items-center justify-center gap-2">
+                    <span className="text-green-400">🎯</span>
+                    Step-by-step Learning
+                  </li>
+                  <li className="flex items-center justify-center gap-2">
+                    <span className="text-purple-400">🌟</span>
+                    Multiple Programming Languages
+                  </li>
+                </ul>
+              </div>
+
+              {/* Stats Section */}
+              <div className="text-center md:text-right">
+                <h4 className="mb-4 font-semibold text-white">
+                  Learning Stats
+                </h4>
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
+                    <div className="text-primary-400 text-2xl font-bold">
+                      {stats.algorithms}
+                    </div>
+                    <div className="text-xs tracking-wider text-slate-400 uppercase">
+                      Algorithms
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
+                    <div className="text-secondary-400 text-2xl font-bold">
+                      {stats.categories}
+                    </div>
+                    <div className="text-xs tracking-wider text-slate-400 uppercase">
+                      Categories
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                <Button
-                  onClick={clearFilters}
-                  variant="primary"
-                  className="from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 bg-gradient-to-r shadow-lg transition-all duration-300 hover:shadow-xl"
-                >
-                  <span className="mr-2">✨</span>
-                  {t("common.clearAllFilters", {
-                    defaultValue: "Clear All Filters",
-                  })}
-                </Button>
+            {/* Bottom Section */}
+            <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/50 pt-8 sm:flex-row">
+              <div className="text-center text-sm text-slate-400 sm:text-left">
+                <p className="flex items-center justify-center gap-2 sm:justify-start">
+                  Built with
+                  <span className="animate-pulse text-red-400">❤️</span>
+                  for learning algorithms and data structures
+                </p>
+              </div>
 
-                <Button
+              <div className="flex items-center gap-4">
+                <button
                   onClick={() => {
-                    clearFilters();
-                    const featuresSection = document.querySelector(
-                      "[data-about-section]"
-                    );
-                    if (featuresSection) {
-                      scrollToElement(featuresSection as Element, 100);
-                    }
+                    resetOnboardingTour();
+                    setShowOnboarding(true);
                   }}
-                  variant="outline"
-                  className="hover:border-primary-400 dark:hover:border-primary-500 border-slate-300 dark:border-slate-600"
+                  className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
                 >
-                  <span className="mr-2">🎯</span>
-                  View Featured
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-16">
-              {Object.entries(filteredGrouped).map(([topic, rows]) => (
-                <section key={topic} className="animate-fade-in-up">
-                  <div className="group mb-8 flex items-center gap-4">
-                    <div className="cursor-default text-3xl transition-transform duration-300 group-hover:scale-110">
-                      {TOPIC_META[topic]?.icon ?? "📘"}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="group-hover:text-primary-600 dark:group-hover:text-primary-400 text-2xl font-black text-slate-900 transition-colors duration-300 md:text-3xl dark:text-slate-100">
-                        {pretty(topic)}
-                      </h3>
-                      <div className="from-primary-500 to-secondary-500 mt-1 h-0.5 w-0 bg-gradient-to-r transition-all duration-500 group-hover:w-24"></div>
-                    </div>
-                    <div className="liquid-glass-card px-4 py-2 text-sm font-bold text-slate-700 shadow-sm dark:text-slate-300">
-                      {rows.length} algorithms
-                    </div>
-                  </div>
+                  <span>🎯</span>
+                  Take the Tour
+                </button>
 
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {rows.map(({ item }, index) => (
-                      <div
-                        key={`${topic}/${item.slug}`}
-                        className="group animate-fade-in-up"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <AlgoCard
-                          topic={topic}
-                          item={item}
-                          titleMap={titleMap}
-                          accent={TOPIC_META[topic]?.color}
-                          showTags={showTagsOnCards}
-                          onTagClick={handleTagClick}
-                          data-tour={index === 0 ? "algorithm-card" : undefined}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
+                <button
+                  onClick={() => toggleHeroSection()}
+                  className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
+                >
+                  <span>✨</span>
+                  {showHero ? "Hide Hero" : "Show Hero"}
+                </button>
 
-      {/* Enhanced Footer */}
-      <footer className="liquid-glass-section relative mt-16 overflow-hidden border-t border-white/20 dark:border-white/10">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZm9vdGVyR3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2Zvb3RlckdyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
-
-        {/* Gradient Overlays */}
-        <div className="from-primary-600/10 absolute top-0 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
-        <div className="from-secondary-600/10 absolute right-1/4 bottom-0 h-40 w-40 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
-
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
-            {/* Brand Section */}
-            <div className="text-center md:text-left">
-              <div className="mb-4 flex items-center justify-center gap-3 md:justify-start">
-                <span className="text-3xl">🔬</span>
-                <h3 className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-xl font-black text-transparent">
-                  AlgoLens
-                </h3>
-              </div>
-              <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-400 md:mx-0">
-                Making algorithms and data structures accessible through
-                interactive visualizations and hands-on learning.
-              </p>
-            </div>
-
-            {/* Features Section */}
-            <div className="text-center">
-              <h4 className="mb-4 font-semibold text-white">What We Offer</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li className="flex items-center justify-center gap-2">
-                  <span className="text-primary-400">📊</span>
-                  Interactive Visualizations
-                </li>
-                <li className="flex items-center justify-center gap-2">
-                  <span className="text-secondary-400">⚡</span>
-                  Real-time Performance Analysis
-                </li>
-                <li className="flex items-center justify-center gap-2">
-                  <span className="text-green-400">🎯</span>
-                  Step-by-step Learning
-                </li>
-                <li className="flex items-center justify-center gap-2">
-                  <span className="text-purple-400">🌟</span>
-                  Multiple Programming Languages
-                </li>
-              </ul>
-            </div>
-
-            {/* Stats Section */}
-            <div className="text-center md:text-right">
-              <h4 className="mb-4 font-semibold text-white">Learning Stats</h4>
-              <div className="space-y-3">
-                <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
-                  <div className="text-primary-400 text-2xl font-bold">
-                    {stats.algorithms}
-                  </div>
-                  <div className="text-xs tracking-wider text-slate-400 uppercase">
-                    Algorithms
-                  </div>
-                </div>
-                <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
-                  <div className="text-secondary-400 text-2xl font-bold">
-                    {stats.categories}
-                  </div>
-                  <div className="text-xs tracking-wider text-slate-400 uppercase">
-                    Categories
-                  </div>
-                </div>
+                <button
+                  onClick={() => setShowFeaturedAlgorithms((prev) => !prev)}
+                  className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
+                  title={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms (Ctrl+Shift+F)`}
+                  aria-label={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms section`}
+                >
+                  <span>⭐</span>
+                  {showFeaturedAlgorithms ? "Hide Featured" : "Show Featured"}
+                </button>
               </div>
             </div>
           </div>
+        </footer>
 
-          {/* Bottom Section */}
-          <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/50 pt-8 sm:flex-row">
-            <div className="text-center text-sm text-slate-400 sm:text-left">
-              <p className="flex items-center justify-center gap-2 sm:justify-start">
-                Built with
-                <span className="animate-pulse text-red-400">❤️</span>
-                for learning algorithms and data structures
-              </p>
+        {/* Debug Panel (Dev Mode) */}
+        {import.meta.env.DEV && (
+          <DebugPanel
+            isOpen={showDebugPanel}
+            onClose={() => {
+              logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
+                timestamp: new Date().toISOString(),
+              });
+              setShowDebugPanel(false);
+            }}
+          />
+        )}
+
+        {/* Onboarding Tour */}
+        <OnboardingTour
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={() => {
+            markOnboardingTourSeen();
+            setShowOnboarding(false);
+          }}
+          tourType="homepage"
+        />
+
+        {/* Floating Action Buttons - Fixed to viewport */}
+        {/* Keyboard Shortcuts Button - Bottom position */}
+        <KeyboardShortcutsButton />
+
+        {/* Debug Tools (Dev Mode) */}
+        {import.meta.env.DEV && (
+          <>
+            {/* Debug Toggle Button */}
+            <div className="fixed right-6 bottom-[180px] z-50">
+              <div className="relative">
+                <button
+                  className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
+                  title="Debug Panel (Dev) - Ctrl+Shift+D"
+                  onClick={() => {
+                    logger.info(
+                      LogCategory.USER_INTERACTION,
+                      "Debug panel opened via floating button",
+                      {
+                        method: "floating_button_click",
+                        timestamp: new Date().toISOString(),
+                      }
+                    );
+                    setShowDebugPanel(true);
+                  }}
+                >
+                  🐛
+                  <span className="max-w-0 overflow-hidden text-sm font-medium whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[10rem] group-hover:opacity-100">
+                    Debug
+                  </span>
+                  <div className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full bg-red-400"></div>
+                </button>
+              </div>
             </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => {
-                  resetOnboardingTour();
-                  setShowOnboarding(true);
-                }}
-                className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
-              >
-                <span>🎯</span>
-                Take the Tour
-              </button>
-
-              <button
-                onClick={() => toggleHeroSection()}
-                className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
-              >
-                <span>✨</span>
-                {showHero ? "Hide Hero" : "Show Hero"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Onboarding Tour */}
-      <OnboardingTour
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={() => {
-          markOnboardingTourSeen();
-          setShowOnboarding(false);
-        }}
-        tourType="homepage"
-      />
-
-      {/* Debug and Keyboard Shortcuts */}
-      {import.meta.env.DEV && <DebugToggle />}
-      <KeyboardShortcutsButton />
+          </>
+        )}
+      </div>{" "}
+      {/* Close content wrapper */}
     </div>
   );
 }
