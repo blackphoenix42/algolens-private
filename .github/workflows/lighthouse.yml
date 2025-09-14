@@ -22,9 +22,14 @@ jobs:
       - name: Install deps & build
         run: |
           npm ci
-          # Workaround npm optional-deps quirk for Rollup on Linux
-          npm i --no-save --no-package-lock @rollup/rollup-linux-x64-gnu@^4
-          npm run build --if-present || npx vite build
+
+      # Workaround npm optional-deps quirk for Rollup on Linux
+      - name: Patch Rollup native binary (Linux)
+        if: runner.os == 'Linux'
+        run: npm i --no-save --no-package-lock @rollup/rollup-linux-x64-gnu@^4
+
+      - name: Build application
+        run: npm run build --if-present || npx vite build
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
