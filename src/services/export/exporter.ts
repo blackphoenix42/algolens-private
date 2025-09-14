@@ -368,7 +368,8 @@ export async function exportGIF(
     enc.addFrame(ctx.getImageData(0, 0, W, H).data);
   }
   enc.finish();
-  return new Blob([enc.out.getData()], { type: "image/gif" });
+  const data = enc.out.getData();
+  return new Blob([data.buffer as ArrayBuffer], { type: "image/gif" });
 }
 
 export async function exportMP4(
