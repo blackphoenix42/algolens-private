@@ -1,10 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Base URL: override with PW_BASE_URL to point at dev server instead of preview
-const BASE_URL = (process.env.PW_BASE_URL || "http://127.0.0.1:4173").replace(
-  /\/+$/,
-  ""
-);
+// In CI/GitHub Actions, the app is served with a base path matching the repo name
+const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
+const repoName =
+  process.env.GITHUB_REPOSITORY?.split("/")[1] || "algolens-private";
+const basePath = isGitHubActions ? `/${repoName}` : "";
+const BASE_URL = (
+  process.env.PW_BASE_URL || `http://127.0.0.1:4173${basePath}`
+).replace(/\/+$/, "");
 
 export default defineConfig({
   testDir: "e2e",
@@ -63,7 +67,7 @@ export default defineConfig({
     : [
         {
           command: "npm run build && npx vite preview --port 4173 --strictPort",
-          url: BASE_URL,
+          url: `http://127.0.0.1:4173${basePath}`,
           reuseExistingServer: true,
           timeout: 120_000,
           stdout: "pipe",
