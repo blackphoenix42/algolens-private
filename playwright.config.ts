@@ -7,7 +7,7 @@ const repoName =
   process.env.GITHUB_REPOSITORY?.split("/")[1] || "algolens-private";
 const basePath = isGitHubActions ? `/${repoName}` : "";
 const BASE_URL = (
-  process.env.PW_BASE_URL || `http://127.0.0.1:4173${basePath}`
+  process.env.PW_BASE_URL || `http://localhost:4173${basePath}`
 ).replace(/\/+$/, "");
 
 export default defineConfig({
@@ -66,8 +66,9 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: "npm run build && npx vite preview --port 4173 --strictPort",
-          url: `http://127.0.0.1:4173${basePath}`,
+          command:
+            "npm run build && npx vite preview --port 4173 --strictPort --host localhost",
+          url: `http://localhost:4173${basePath}`,
           reuseExistingServer: true,
           timeout: 120_000,
           stdout: "pipe",

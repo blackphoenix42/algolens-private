@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("Visualizer visual snapshots", () => {
   test("home page baseline", async ({ page }) => {
-    await page.goto("http://127.0.0.1:4173/"); // vite preview default
+    await page.goto("/"); // Use relative URL to leverage baseURL from config
     await page.waitForLoadState("networkidle");
 
     // Mask dynamic regions if needed (e.g., timestamps)
@@ -41,9 +41,7 @@ test.describe("Visualizer visual snapshots", () => {
   });
 
   test("visualizer with seeded dataset", async ({ page }) => {
-    await page.goto(
-      "http://127.0.0.1:4173/visualizer?algo=bubble&n=64&seed=42&speed=1"
-    );
+    await page.goto("/visualizer?algo=bubble&n=64&seed=42&speed=1"); // Use relative URL
     await page.waitForSelector("[data-testid='canvas-ready']");
 
     // Take a snapshot of the initial state

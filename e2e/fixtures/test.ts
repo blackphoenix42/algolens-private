@@ -10,7 +10,7 @@ const test = base.extend<Fixtures>({
   // Rename second arg from `use` → `provide` to avoid react-hooks false positive
   gotoApp: async ({ page }, provide) => {
     const BASE =
-      process.env.PW_BASE_URL?.replace(/\/+$/, "") || "http://127.0.0.1:4173";
+      process.env.PW_BASE_URL?.replace(/\/+$/, "") || "http://localhost:4173";
 
     // One-time route & CSS setup per test
     await page.route(
@@ -36,7 +36,7 @@ const test = base.extend<Fixtures>({
 });
 
 test.use({
-  baseURL: process.env.VITE_PREVIEW_URL ?? "http://127.0.0.1:4173",
+  baseURL: process.env.VITE_PREVIEW_URL ?? "http://localhost:4173",
 });
 
 export { expect, test };
