@@ -15,12 +15,14 @@
   "urls": [
     { "url": "http://127.0.0.1:4173/algolens-private/" },
     {
-      "url": "http://127.0.0.1:4173/algolens-private/sort/bubble?dataset=random&n=50"
+      "url": "http://127.0.0.1:4173/algolens-private/viz/sorting/bubble-sort?dataset=random&n=50"
     },
     {
-      "url": "http://127.0.0.1:4173/algolens-private/sort/quick?dataset=gaussian&n=100"
+      "url": "http://127.0.0.1:4173/algolens-private/viz/sorting/quick-sort?dataset=gaussian&n=100"
     },
-    { "url": "http://127.0.0.1:4173/algolens-private/graph/dijkstra" },
-    { "url": "http://127.0.0.1:4173/algolens-private/404" }
+    {
+      "url": "http://127.0.0.1:4173/algolens-private/viz/graphs/depth-first-search"
+    },
+    { "url": "http://127.0.0.1:4173/algolens-private/404.html" }
   ]
 }
