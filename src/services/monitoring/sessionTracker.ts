@@ -1,4 +1,6 @@
 // src/services/monitoring/sessionTracker.ts
+import { generateId } from "@/utils";
+
 import { EventLogger } from "./eventLogger";
 import { LogCategory, logger } from "./logger";
 
@@ -34,7 +36,7 @@ export class SessionTracker {
   }
 
   private initializeSession(): SessionData {
-    const sessionId = crypto.randomUUID();
+    const sessionId = generateId(); // Use crypto-secure ID generation
     const now = new Date().toISOString();
 
     const session: SessionData = {

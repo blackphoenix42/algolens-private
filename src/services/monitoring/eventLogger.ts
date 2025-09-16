@@ -1,6 +1,11 @@
 // src/services/monitoring/eventLogger.ts
+import { generateId } from "@/utils";
+
 import { LogCategory, logger } from "./logger";
 
+/**
+ * Event logging interfaces and utilities for user analytics
+ */
 export interface UserEvent {
   action: string;
   category: string;
@@ -161,7 +166,7 @@ export class EventLogger {
     logger.info(LogCategory.GENERAL, `Session ${event}`, {
       ...data,
       timestamp: new Date().toISOString(),
-      sessionId: crypto.randomUUID(),
+      sessionId: generateId(), // Use crypto-secure ID generation
     });
   }
 }

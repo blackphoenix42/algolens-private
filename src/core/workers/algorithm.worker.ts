@@ -26,12 +26,13 @@ let currentComputation: {
 } | null = null;
 
 // Mock algorithm implementations (in a real app, these would be imported)
-const algorithms = {
-  "bubble-sort": (arr: number[]) => bubbleSort([...arr]),
-  "quick-sort": (arr: number[]) => quickSort([...arr]),
-  "merge-sort": (arr: number[]) => mergeSort([...arr]),
+// Using Map for secure method lookup to prevent dynamic method call vulnerabilities
+const algorithms = new Map([
+  ["bubble-sort", (arr: number[]) => bubbleSort([...arr])],
+  ["quick-sort", (arr: number[]) => quickSort([...arr])],
+  ["merge-sort", (arr: number[]) => mergeSort([...arr])],
   // Add more algorithms as needed
-};
+]);
 
 function bubbleSort(arr: number[]): AlgoFrame[] {
   const frames: AlgoFrame[] = [];
@@ -329,10 +330,14 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
             } as WorkerResponse);
           }, 100);
 
-          // Run the algorithm
-          const algorithmFn = algorithms[algorithm as keyof typeof algorithms];
-          if (!algorithmFn) {
+          // Run the algorithm with secure method lookup
+          if (!algorithms.has(algorithm)) {
             throw new Error(`Algorithm ${algorithm} not found`);
+          }
+
+          const algorithmFn = algorithms.get(algorithm)!;
+          if (typeof algorithmFn !== "function") {
+            throw new Error(`Algorithm ${algorithm} is not a valid function`);
           }
 
           const frames = algorithmFn(input);

@@ -72,10 +72,10 @@ export function formatNumber(num: number): string {
  */
 /**
  * Generate a random ID with optional cryptographic strength
- * @param cryptoSecure - Whether to use cryptographically secure randomness
+ * @param cryptoSecure - Whether to use cryptographically secure randomness (defaults to true for security)
  * @returns A random string ID
  */
-export function generateId(cryptoSecure = false): string {
+export function generateId(cryptoSecure = true): string {
   if (
     cryptoSecure &&
     typeof window !== "undefined" &&
@@ -94,6 +94,14 @@ export function generateId(cryptoSecure = false): string {
   }
 
   // Use Math.random for non-security-sensitive use cases (UI, animations, demo data)
+  return Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Generate a random ID for non-security-sensitive contexts (UI, animations, demo data)
+ * @returns A random string ID using Math.random (not cryptographically secure)
+ */
+export function generateNonSecureId(): string {
   return Math.random().toString(36).substr(2, 9);
 }
 

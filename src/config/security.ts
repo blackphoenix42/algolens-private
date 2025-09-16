@@ -50,8 +50,10 @@ export const SANITIZATION_CONFIG = {
  *      * State persistence IDs
  *      * Notification system IDs
  *      * Performance monitoring alert IDs
+ *      * All ID generation by default (generateId() function)
  *    - Timestamp-based fallback used when crypto is unavailable (better than Math.random for ID generation)
  *    - Math.random() used ONLY for UI effects, animations, and demo data generation (non-security contexts)
+ *    - generateNonSecureId() function available for explicit non-security contexts
  *
  * 5. Dynamic Method Calls:
  *    - All dynamic method invocations have been eliminated or secured with explicit validation
