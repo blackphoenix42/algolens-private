@@ -22,6 +22,8 @@ export function initAnalytics() {
     capture_pageleave: true,
     autocapture: true,
     persistence: "localStorage+cookie",
+    // Note: PostHog uses Math.random() internally for analytics IDs
+    // This is acceptable for non-security-sensitive analytics tracking
   });
   enabled = true;
 }

@@ -59,4 +59,11 @@ export const SANITIZATION_CONFIG = {
  *    - All dynamic method invocations have been eliminated or secured with explicit validation
  *    - Method name whitelisting used where dynamic calls are necessary
  *    - No user-controlled method names accepted
+ *
+ * 6. Third-Party Library Randomness (PostHog Analytics):
+ *    - PostHog-js uses Math.random() internally for analytics identifiers (session IDs, user IDs)
+ *    - This is acceptable for analytics tracking as it's not security-sensitive
+ *    - CodeQL may flag this as "insecure randomness" but it's safe in this context
+ *    - Analytics identifiers don't require cryptographic security
+ *    - Alternative: Consider replacing with self-hosted analytics if security compliance requires it
  */

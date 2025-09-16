@@ -9,9 +9,6 @@ type Fixtures = {
 const test = base.extend<Fixtures>({
   // Rename second arg from `use` → `provide` to avoid react-hooks false positive
   gotoApp: async ({ page }, provide) => {
-    const BASE =
-      process.env.PW_BASE_URL?.replace(/\/+$/, "") || "http://localhost:4173";
-
     // One-time route & CSS setup per test
     await page.route(
       /(googletagmanager|google-analytics|sentry|cdn\.jsdelivr|stats\.js|vitals)/,
@@ -26,17 +23,23 @@ const test = base.extend<Fixtures>({
     });
 
     await provide(async (path = "/") => {
-      const url = path.startsWith("http")
-        ? path
-        : `${BASE}${path.startsWith("/") ? "" : "/"}${path}`;
-      await page.goto(url);
+      // Use Playwright's baseURL which already handles GitHub Actions base path
+      // Don't add additional base path logic here
+      await page.goto(path);
       await page.waitForLoadState("networkidle");
     });
   },
 });
 
 test.use({
-  baseURL: process.env.VITE_PREVIEW_URL ?? "http://localhost:4173",
+  baseURL: (() => {
+    // Use same logic as playwright.config.ts
+    const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
+    const repoName =
+      process.env.GITHUB_REPOSITORY?.split("/")[1] || "algolens-private";
+    const basePath = isGitHubActions ? `/${repoName}` : "";
+    return process.env.PW_BASE_URL || `http://localhost:4173${basePath}`;
+  })(),
 });
 
 export { expect, test };

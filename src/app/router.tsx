@@ -126,11 +126,21 @@ export const createRouter: typeof createBrowserRouter = hasWrap(Sentry)
 
 // Configure base path for GitHub Pages
 const getBasename = () => {
-  // Check if running on GitHub Pages
+  // Check if running on GitHub Pages or in CI with GitHub Actions base path
   if (typeof window !== "undefined") {
     const { hostname, pathname } = window.location;
+
+    // Production GitHub Pages
     if (
       hostname === "blackphoenix42.github.io" &&
+      pathname.startsWith("/algolens-private")
+    ) {
+      return "/algolens-private";
+    }
+
+    // CI/testing environment with GitHub Actions base path
+    if (
+      (hostname === "127.0.0.1" || hostname === "localhost") &&
       pathname.startsWith("/algolens-private")
     ) {
       return "/algolens-private";
