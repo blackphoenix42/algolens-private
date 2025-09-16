@@ -62,17 +62,19 @@ export default defineConfig({
   ],
 
   // Local server: uses Vite preview. If PW_BASE_URL is set, we reuse that and skip starting a server.
-  webServer: process.env.PW_BASE_URL
-    ? undefined
-    : [
-        {
-          command:
-            "npm run build && npx vite preview --port 4173 --strictPort --host localhost",
-          url: `http://localhost:4173${basePath}`,
-          reuseExistingServer: true,
-          timeout: 120_000,
-          stdout: "pipe",
-          stderr: "pipe",
-        },
-      ],
+  // Also skip webServer if using start-server-and-test (indicated by USE_START_SERVER_AND_TEST env var)
+  webServer:
+    process.env.PW_BASE_URL || process.env.USE_START_SERVER_AND_TEST
+      ? undefined
+      : [
+          {
+            command:
+              "npm run build && npx vite preview --port 4173 --strictPort --host localhost",
+            url: `http://localhost:4173${basePath}`,
+            reuseExistingServer: true,
+            timeout: 120_000,
+            stdout: "pipe",
+            stderr: "pipe",
+          },
+        ],
 });

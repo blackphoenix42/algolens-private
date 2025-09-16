@@ -42,11 +42,15 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      # Runs tests; relies on your playwright.config.ts "webServer" to build+preview
-      - name: Run Playwright tests
+      # Install start-server-and-test for running the server and tests
+      - name: Install start-server-and-test
+        run: npm i --no-save --no-package-lock start-server-and-test
+
+      # Runs tests with managed server lifecycle
+      - name: Start server and run Playwright tests
         env:
           CI: true
-        run: npm run test:e2e
+        run: npm run test:e2e:ci
 
       # Always upload the HTML report (and any traces/videos on failure)
       - name: Upload Playwright report

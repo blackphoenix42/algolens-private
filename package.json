@@ -36,6 +36,7 @@
     "format:check": "prettier --check .",
     "test": "vitest ",
     "test:e2e": "playwright test --reporter=dot",
+    "test:e2e:ci": "cross-env GITHUB_ACTIONS=true GITHUB_REPOSITORY=blackphoenix42/algolens-private USE_START_SERVER_AND_TEST=true npm run build && start-server-and-test \"vite preview --port 4173 --strictPort --host 127.0.0.1\" \"http-get://127.0.0.1:4173/algolens-private/\" \"playwright test --reporter=dot\"",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "pwsh -NoProfile -Command \"$env:PWDEBUG='1'; playwright test\"",
     "e2e:report": "playwright show-report",
