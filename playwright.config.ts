@@ -62,9 +62,9 @@ export default defineConfig({
   ],
 
   // Local server: uses Vite preview. If PW_BASE_URL is set, we reuse that and skip starting a server.
-  // Also skip webServer if using start-server-and-test (indicated by USE_START_SERVER_AND_TEST env var)
+  // In GitHub Actions CI, we use start-server-and-test instead of webServer
   webServer:
-    process.env.PW_BASE_URL || process.env.USE_START_SERVER_AND_TEST
+    process.env.PW_BASE_URL || (process.env.CI && isGitHubActions)
       ? undefined
       : [
           {
