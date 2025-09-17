@@ -837,6 +837,7 @@ export default function HomePage() {
                     onChange={(value) => setQ(value)}
                     placeholder="Quick search..."
                     className="w-48 text-sm"
+                    aria-label="Quick search algorithms"
                     // Enable dropdown with algorithm suggestions
                     searchableItems={searchableItems}
                     enableFuzzySearch={true}

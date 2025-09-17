@@ -627,6 +627,7 @@ export default function VisualizerPage() {
                       max={99}
                       placeholder="Enter target value"
                       title="Target value to search for"
+                      aria-label="Search target value"
                     />
                     {meta.slug === "binary-search" && (
                       <p

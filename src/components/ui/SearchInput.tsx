@@ -44,6 +44,9 @@ export interface SearchInputProps {
   loading?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
+
+  // Accessibility props
+  "aria-label"?: string;
 }
 
 export function SearchInput({
@@ -73,6 +76,9 @@ export function SearchInput({
   loading = false,
   disabled = false,
   autoFocus = false,
+
+  // Accessibility props
+  "aria-label": ariaLabel,
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(value);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -349,6 +355,7 @@ export function SearchInput({
         }}
         disabled={disabled}
         loading={loading || isSearching}
+        aria-label={ariaLabel}
         leftIcon={
           <svg
             className="h-4 w-4"

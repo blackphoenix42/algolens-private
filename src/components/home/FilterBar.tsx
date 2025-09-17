@@ -113,6 +113,7 @@ export default function FilterBar(props: Props) {
                 defaultValue:
                   "Search by algorithm, tags, concepts, or difficulty...",
               })}
+              aria-label="Search algorithms by name, tags, concepts, or difficulty"
               // Performance optimization for fast typing
               debounceMs={20}
               // Enhanced search props

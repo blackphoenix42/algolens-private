@@ -261,6 +261,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={n}
               onChange={(e) => setN(Number(e.target.value))}
               className="w-full"
+              aria-label={t("controls.size", { defaultValue: "Size" })}
             />
             <input
               type="number"
@@ -269,6 +270,9 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={n}
               onChange={(e) => setN(Number(e.target.value))}
               className="ui-input w-16 shrink-0"
+              aria-label={
+                t("controls.size", { defaultValue: "Size" }) + " value"
+              }
             />
           </div>
 
@@ -282,6 +286,9 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={min}
               onChange={(e) => setMin(Number(e.target.value))}
               className="ui-input w-16 shrink-0"
+              aria-label={
+                t("controls.range", { defaultValue: "Range" }) + " minimum"
+              }
             />
             <span className="panel-muted shrink-0">to</span>
             <input
@@ -289,6 +296,9 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={max}
               onChange={(e) => setMax(Number(e.target.value))}
               className="ui-input w-16 shrink-0"
+              aria-label={
+                t("controls.range", { defaultValue: "Range" }) + " maximum"
+              }
             />
           </label>
 
@@ -302,6 +312,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={seed}
               onChange={(e) => setSeed(Number(e.target.value))}
               className="ui-input w-28 shrink-0"
+              aria-label={t("controls.seed", { defaultValue: "Seed" })}
             />
           </label>
 
@@ -340,6 +351,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
               value={dist}
               onChange={(e) => setDist(e.target.value as Dist)}
               className="ui-select w-full"
+              aria-label="Distribution type"
             >
               <optgroup
                 label={t("controls.distributions.basic", {
@@ -441,6 +453,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
                 value={uniques}
                 onChange={(e) => setUniques(Number(e.target.value))}
                 className="ui-input w-16 shrink-0"
+                aria-label={t("controls.uniques", { defaultValue: "Uniques" })}
               />
             </label>
           )}
@@ -456,6 +469,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
                 value={period}
                 onChange={(e) => setPeriod(Number(e.target.value))}
                 className="ui-input w-16 shrink-0"
+                aria-label={t("controls.period", { defaultValue: "Period" })}
               />
             </label>
           )}
@@ -485,6 +499,9 @@ export default function DatasetPanel({ value, onChange }: Props) {
                 })}
                 value={customText}
                 onChange={onCustomChange}
+                aria-label={t("controls.customNumbers", {
+                  defaultValue: "Custom numbers",
+                })}
               />
             </div>
           )}
