@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import DebugPanel from "@/components/debug/DebugPanel";
 import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
+import { AIRecommendationPanel } from "@/components/home/AIRecommendationPanel";
+import { AISearchHelper } from "@/components/home/AISearchHelper";
 import AlgoCard, { AlgoItem } from "@/components/home/AlgoCard";
 import FilterBar from "@/components/home/FilterBar";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
@@ -14,6 +16,7 @@ import { Card } from "@/components/ui/Card";
 import FloatingParticles from "@/components/ui/FloatingParticles";
 import { SearchInput } from "@/components/ui/SearchInput";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { ENABLE_AI_UI } from "@/config/featureFlags";
 import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
 import { LanguageSwitcher, useI18n } from "@/i18n";
@@ -856,6 +859,7 @@ export default function HomePage() {
 
                 {/* Language & Theme Controls */}
                 <div className="flex items-center gap-1">
+                  {ENABLE_AI_UI && <AISearchHelper />}
                   <LanguageSwitcher variant="dropdown" />
                   <ThemeToggle data-tour="theme-toggle" />
                 </div>
@@ -1172,6 +1176,28 @@ export default function HomePage() {
           setShowTagsOnCards={setShowTagsOnCards}
           onTagClick={handleTagClick}
         />
+
+        {/* AI Recommendation Panel - Show when no search/filters active */}
+        {ENABLE_AI_UI &&
+          !q &&
+          selectedCategories.length === 0 &&
+          selectedTags.length === 0 &&
+          selectedDifficulties.length === 0 && (
+            <section className="px-4 py-8">
+              <div className="mx-auto max-w-7xl">
+                <AIRecommendationPanel
+                  onAlgorithmSelect={(slug) => {
+                    setQ(slug);
+                    setTimeout(() => {
+                      document
+                        .getElementById("search-container")
+                        ?.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                  }}
+                />
+              </div>
+            </section>
+          )}
 
         {/* Enhanced Featured Algorithms */}
         {!q &&

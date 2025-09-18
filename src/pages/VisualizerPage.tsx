@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { AIChatPanel } from "@/components/ai/AIChatPanel";
 import ArrayCanvas, {
   ArrayCanvasHandle,
 } from "@/components/canvas/Array/ArrayCanvas";
@@ -22,6 +23,7 @@ import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPa
 import HomeButton from "@/components/ui/HomeButton";
 import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { ENABLE_AI_UI } from "@/config/featureFlags";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
@@ -159,6 +161,9 @@ export default function VisualizerPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [activeTab, setActiveTab] = useState<"canvas" | "complexity">("canvas");
   const [enhancedMode, setEnhancedMode] = useState(false);
+
+  // AI Chat Panel state
+  const [showAIChat, setShowAIChat] = useState(false);
 
   // Refs must be declared unconditionally (before any early return)
   const surfaceRef = useRef<HTMLDivElement | null>(null);
@@ -549,6 +554,28 @@ export default function VisualizerPage() {
           <div className="flex items-center gap-2">
             <LanguageSwitcher variant="dropdown" />
             <ThemeToggle />
+            {ENABLE_AI_UI && meta && (
+              <button
+                onClick={() => setShowAIChat(true)}
+                className="flex items-center gap-2 rounded bg-gradient-to-r from-blue-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors hover:from-blue-600 hover:to-indigo-700"
+                title="AI Assistant - Get help with this algorithm"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">AI Help</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -965,6 +992,16 @@ export default function VisualizerPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* AI Chat Panel (feature flagged) */}
+        {ENABLE_AI_UI && meta && (
+          <AIChatPanel
+            meta={meta}
+            isOpen={showAIChat}
+            onClose={() => setShowAIChat(false)}
+            currentStep={frame.pcLine}
+          />
         )}
       </div>
     </>
