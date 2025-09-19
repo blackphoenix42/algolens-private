@@ -1,7 +1,8 @@
 import { Keyboard, X } from "lucide-react";
 import React, { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
+import { useTheme } from "@/providers/ThemeProvider";
 import { cn } from "@/utils";
 
 interface KeyboardShortcutsPanelProps {
@@ -14,6 +15,8 @@ export function KeyboardShortcutsPanel({
   onClose,
 }: KeyboardShortcutsPanelProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toggle: toggleTheme } = useTheme();
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   // Add click-outside functionality
@@ -43,6 +46,160 @@ export function KeyboardShortcutsPanel({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, onClose]);
+
+  // Handle shortcut clicks
+  const handleShortcutClick = (shortcutKey: string) => {
+    // Close the panel first
+    onClose();
+
+    // Determine the action based on the shortcut key
+    const isVisualizerPage = location.pathname.includes("/viz/");
+
+    switch (shortcutKey) {
+      // Navigation shortcuts
+      case "H":
+        navigate("/");
+        break;
+      case "V":
+        if (!isVisualizerPage) {
+          navigate("/viz/sorting/bubble-sort");
+        }
+        break;
+      case "Esc":
+        // Already closed the panel above
+        break;
+
+      // Search shortcuts
+      case "/":
+      case "Ctrl+K": {
+        const searchInput = document.querySelector(
+          'input[type="search"], input[placeholder*="search" i]'
+        ) as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+        break;
+      }
+      case "Enter": {
+        // Trigger search with current query
+        const searchBtn = document.querySelector(
+          "[data-search-button]"
+        ) as HTMLButtonElement;
+        if (searchBtn) {
+          searchBtn.click();
+        }
+        break;
+      }
+
+      // Theme and interface
+      case "T":
+        toggleTheme();
+        break;
+      case "F":
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen();
+        }
+        break;
+      case "?":
+        // Already handled by closing the panel
+        break;
+
+      // Visualizer controls (only work on visualizer pages)
+      case "Space":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:play-pause"));
+        }
+        break;
+      case "→":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:step-forward"));
+        }
+        break;
+      case "←":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:step-backward"));
+        }
+        break;
+      case "↑":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:speed-up"));
+        }
+        break;
+      case "↓":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:speed-down"));
+        }
+        break;
+      case "R":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:reset"));
+        }
+        break;
+      case "Ctrl+Home":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:go-to-start"));
+        }
+        break;
+      case "Ctrl+End":
+        if (isVisualizerPage) {
+          document.dispatchEvent(new CustomEvent("algolens:go-to-end"));
+        }
+        break;
+
+      // Speed presets
+      case "1":
+        if (isVisualizerPage) {
+          document.dispatchEvent(
+            new CustomEvent("algolens:set-speed", { detail: 0.25 })
+          );
+        }
+        break;
+      case "2":
+        if (isVisualizerPage) {
+          document.dispatchEvent(
+            new CustomEvent("algolens:set-speed", { detail: 0.5 })
+          );
+        }
+        break;
+      case "3":
+        if (isVisualizerPage) {
+          document.dispatchEvent(
+            new CustomEvent("algolens:set-speed", { detail: 1 })
+          );
+        }
+        break;
+      case "4":
+        if (isVisualizerPage) {
+          document.dispatchEvent(
+            new CustomEvent("algolens:set-speed", { detail: 2 })
+          );
+        }
+        break;
+      case "5":
+        if (isVisualizerPage) {
+          document.dispatchEvent(
+            new CustomEvent("algolens:set-speed", { detail: 4 })
+          );
+        }
+        break;
+
+      // Filter management shortcuts (home page)
+      case "Ctrl+Shift+C":
+        document.dispatchEvent(new CustomEvent("algolens:clear-filters"));
+        break;
+      case "Ctrl+Shift+F":
+        document.dispatchEvent(new CustomEvent("algolens:toggle-featured"));
+        break;
+      case "Ctrl+Shift+E":
+        document.dispatchEvent(new CustomEvent("algolens:toggle-filter-bar"));
+        break;
+
+      default:
+        console.log(`Shortcut ${shortcutKey} not implemented yet`);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -251,14 +408,16 @@ export function KeyboardShortcutsPanel({
                   ) => (
                     <div
                       key={index}
+                      onClick={() => handleShortcutClick(shortcut.key)}
                       className={cn(
-                        "group flex items-center justify-between rounded-xl p-4 transition-all duration-200",
+                        "group flex cursor-pointer items-center justify-between rounded-xl p-4 transition-all duration-200",
                         "bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-800/20",
                         "border border-slate-200/60 dark:border-slate-700/60",
                         "hover:from-primary-50 hover:to-secondary-50 dark:hover:from-primary-900/20 dark:hover:to-secondary-900/20",
                         "hover:border-primary-200 dark:hover:border-primary-700",
                         "hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
                       )}
+                      title={`Click to execute: ${shortcut.description}`}
                     >
                       <div className="flex items-center gap-3">
                         {shortcut.icon && (

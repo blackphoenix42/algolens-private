@@ -467,6 +467,85 @@ export default function VisualizerPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [runner, navigate]);
 
+  // Handle custom algolens events from KeyboardProvider and clickable shortcuts
+  useEffect(() => {
+    const handlePlayPause = () => {
+      if (runner.playing) {
+        runner.pause();
+      } else {
+        runner.playForward();
+      }
+    };
+
+    const handleStepForward = () => {
+      runner.stepNext();
+    };
+
+    const handleStepBackward = () => {
+      runner.stepPrev();
+    };
+
+    const handleReset = () => {
+      runner.toStart();
+      runner.pause();
+    };
+
+    const handleSpeedUp = () => {
+      const newSpeed = Math.min(runner.speed * 1.5, 8);
+      runner.setSpeed(newSpeed);
+    };
+
+    const handleSpeedDown = () => {
+      const newSpeed = Math.max(runner.speed / 1.5, 0.1);
+      runner.setSpeed(newSpeed);
+    };
+
+    const handleGoToStart = () => {
+      runner.toStart();
+    };
+
+    const handleGoToEnd = () => {
+      runner.toEnd();
+    };
+
+    const handleSetSpeed = (event: CustomEvent) => {
+      const speed = event.detail;
+      runner.setSpeed(speed);
+    };
+
+    // Add event listeners
+    document.addEventListener("algolens:play-pause", handlePlayPause);
+    document.addEventListener("algolens:step-forward", handleStepForward);
+    document.addEventListener("algolens:step-backward", handleStepBackward);
+    document.addEventListener("algolens:reset", handleReset);
+    document.addEventListener("algolens:speed-up", handleSpeedUp);
+    document.addEventListener("algolens:speed-down", handleSpeedDown);
+    document.addEventListener("algolens:go-to-start", handleGoToStart);
+    document.addEventListener("algolens:go-to-end", handleGoToEnd);
+    document.addEventListener(
+      "algolens:set-speed",
+      handleSetSpeed as EventListener
+    );
+
+    return () => {
+      document.removeEventListener("algolens:play-pause", handlePlayPause);
+      document.removeEventListener("algolens:step-forward", handleStepForward);
+      document.removeEventListener(
+        "algolens:step-backward",
+        handleStepBackward
+      );
+      document.removeEventListener("algolens:reset", handleReset);
+      document.removeEventListener("algolens:speed-up", handleSpeedUp);
+      document.removeEventListener("algolens:speed-down", handleSpeedDown);
+      document.removeEventListener("algolens:go-to-start", handleGoToStart);
+      document.removeEventListener("algolens:go-to-end", handleGoToEnd);
+      document.removeEventListener(
+        "algolens:set-speed",
+        handleSetSpeed as EventListener
+      );
+    };
+  }, [runner]);
+
   // Show loading state while algorithm is being loaded
   if (isLoadingMeta) {
     return (
