@@ -11,6 +11,7 @@
     "node": ">=22.18.0 <23"
   },
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
