@@ -97,7 +97,7 @@
     "katex": "^0.16.22",
     "konva": "10.0.2",
     "lucide-react": "0.544.0",
-    "openai": "5.20.3",
+    "openai": "5.22.0",
     "posthog-js": "1.266.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -114,7 +114,7 @@
     "remark-math": "^6.0.0",
     "socket.io-client": "4.8.1",
     "web-vitals": "5.1.0",
-    "zod": "4.1.9"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@axe-core/react": "4.10.2",
