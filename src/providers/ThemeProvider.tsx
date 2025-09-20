@@ -14,7 +14,7 @@ type ThemeCtx = {
 };
 
 const Ctx = createContext<ThemeCtx | null>(null);
-const KEY = "ui-theme";
+// const KEY = "ui-theme"; // Disabled localStorage usage
 function apply(t: Theme) {
   const el = document.documentElement;
   if (t === "dark") el.classList.add("dark");
@@ -23,30 +23,23 @@ function apply(t: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem(KEY) as Theme | null;
-    if (stored === "light" || stored === "dark") return stored;
-    // default: respect system
-    return window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  });
+  // Always use dark theme - no localStorage
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     apply(theme);
-    localStorage.setItem(KEY, theme);
+    // localStorage.setItem(KEY, theme); // Disabled localStorage usage
   }, [theme]);
 
-  // keep tabs in sync
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === KEY && (e.newValue === "light" || e.newValue === "dark"))
-        setTheme(e.newValue);
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  // Disabled storage sync since we're not using localStorage
+  // useEffect(() => {
+  //   const onStorage = (e: StorageEvent) => {
+  //     if (e.key === KEY && (e.newValue === "light" || e.newValue === "dark"))
+  //       setTheme(e.newValue);
+  //   };
+  //   window.addEventListener("storage", onStorage);
+  //   return () => window.removeEventListener("storage", onStorage);
+  // }, []);
 
   const value = useMemo<ThemeCtx>(
     () => ({

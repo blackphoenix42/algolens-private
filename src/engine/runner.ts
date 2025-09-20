@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { LogCategory, logger } from "@/services/monitoring";
+// import { LogCategory, logger } from "@/services/monitoring";
 import { clamp } from "@/utils";
 
 export function useRunner(total: number, initialSpeed = 1) {
@@ -8,164 +8,205 @@ export function useRunner(total: number, initialSpeed = 1) {
   const [playing, setPlaying] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [speed, setSpeed] = useState(initialSpeed); // steps / second
-  const raf = useRef<number | null>(null);
-  const last = useRef<number>(0);
-  const carry = useRef<number>(0); // fractional steps accumulator
 
-  // Log runner initialization
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize runner with logging disabled
   useEffect(() => {
-    logger.debug(LogCategory.RUNNER, "Runner initialized", {
-      total,
-      initialSpeed,
-      idx,
-    });
-  }, [total, initialSpeed, idx]);
+    // logger.debug(LogCategory.RUNNER, "Runner initialized", {
+    //   total,
+    //   initialSpeed,
+    //   timestamp: new Date().toISOString(),
+    // });
+  }, [total, initialSpeed]);
 
-  // Log state changes
+  const pause = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  const play = useCallback(() => {
+    if (intervalRef.current) return;
+
+    const _startTime = Date.now();
+    // logger.time(`animation-loop-${_startTime}`, LogCategory.ANIMATION);
+
+    intervalRef.current = setInterval(() => {
+      setIdx((prevIdx) => {
+        let newIdx = prevIdx + direction;
+
+        // Logging disabled
+        // if (process.env.NODE_ENV === "development") {
+        //   logger.trace(LogCategory.ANIMATION, "Animation step", {
+        //     prevIdx,
+        //     newIdx,
+        //     direction,
+        //     speed,
+        //     timestamp: performance.now(),
+        //   });
+        // }
+
+        // Check boundaries
+        if (newIdx >= total || newIdx < 0) {
+          // logger.debug(LogCategory.ANIMATION, "Animation reached boundary", {
+          //   prevIdx,
+          //   attemptedIdx: newIdx,
+          //   total,
+          //   direction,
+          //   action: "clamping",
+          // });
+
+          newIdx = clamp(newIdx, 0, total - 1);
+
+          // Auto-pause when reaching boundaries
+          setTimeout(() => {
+            setPlaying(false);
+          }, 0);
+        }
+
+        return newIdx;
+      });
+    }, 1000 / speed);
+  }, [direction, speed, total]);
+
+  // Handle play/pause
   useEffect(() => {
     if (playing) {
-      logger.debug(LogCategory.RUNNER, "Animation started", {
-        direction: direction === 1 ? "forward" : "backward",
-        speed,
-        currentIndex: idx,
-        total,
-      });
+      play();
     } else {
-      logger.debug(LogCategory.RUNNER, "Animation stopped", {
-        currentIndex: idx,
-        total,
-      });
+      pause();
     }
-  }, [playing, direction, speed, idx, total]);
 
-  useEffect(() => {
-    if (!playing) return;
+    return () => pause(); // cleanup
+  }, [playing, play, pause]);
 
-    const startTime = performance.now();
-    logger.time(`animation-loop-${startTime}`, LogCategory.ANIMATION);
+  const setIndex = (newIdx: number) => {
+    const clampedIdx = clamp(newIdx, 0, total - 1);
+    // logger.debug(LogCategory.RUNNER, "Manual index change", {
+    //   requestedIdx: newIdx,
+    //   actualIdx: clampedIdx,
+    //   total,
+    // });
+    setIdx(clampedIdx);
+  };
 
-    const loop = (t: number) => {
-      if (!last.current) last.current = t;
-      const dt = (t - last.current) / 1000;
-      carry.current += dt * Math.max(0, speed);
-      const steps = Math.floor(carry.current);
-      if (steps > 0) {
-        carry.current -= steps;
-        setIdx((i) => {
-          const next = clamp(i + direction * steps, 0, Math.max(total - 1, 0));
+  const togglePlay = () => {
+    // logger.debug(LogCategory.RUNNER, "Play state change", {
+    //   from: playing,
+    //   to: !playing,
+    //   idx,
+    // });
+    setPlaying(!playing);
+  };
 
-          // Log step progression
-          if (next !== i) {
-            logger.trace(LogCategory.ANIMATION, "Animation step", {
-              from: i,
-              to: next,
-              steps,
-              direction,
-              speed,
-            });
-          }
+  const toggleDirection = () => {
+    const newDirection = direction === 1 ? -1 : 1;
+    // logger.debug(LogCategory.RUNNER, "Direction change", {
+    //   from: direction,
+    //   to: newDirection,
+    //   idx,
+    // });
+    setDirection(newDirection as 1 | -1);
+  };
 
-          if (next === 0 || next === Math.max(total - 1, 0)) {
-            setPlaying(false);
-            logger.debug(LogCategory.ANIMATION, "Animation reached boundary", {
-              index: next,
-              boundary: next === 0 ? "start" : "end",
-            });
-          }
-          return next;
-        });
-        last.current = t;
-      }
-      raf.current = requestAnimationFrame(loop);
-    };
-    raf.current = requestAnimationFrame(loop);
+  const setSpeedValue = (newSpeed: number) => {
+    const clampedSpeed = clamp(newSpeed, 0.1, 10);
+    // logger.debug(LogCategory.RUNNER, "Speed change", {
+    //   from: speed,
+    //   to: clampedSpeed,
+    //   requested: newSpeed,
+    // });
+    setSpeed(clampedSpeed);
+  };
 
-    return () => {
-      if (raf.current) {
-        cancelAnimationFrame(raf.current);
-        logger.timeEnd(`animation-loop-${startTime}`, LogCategory.ANIMATION);
-      }
-      last.current = 0;
-      carry.current = 0;
-    };
-  }, [playing, speed, direction, total]);
+  const reset = () => {
+    // logger.debug(LogCategory.RUNNER, "Runner reset", {
+    //   previousIdx: idx,
+    //   wasPlaying: playing,
+    // });
+    setIdx(0);
+    setPlaying(false);
+    setDirection(1);
+  };
+
+  const stepForward = () => {
+    const newIdx = clamp(idx + 1, 0, total - 1);
+    // logger.trace(LogCategory.RUNNER, "Step forward", {
+    //   from: idx,
+    //   to: newIdx,
+    //   total,
+    // });
+    setIdx(newIdx);
+  };
+
+  const stepBackward = () => {
+    const newIdx = clamp(idx - 1, 0, total - 1);
+    // logger.trace(LogCategory.RUNNER, "Step backward", {
+    //   from: idx,
+    //   to: newIdx,
+    //   total,
+    // });
+    setIdx(newIdx);
+  };
+
+  const goToStart = () => {
+    // logger.debug(LogCategory.RUNNER, "Go to start", {
+    //   from: idx,
+    //   to: 0,
+    // });
+    setIdx(0);
+  };
+
+  const goToEnd = () => {
+    const endIdx = total - 1;
+    // logger.debug(LogCategory.RUNNER, "Go to end", {
+    //   from: idx,
+    //   to: endIdx,
+    //   total,
+    // });
+    setIdx(endIdx);
+  };
+
+  // Compatibility methods for existing code
+  const playForward = () => {
+    setDirection(1);
+    setPlaying(true);
+  };
+
+  const playBackward = () => {
+    setDirection(-1);
+    setPlaying(true);
+  };
 
   return {
     idx,
-    setIdx: (newIdx: number) => {
-      logger.debug(LogCategory.RUNNER, "Manual index change", {
-        from: idx,
-        to: newIdx,
-      });
-      setIdx(newIdx);
-    },
     playing,
-    setPlaying: (newPlaying: boolean) => {
-      logger.debug(LogCategory.RUNNER, "Play state change", {
-        from: playing,
-        to: newPlaying,
-      });
-      setPlaying(newPlaying);
-    },
     direction,
-    setDirection: (newDirection: 1 | -1) => {
-      logger.debug(LogCategory.RUNNER, "Direction change", {
-        from: direction === 1 ? "forward" : "backward",
-        to: newDirection === 1 ? "forward" : "backward",
-      });
-      setDirection(newDirection);
-    },
     speed,
-    setSpeed: (newSpeed: number) => {
-      logger.debug(LogCategory.RUNNER, "Speed change", {
-        from: speed,
-        to: newSpeed,
-      });
-      setSpeed(newSpeed);
-    },
-    playForward: () => {
-      logger.debug(LogCategory.RUNNER, "Play forward triggered");
-      setDirection(1);
-      setPlaying(true);
-    },
-    playBackward: () => {
-      logger.debug(LogCategory.RUNNER, "Play backward triggered");
-      setDirection(-1);
-      setPlaying(true);
-    },
-    pause: () => {
-      logger.debug(LogCategory.RUNNER, "Pause triggered");
-      setPlaying(false);
-    },
-    stepNext: () => {
-      logger.debug(LogCategory.RUNNER, "Step next triggered");
-      setIdx((i) => {
-        const next = clamp(i + 1, 0, Math.max(total - 1, 0));
-        logger.trace(LogCategory.RUNNER, "Manual step forward", {
-          from: i,
-          to: next,
-        });
-        return next;
-      });
-    },
-    stepPrev: () => {
-      logger.debug(LogCategory.RUNNER, "Step previous triggered");
-      setIdx((i) => {
-        const next = clamp(i - 1, 0, Math.max(total - 1, 0));
-        logger.trace(LogCategory.RUNNER, "Manual step backward", {
-          from: i,
-          to: next,
-        });
-        return next;
-      });
-    },
-    toStart: () => {
-      logger.debug(LogCategory.RUNNER, "Jump to start triggered");
-      setIdx(0);
-    },
-    toEnd: () => {
-      logger.debug(LogCategory.RUNNER, "Jump to end triggered");
-      setIdx(Math.max(total - 1, 0));
-    },
+    setIndex,
+    setIdx: setIndex, // alias for compatibility
+    togglePlay,
+    toggleDirection,
+    setSpeed: setSpeedValue,
+    reset,
+    stepForward,
+    stepNext: stepForward, // alias for compatibility
+    stepBackward,
+    stepPrev: stepBackward, // alias for compatibility
+    goToStart,
+    toStart: goToStart, // alias for compatibility
+    goToEnd,
+    toEnd: goToEnd, // alias for compatibility
+    playForward,
+    playBackward,
+    pause,
+    // Utility methods
+    isAtStart: idx === 0,
+    isAtEnd: idx === total - 1,
+    progress: total > 0 ? (idx / (total - 1)) * 100 : 0,
+    canStepForward: idx < total - 1,
+    canStepBackward: idx > 0,
   };
 }

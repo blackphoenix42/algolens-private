@@ -2,7 +2,6 @@
 import { generateId } from "@/utils";
 
 import { EventLogger } from "./eventLogger";
-import { LogCategory, logger } from "./logger";
 
 interface SessionData {
   sessionId: string;
@@ -52,7 +51,7 @@ export class SessionTracker {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
 
-    logger.info(LogCategory.GENERAL, "Session started", session);
+    // logger.info(LogCategory.GENERAL, "Session started", session);
     EventLogger.logSessionEvent("start", { ...session });
 
     return session;
@@ -92,10 +91,10 @@ export class SessionTracker {
         height: window.innerHeight,
       };
 
-      logger.debug(LogCategory.GENERAL, "Viewport resized", {
-        viewport: this.sessionData.viewport,
-        timestamp: new Date().toISOString(),
-      });
+      // logger.debug(LogCategory.GENERAL, "Viewport resized", {
+      //   viewport: this.sessionData.viewport,
+      //   timestamp: new Date().toISOString(),
+      // });
     });
 
     // Track beforeunload
@@ -107,14 +106,14 @@ export class SessionTracker {
     this.resetActivityTimer();
   }
 
-  private updateActivity(source: string) {
+  private updateActivity(_source: string) {
     this.sessionData.lastActivity = new Date().toISOString();
 
-    logger.debug(LogCategory.USER_INTERACTION, "User activity detected", {
-      source,
-      sessionId: this.sessionData.sessionId,
-      timestamp: this.sessionData.lastActivity,
-    });
+    // logger.debug(LogCategory.USER_INTERACTION, "User activity detected", {
+    //   source,
+    //   sessionId: this.sessionData.sessionId,
+    //   timestamp: this.sessionData.lastActivity,
+    // });
 
     this.resetActivityTimer();
   }
@@ -125,11 +124,11 @@ export class SessionTracker {
     }
 
     this.activityTimer = setTimeout(() => {
-      logger.info(LogCategory.GENERAL, "Session timeout due to inactivity", {
-        sessionId: this.sessionData.sessionId,
-        duration: Date.now() - new Date(this.sessionData.startTime).getTime(),
-        timestamp: new Date().toISOString(),
-      });
+      // logger.info(LogCategory.GENERAL, "Session timeout due to inactivity", {
+      //   sessionId: this.sessionData.sessionId,
+      //   duration: Date.now() - new Date(this.sessionData.startTime).getTime(),
+      //   timestamp: new Date().toISOString(),
+      // });
 
       EventLogger.logSessionEvent("end", {
         reason: "timeout",
@@ -138,24 +137,24 @@ export class SessionTracker {
     }, this.ACTIVITY_TIMEOUT);
   }
 
-  public logPageView(path: string) {
+  public logPageView(_path: string) {
     this.sessionData.pageViews++;
 
-    logger.info(LogCategory.ROUTER, "Page view logged", {
-      path,
-      sessionId: this.sessionData.sessionId,
-      pageViews: this.sessionData.pageViews,
-      timestamp: new Date().toISOString(),
-    });
+    // logger.info(LogCategory.ROUTER, "Page view logged", {
+    //   path: _path,
+    //   sessionId: this.sessionData.sessionId,
+    //   pageViews: this.sessionData.pageViews,
+    //   timestamp: new Date().toISOString(),
+    // });
   }
 
-  public logFeatureUsage(feature: string, data?: Record<string, unknown>) {
-    logger.info(LogCategory.USER_INTERACTION, `Feature used: ${feature}`, {
-      feature,
-      sessionId: this.sessionData.sessionId,
-      ...data,
-      timestamp: new Date().toISOString(),
-    });
+  public logFeatureUsage(_feature: string, _data?: Record<string, unknown>) {
+    // logger.info(LogCategory.USER_INTERACTION, `Feature used: ${_feature}`, {
+    //   feature: _feature,
+    //   sessionId: this.sessionData.sessionId,
+    //   ..._data,
+    //   timestamp: new Date().toISOString(),
+    // });
   }
 
   public getSessionInfo(): SessionData {
@@ -166,12 +165,12 @@ export class SessionTracker {
     const duration =
       Date.now() - new Date(this.sessionData.startTime).getTime();
 
-    logger.info(LogCategory.GENERAL, "Session ended", {
-      sessionId: this.sessionData.sessionId,
-      duration,
-      pageViews: this.sessionData.pageViews,
-      timestamp: new Date().toISOString(),
-    });
+    // logger.info(LogCategory.GENERAL, "Session ended", {
+    //   sessionId: this.sessionData.sessionId,
+    //   duration,
+    //   pageViews: this.sessionData.pageViews,
+    //   timestamp: new Date().toISOString(),
+    // });
 
     EventLogger.logSessionEvent("end", {
       sessionData: this.sessionData,
@@ -195,4 +194,4 @@ export class SessionTracker {
 }
 
 // Initialize session tracking
-export const sessionTracker = SessionTracker.getInstance();
+// export const sessionTracker = SessionTracker.getInstance();

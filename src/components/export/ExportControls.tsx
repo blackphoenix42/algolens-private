@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { log } from "@/services/monitoring";
+// import { log } from "@/services/monitoring";
 
 type ExportFormat = "png" | "svg" | "gif" | "mp4";
 
@@ -48,7 +48,7 @@ export default function ExportControls({
 
     try {
       setIsExporting(true);
-      log.user.action("Export PNG", { algorithm: algorithmName });
+      // log.user.action("Export PNG", { algorithm: algorithmName });
 
       let canvas: HTMLCanvasElement;
 
@@ -110,7 +110,7 @@ export default function ExportControls({
 
     try {
       setIsExporting(true);
-      log.user.action("Export SVG", { algorithm: algorithmName });
+      // log.user.action("Export SVG", { algorithm: algorithmName });
 
       let svgElement: SVGSVGElement;
 
@@ -173,10 +173,10 @@ export default function ExportControls({
     try {
       setIsExporting(true);
       setExportProgress(0);
-      log.user.action("Export GIF", {
-        algorithm: algorithmName,
-        frameCount: animationFrames.length,
-      });
+      // log.user.action("Export GIF", {
+      //   algorithm: algorithmName,
+      //   frameCount: animationFrames.length,
+      // });
 
       // For now, show a placeholder implementation
       // Real GIF creation would require a library like gif.js
@@ -198,7 +198,7 @@ export default function ExportControls({
 
     setIsExporting(false);
     setExportProgress(0);
-  }, [animationFrames, algorithmName]);
+  }, [animationFrames]);
 
   const exportAsMP4 = useCallback(async () => {
     if (!animationFrames.length) {
@@ -209,10 +209,10 @@ export default function ExportControls({
     try {
       setIsExporting(true);
       setExportProgress(0);
-      log.user.action("Export MP4", {
-        algorithm: algorithmName,
-        frameCount: animationFrames.length,
-      });
+      // log.user.action("Export MP4", {
+      //   algorithm: algorithmName,
+      //   frameCount: animationFrames.length,
+      // });
 
       // For now, show a placeholder implementation
       // Real MP4 creation would require MediaRecorder API or a library
@@ -234,7 +234,7 @@ export default function ExportControls({
 
     setIsExporting(false);
     setExportProgress(0);
-  }, [animationFrames, algorithmName]);
+  }, [animationFrames]);
 
   const exportHandlers = {
     png: exportAsPNG,

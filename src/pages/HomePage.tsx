@@ -1,30 +1,26 @@
-import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import DebugPanel from "@/components/debug/DebugPanel";
-import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
-import { AIRecommendationPanel } from "@/components/home/AIRecommendationPanel";
-import { AISearchHelper } from "@/components/home/AISearchHelper";
+// import DebugPanel from "@/components/debug/DebugPanel";
+// import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
+// import { AIRecommendationPanel } from "@/components/home/AIRecommendationPanel";
+// import { AISearchHelper } from "@/components/home/AISearchHelper";
 import AlgoCard, { AlgoItem } from "@/components/home/AlgoCard";
 import FilterBar from "@/components/home/FilterBar";
-import OnboardingTour from "@/components/onboarding/OnboardingTour";
-import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
-import { AlgorithmIcon } from "@/components/ui/AlgorithmIcon";
+// import OnboardingTour from "@/components/onboarding/OnboardingTour";
+// import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import FloatingParticles from "@/components/ui/FloatingParticles";
-import { SearchInput } from "@/components/ui/SearchInput";
-import ThemeToggle from "@/components/ui/ThemeToggle";
-import { ENABLE_AI_UI } from "@/config/featureFlags";
+// import { SearchInput } from "@/components/ui/SearchInput";
+// import ThemeToggle from "@/components/ui/ThemeToggle";
+// import { ENABLE_AI_UI } from "@/config/featureFlags";
 import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
-import { LanguageSwitcher, useI18n } from "@/i18n";
-import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
+// import { LanguageSwitcher, useI18n } from "@/i18n";
+// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
 import {
   cn,
-  createSearchableFromAlgoMeta,
+  // createSearchableFromAlgoMeta,
   formatDifficulty,
   scrollToElement,
 } from "@/utils";
@@ -67,13 +63,11 @@ const TOPIC_META: Record<string, { icon: string; color: string }> = {
 function useSafeCatalog(): {
   catalog: Record<string, AlgoItem[]>;
   metaCatalog: Record<string, AlgoMeta[]>;
-  isLoading: boolean;
 } {
   const [catalog, setCatalog] = useState<Record<string, AlgoItem[]>>({});
   const [metaCatalog, setMetaCatalog] = useState<Record<string, AlgoMeta[]>>(
     {}
   );
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadCatalog = async () => {
@@ -101,8 +95,6 @@ function useSafeCatalog(): {
         console.error("Failed to load algorithm catalog:", error);
         setCatalog({});
         setMetaCatalog({});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -110,41 +102,41 @@ function useSafeCatalog(): {
     runWhenIdle(loadCatalog);
   }, []);
 
-  return { catalog, metaCatalog, isLoading };
+  return { catalog, metaCatalog };
 }
 
 export default function HomePage() {
-  const { t } = useI18n();
-  const componentLogger = useComponentLogger("HomePage");
-  const navigate = useNavigate();
+  // const { t } = useI18n();
+  // const componentLogger = useComponentLogger("HomePage");
+  const _navigate = useNavigate();
   const { catalog, metaCatalog } = useSafeCatalog();
   const {
-    shouldShowOnboardingTour,
+    // shouldShowOnboardingTour,
     resetOnboardingTour,
-    markOnboardingTourSeen,
+    // markOnboardingTourSeen,
   } = usePreferences();
 
   // Log homepage access
   useEffect(() => {
-    logger.info(LogCategory.ROUTER, "HomePage accessed");
-    componentLogger.mount();
+    // // logger.info(LogCategory.ROUTER, "HomePage accessed");
+    // componentLogger.mount();
 
     // Log catalog contents
-    const catalogStats = Object.entries(catalog).map(([topic, items]) => ({
+    const _catalogStats = Object.entries(catalog).map(([topic, items]) => ({
       topic,
       count: items.length,
     }));
-    logger.debug(LogCategory.GENERAL, "Algorithm catalog loaded", {
-      catalogStats,
-      totalAlgorithms: Object.values(catalog).reduce(
-        (acc, items) => acc + items.length,
-        0
-      ),
-      timestamp: new Date().toISOString(),
-    });
+    // logger.debug(LogCategory.GENERAL, "Algorithm catalog loaded", {
+    //   catalogStats,
+    //   totalAlgorithms: Object.values(catalog).reduce(
+    //     (acc, items) => acc + items.length,
+    //     0
+    //   ),
+    //   timestamp: new Date().toISOString(),
+    // });
 
-    return () => componentLogger.unmount();
-  }, [catalog, componentLogger]);
+    // return () => componentLogger.unmount();
+  }, [catalog]);
 
   const [q, setQ] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -153,19 +145,20 @@ export default function HomePage() {
     []
   );
   const [sortKey, setSortKey] = useState<SortKey>("relevance");
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  // const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTagsOnCards, setShowTagsOnCards] = useState(true);
-  const [showFeaturedAlgorithms, setShowFeaturedAlgorithms] = useState(true);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  // const [showFeaturedAlgorithms, setShowFeaturedAlgorithms] = useState(true);
+  // const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Performance Monitor
-  const performanceMonitor = usePerformanceMonitor();
+  // const performanceMonitor = usePerformanceMonitor();
 
   // Hero section visibility from preferences
-  const { preferences, toggleHeroSection } = usePreferences();
-  const showHero = preferences.showHeroSection;
+  const { preferences: _preferences, toggleHeroSection } = usePreferences();
+  // const showHero = preferences.showHeroSection;
 
   // Check if this is a first-time user
+  /*
   useEffect(() => {
     const shouldShow = shouldShowOnboardingTour();
     if (shouldShow) {
@@ -176,8 +169,10 @@ export default function HomePage() {
     preferences.showOnboardingTour,
     preferences.lastSeenOnboardingVersion,
   ]);
+  */
 
   // Keyboard shortcut for toggling featured algorithms
+  /*
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -198,16 +193,16 @@ export default function HomePage() {
           setShowFeaturedAlgorithms((prev) => !prev);
 
           // Log the action
-          logger.info(
-            LogCategory.USER_INTERACTION,
-            "Featured algorithms toggled via keyboard",
-            {
-              showFeatured: !showFeaturedAlgorithms,
-              source: "keyboard_shortcut",
-              shortcut: "Ctrl+Shift+F",
-              timestamp: new Date().toISOString(),
-            }
-          );
+          // logger.info(
+          //   LogCategory.USER_INTERACTION,
+          //   "Featured algorithms toggled via keyboard",
+          //   {
+          //     showFeatured: !showFeaturedAlgorithms,
+          //     source: "keyboard_shortcut",
+          //     shortcut: "Ctrl+Shift+F",
+          //     timestamp: new Date().toISOString(),
+          //   }
+          // );
         }
       }
     };
@@ -215,6 +210,7 @@ export default function HomePage() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [showFeaturedAlgorithms]);
+  */
 
   // Keyboard shortcut for toggling debug panel (Dev Mode)
   useEffect(() => {
@@ -236,19 +232,19 @@ export default function HomePage() {
           !target.isContentEditable
         ) {
           event.preventDefault();
-          setShowDebugPanel((prev) => {
-            const newState = !prev;
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              `Debug panel ${newState ? "opened" : "closed"} via keyboard shortcut`,
-              {
-                method: "keyboard_shortcut",
-                key: "Ctrl+Shift+D",
-                timestamp: new Date().toISOString(),
-              }
-            );
-            return newState;
-          });
+          // setShowDebugPanel((prev) => {
+          //   const newState = !prev;
+          //   // logger.info(
+          //   //   LogCategory.USER_INTERACTION,
+          //   //   `Debug panel ${newState ? "opened" : "closed"} via keyboard shortcut`,
+          //   //   {
+          //     //     method: "keyboard_shortcut",
+          //     //     key: "Ctrl+Shift+D",
+          //     //     timestamp: new Date().toISOString(),
+          //     //   }
+          //     // );
+          //     return newState;
+          //   });
         }
       }
     };
@@ -269,10 +265,10 @@ export default function HomePage() {
   );
 
   // Create searchable algorithm data for mini search dropdown
-  const searchableItems = useMemo(() => {
-    const allAlgorithms = Object.values(metaCatalog).flat();
-    return createSearchableFromAlgoMeta(allAlgorithms);
-  }, [metaCatalog]);
+  // const searchableItems = useMemo(() => {
+  //   const allAlgorithms = Object.values(metaCatalog).flat();
+  //   return createSearchableFromAlgoMeta(allAlgorithms);
+  // }, [metaCatalog]);
 
   const tagUniverse = useMemo(() => {
     const s = new Set<string>();
@@ -418,19 +414,19 @@ export default function HomePage() {
       selectedDifficulties.length ||
       sortKey !== "relevance"
     ) {
-      logger.info(LogCategory.USER_INTERACTION, "Search/filter applied", {
-        query: q,
-        categories: selectedCategories,
-        tags: selectedTags,
-        difficulties: selectedDifficulties,
-        sortKey,
-        resultsCount: totalShown,
-        totalAlgorithms: Object.values(catalog).reduce(
-          (acc, items) => acc + items.length,
-          0
-        ),
-        timestamp: new Date().toISOString(),
-      });
+      // logger.info(LogCategory.USER_INTERACTION, "Search/filter applied", {
+      //   query: q,
+      //   categories: selectedCategories,
+      //   tags: selectedTags,
+      //   difficulties: selectedDifficulties,
+      //   sortKey,
+      //   resultsCount: totalShown,
+      //   totalAlgorithms: Object.values(catalog).reduce(
+      //     (acc, items) => acc + items.length,
+      //     0
+      //   ),
+      //   timestamp: new Date().toISOString(),
+      // });
     }
   }, [
     q,
@@ -443,53 +439,43 @@ export default function HomePage() {
   ]);
 
   const clearFilters = useCallback(() => {
-    logger.info(LogCategory.USER_INTERACTION, "Filters cleared", {
-      previousFilters: {
-        query: q,
-        categories: selectedCategories,
-        tags: selectedTags,
-        difficulties: selectedDifficulties,
-        sortKey,
-      },
-      resultsBeforeClearing: totalShown,
-      timestamp: new Date().toISOString(),
-    });
+    // logger.info(LogCategory.USER_INTERACTION, "Filters cleared", {
+    //   previousFilters: {
+    //     query: q,
+    //     categories: selectedCategories,
+    //     tags: selectedTags,
+    //     difficulties: selectedDifficulties,
+    //     sortKey,
+    //   },
+    //   resultsBeforeClearing: totalShown,
+    //   timestamp: new Date().toISOString(),
+    // });
 
     setQ("");
     setSelectedCategories([]);
     setSelectedTags([]);
     setSelectedDifficulties([]);
     setSortKey("relevance");
-  }, [
-    q,
-    selectedCategories,
-    selectedTags,
-    selectedDifficulties,
-    sortKey,
-    totalShown,
-  ]);
+  }, []);
 
-  const handleTagClick = useCallback(
-    (tag: string) => {
-      // Toggle the tag in selected tags if not already selected, or just select it
-      setSelectedTags((prev) => {
-        if (prev.includes(tag)) {
-          return prev; // Already selected, don't change
-        } else {
-          return [...prev, tag]; // Add to selection
-        }
-      });
+  const handleTagClick = useCallback((tag: string) => {
+    // Toggle the tag in selected tags if not already selected, or just select it
+    setSelectedTags((prev) => {
+      if (prev.includes(tag)) {
+        return prev; // Already selected, don't change
+      } else {
+        return [...prev, tag]; // Add to selection
+      }
+    });
 
-      logger.info(LogCategory.USER_INTERACTION, "Tag clicked from card", {
-        tag,
-        selectedTags: selectedTags.includes(tag)
-          ? selectedTags
-          : [...selectedTags, tag],
-        timestamp: new Date().toISOString(),
-      });
-    },
-    [selectedTags]
-  );
+    // logger.info(LogCategory.USER_INTERACTION, "Tag clicked from card", {
+    //   tag,
+    //   selectedTags: selectedTags.includes(tag)
+    //     ? selectedTags
+    //     : [...selectedTags, tag],
+    //   timestamp: new Date().toISOString(),
+    // });
+  }, []);
 
   // Home page keyboard shortcuts
   useEffect(() => {
@@ -599,7 +585,7 @@ export default function HomePage() {
         case event.ctrlKey && event.key === "t":
           event.preventDefault();
           resetOnboardingTour();
-          setShowOnboarding(true);
+          // setShowOnboarding(true);
           break;
 
         case event.ctrlKey && event.key === "r":
@@ -662,13 +648,14 @@ export default function HomePage() {
     clearFilters,
     toggleHeroSection,
     resetOnboardingTour,
-    setShowOnboarding,
+    // setShowOnboarding,
     setSelectedCategories,
     setSelectedDifficulties,
     setQ,
     q,
   ]);
 
+  /*
   const featuredAlgorithms = useMemo(() => {
     const featured = [
       { category: "sorting", slug: "bubble-sort" },
@@ -685,6 +672,7 @@ export default function HomePage() {
       })
       .filter(Boolean) as Array<{ topic: string; item: AlgoItem }>;
   }, [catalog]);
+  */
 
   const stats = useMemo(() => {
     const totalAlgorithms = allItems.length;
@@ -704,40 +692,7 @@ export default function HomePage() {
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         style={{ contain: "layout style" }}
-      >
-        <div
-          className="liquid-glass-hero animate-float absolute rounded-full opacity-30"
-          style={{
-            top: "25%",
-            left: "25%",
-            width: "384px",
-            height: "384px",
-            willChange: "transform",
-          }}
-        ></div>
-        <div
-          className="liquid-glass-hero animate-float absolute rounded-full opacity-20"
-          style={{
-            right: "25%",
-            bottom: "25%",
-            width: "288px",
-            height: "288px",
-            animationDelay: "2s",
-            willChange: "transform",
-          }}
-        ></div>
-        <div
-          className="liquid-glass-hero animate-float absolute rounded-full opacity-25"
-          style={{
-            top: "75%",
-            left: "75%",
-            width: "192px",
-            height: "192px",
-            animationDelay: "4s",
-            willChange: "transform",
-          }}
-        ></div>
-      </div>
+      ></div>
       {/* Header now lives in row 1 and sticks at top */}
       <header
         className={cn(
@@ -762,6 +717,7 @@ export default function HomePage() {
 
               {/* Navigation Controls */}
               <div className="hidden items-center gap-2 sm:flex lg:gap-3">
+                {/*
                 {!showHero && (
                   <Button
                     variant="ghost"
@@ -774,6 +730,9 @@ export default function HomePage() {
                     <span className="hidden text-sm lg:inline">Show Hero</span>
                   </Button>
                 )}
+                */}
+                {/* Featured algorithms button */}
+                {/*
                 <Button
                   variant="ghost"
                   size="sm"
@@ -787,6 +746,9 @@ export default function HomePage() {
                     {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
                   </span>
                 </Button>
+                */}
+                {/* Quick Tour button */}
+                {/*
                 <Button
                   variant="ghost"
                   size="sm"
@@ -806,6 +768,7 @@ export default function HomePage() {
                     {t("common.quickTour", { defaultValue: "Tour" })}
                   </span>
                 </Button>
+                */}
               </div>
             </div>
 
@@ -834,6 +797,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Mini Search Input */}
+                {/*
                 <div className="hidden sm:block">
                   <SearchInput
                     value={q}
@@ -856,12 +820,13 @@ export default function HomePage() {
                     }}
                   />
                 </div>
+                */}
 
                 {/* Language & Theme Controls */}
                 <div className="flex items-center gap-1">
-                  {ENABLE_AI_UI && <AISearchHelper />}
-                  <LanguageSwitcher variant="dropdown" />
-                  <ThemeToggle data-tour="theme-toggle" />
+                  {/* {ENABLE_AI_UI && <AISearchHelper />} */}
+                  {/* <LanguageSwitcher variant="dropdown" /> */}
+                  {/* <ThemeToggle data-tour="theme-toggle" /> */}
                 </div>
               </div>
             </div>
@@ -873,6 +838,8 @@ export default function HomePage() {
             className="mt-3 hidden border-t border-white/10 pt-3 sm:hidden"
           >
             <div className="flex flex-wrap items-center gap-2">
+              {/* Show Hero button */}
+              {/*
               {!showHero && (
                 <Button
                   variant="ghost"
@@ -891,6 +858,9 @@ export default function HomePage() {
                   <span className="text-sm">Show Hero</span>
                 </Button>
               )}
+              */}
+              {/* Featured algorithms mobile button */}
+              {/*
               <Button
                 variant="ghost"
                 size="sm"
@@ -909,12 +879,15 @@ export default function HomePage() {
                   {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
                 </span>
               </Button>
+              */}
+              {/* Quick Tour mobile button */}
+              {/*
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
                   resetOnboardingTour();
-                  setShowOnboarding(true);
+                  // setShowOnboarding(true);
                   // Hide mobile menu
                   document
                     .querySelector("[data-mobile-nav]")
@@ -932,6 +905,7 @@ export default function HomePage() {
                   {t("common.quickTour", { defaultValue: "Tour" })}
                 </span>
               </Button>
+              */}
             </div>
           </div>
         </div>
@@ -939,113 +913,66 @@ export default function HomePage() {
       {/* Row 2: the only scrollable area */}
       <div className="relative overflow-y-auto">
         {/* Enhanced Hero Section with better visuals */}
+        {/*
         {showHero && (
           <section
             data-tour="hero-section"
-            className="liquid-glass-hero relative flex min-h-[100vh] items-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
+            className="relative flex min-h-[100vh] items-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
           >
-            {/* Enhanced Animated Background */}
+            {/* Static Background */
+        /*}
             <div className="absolute inset-0">
-              {/* Floating Particles */}
-              <FloatingParticles particleCount={80} />
-
-              {/* Multi-layered Gradient Overlays */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-pink-900/30"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-
-              {/* Enhanced Animated Background Pattern */}
-              <div className="animate-pulse-soft absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+PC9zdmc+')] opacity-40"></div>
-
-              {/* Enhanced Glowing Orbs with better colors and sizes */}
-              <div className="animate-float animation-delay-1000 absolute top-1/4 left-1/4 h-40 w-40 rounded-full bg-gradient-to-r from-blue-500/30 to-cyan-500/20 blur-3xl"></div>
-              <div className="animate-float animation-delay-2000 absolute right-1/4 bottom-1/3 h-48 w-48 rounded-full bg-gradient-to-r from-purple-500/25 to-pink-500/30 blur-3xl"></div>
-              <div className="animate-float animation-delay-3500 absolute top-1/3 right-1/3 h-36 w-36 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/25 blur-3xl"></div>
-
-              {/* Additional depth orbs */}
-              <div className="animate-float animation-delay-4000 absolute bottom-1/4 left-1/3 h-32 w-32 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/15 blur-2xl"></div>
-              <div className="animate-float animation-delay-1500 absolute top-1/2 left-1/2 h-28 w-28 rounded-full bg-gradient-to-r from-indigo-500/25 to-purple-500/20 blur-2xl"></div>
-
-              {/* Enhanced Algorithm-themed floating icons */}
-              <div className="animate-float animation-delay-500 absolute top-20 left-20 hidden sm:block">
-                <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-                  <AlgorithmIcon
-                    variant="sorting"
-                    className="h-12 w-12 text-blue-400/60"
-                  />
-                </div>
-              </div>
-              <div className="animate-float animation-delay-1500 absolute top-32 right-32 hidden md:block">
-                <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-                  <AlgorithmIcon
-                    variant="graph"
-                    className="h-16 w-16 text-purple-400/60"
-                  />
-                </div>
-              </div>
-              <div className="animate-float animation-delay-3000 absolute bottom-32 left-1/3 hidden lg:block">
-                <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
-                  <AlgorithmIcon
-                    variant="array"
-                    className="h-10 w-10 text-pink-400/60"
-                  />
-                </div>
-              </div>
-              <div className="animate-float animation-delay-2500 absolute top-2/3 right-20 hidden lg:block">
-                <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm">
-                  <AlgorithmIcon
-                    variant="tree"
-                    className="h-12 w-12 text-emerald-400/60"
-                  />
-                </div>
-              </div>
+              {/* Single gradient overlay */
+        /*}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/15 to-pink-900/20"></div>
             </div>
 
-            {/* Hero Content */}
+            {/* Hero Content */
+        /*}
             <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-              {/* Hero Header */}
+              {/* Hero Header */
+        /*}
               <div className="mb-12 space-y-8">
-                {/* Enhanced Title with better visual effects */}
-                <div className="animate-fade-in-up space-y-4">
+                {/* Enhanced Title with better visual effects */
+        /*}
+                <div className="space-y-4">
                   <h1 className="text-5xl leading-tight font-extrabold tracking-tight text-gray-900 sm:text-6xl md:text-7xl lg:text-8xl dark:text-white">
                     <span className="relative inline-block">
-                      <span className="animate-gradient-x bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                      <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                         AlgoLens
                       </span>
-                      {/* Glowing underline effect */}
-                      <div className="absolute -bottom-2 left-1/2 h-1 w-24 -translate-x-1/2 animate-pulse rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-60 blur-sm md:w-32"></div>
                     </span>
                   </h1>
-                  {/* Subtitle tagline */}
+                  {/* Subtitle tagline */
+        /*}
                   <p className="text-lg font-medium text-gray-700 opacity-90 sm:text-xl md:text-2xl dark:text-gray-200">
                     Visualize • Learn • Master
                   </p>
                 </div>
 
-                <p className="animate-fade-in-up animation-delay-300 mx-auto max-w-3xl text-xl leading-relaxed text-gray-600 sm:text-2xl md:text-3xl dark:text-gray-300">
+                <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-600 sm:text-2xl md:text-3xl dark:text-gray-300">
                   {t("hero.subtitle")}
                 </p>
-                <div className="animate-fade-in-up animation-delay-600 mx-auto max-w-4xl">
+                <div className="mx-auto max-w-4xl">
                   <p className="text-lg leading-relaxed text-gray-500 sm:text-xl dark:text-gray-400">
                     {t("hero.description")}
                   </p>
                 </div>
               </div>
 
-              {/* Enhanced CTA Buttons */}
-              <div className="animate-fade-in-up animation-delay-900 flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
+              {/* Enhanced CTA Buttons */
+        /*}
+              <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
                 <Button
                   onClick={() => scrollToElement("search-container")}
                   size="lg"
-                  className="group hover:shadow-3xl relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-10 py-5 text-lg font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-110 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700"
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-10 py-5 text-lg font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-105"
                 >
                   <span className="relative z-10 flex items-center gap-3">
-                    <span className="text-2xl group-hover:animate-bounce">
-                      🚀
-                    </span>
+                    <span className="text-2xl">🚀</span>
                     <span>{t("hero.cta.explore")}</span>
                     <svg
-                      className="h-5 w-5 transition-transform group-hover:translate-x-1"
+                      className="h-5 w-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1058,33 +985,28 @@ export default function HomePage() {
                       />
                     </svg>
                   </span>
-                  {/* Animated shimmer effect */}
-                  <div className="group-hover:animate-shimmer absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"></div>
                 </Button>
 
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={() => toggleHeroSection()}
-                  className="group relative overflow-hidden rounded-2xl border-2 border-white/30 bg-white/10 px-10 py-5 text-lg font-semibold text-white backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/50 hover:bg-white/20 hover:shadow-xl"
+                  className="group relative overflow-hidden rounded-2xl border-2 border-white/30 bg-white/10 px-10 py-5 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:border-white/50 hover:bg-white/20"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="text-2xl group-hover:animate-pulse">
-                      ✨
-                    </span>
+                    <span className="text-2xl">✨</span>
                     <span>{t("hero.cta.skip")}</span>
                   </span>
-                  {/* Subtle glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-white/5 opacity-0 transition-opacity group-hover:opacity-100"></div>
                 </Button>
               </div>
 
-              {/* Enhanced Stats Section */}
-              <div className="animate-fade-in-up animation-delay-1200 mt-20 rounded-3xl border border-white/20 bg-white/5 p-8 backdrop-blur-md">
+              {/* Enhanced Stats Section */
+        /*}
+              <div className="mt-20 rounded-3xl border border-white/20 bg-white/5 p-8">
                 <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 lg:gap-8">
                   <div className="group text-center transition-transform hover:scale-105">
                     <div className="mb-3 flex justify-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/30 backdrop-blur-sm">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/30">
                         <span className="text-2xl">📊</span>
                       </div>
                     </div>
@@ -1098,7 +1020,7 @@ export default function HomePage() {
 
                   <div className="group text-center transition-transform hover:scale-105">
                     <div className="mb-3 flex justify-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/30 backdrop-blur-sm">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/30">
                         <span className="text-2xl">🗂️</span>
                       </div>
                     </div>
@@ -1112,7 +1034,7 @@ export default function HomePage() {
 
                   <div className="group text-center transition-transform hover:scale-105">
                     <div className="mb-3 flex justify-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/20 to-pink-600/30 backdrop-blur-sm">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-500/20 to-pink-600/30">
                         <span className="text-2xl">🏷️</span>
                       </div>
                     </div>
@@ -1126,7 +1048,7 @@ export default function HomePage() {
 
                   <div className="group text-center transition-transform hover:scale-105">
                     <div className="mb-3 flex justify-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 backdrop-blur-sm">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/30">
                         <span className="text-2xl">🌟</span>
                       </div>
                     </div>
@@ -1141,7 +1063,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Enhanced Close Button */}
+            {/* Enhanced Close Button */
+        /*}
             <Button
               variant="ghost"
               size="sm"
@@ -1153,6 +1076,7 @@ export default function HomePage() {
             </Button>
           </section>
         )}
+        */}
 
         {/* Enhanced Filter Bar */}
         <FilterBar
@@ -1178,6 +1102,7 @@ export default function HomePage() {
         />
 
         {/* AI Recommendation Panel - Show when no search/filters active */}
+        {/*
         {ENABLE_AI_UI &&
           !q &&
           selectedCategories.length === 0 &&
@@ -1198,187 +1123,9 @@ export default function HomePage() {
               </div>
             </section>
           )}
+        */}
 
-        {/* Enhanced Featured Algorithms */}
-        {!q &&
-          selectedCategories.length === 0 &&
-          selectedTags.length === 0 &&
-          selectedDifficulties.length === 0 &&
-          showFeaturedAlgorithms && (
-            <section className="liquid-glass-section relative px-4 py-12">
-              <div className="mx-auto max-w-7xl">
-                <div
-                  className="animate-fade-in-up mb-12 text-center"
-                  data-about-section
-                >
-                  {/* Close button in top-right corner */}
-                  <button
-                    onClick={() => setShowFeaturedAlgorithms(false)}
-                    className="absolute top-4 right-4 rounded-full p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
-                    title="Hide featured algorithms (Ctrl+Shift+F to show again)"
-                    aria-label="Hide featured algorithms section"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-
-                  <div className="liquid-glass-filter mb-6 inline-flex items-center gap-3 px-4 py-2">
-                    <span className="animate-bounce-subtle text-2xl">✨</span>
-                    <span className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-lg font-semibold text-transparent">
-                      Featured Algorithms
-                    </span>
-                  </div>
-
-                  <h3 className="mb-6 text-3xl leading-tight font-black text-slate-900 md:text-4xl dark:text-slate-100">
-                    Start Your Journey with
-                    <span className="from-primary-600 via-secondary-600 to-primary-700 bg-gradient-to-r bg-clip-text text-transparent">
-                      {" "}
-                      Popular Algorithms
-                    </span>
-                  </h3>
-
-                  <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-                    Discover the fundamental algorithms that every developer
-                    should master. Each one comes with
-                    <span className="text-primary-600 dark:text-primary-400 font-semibold">
-                      {" "}
-                      interactive visualizations
-                    </span>{" "}
-                    and
-                    <span className="text-secondary-600 dark:text-secondary-400 font-semibold">
-                      {" "}
-                      real-time analysis
-                    </span>
-                    .
-                  </p>
-
-                  {/* Enhanced Value Proposition Pills */}
-                  <div className="flex flex-wrap justify-center gap-4 text-sm">
-                    <div className="group liquid-glass-filter text-primary-700 dark:text-primary-300 cursor-default px-4 py-2 transition-all duration-300 hover:scale-105">
-                      <span className="group-hover:animate-bounce-subtle mr-2">
-                        🚀
-                      </span>
-                      Interactive Learning
-                    </div>
-                    <div className="group liquid-glass-filter cursor-default px-4 py-2 text-green-700 transition-all duration-300 hover:scale-105 dark:text-green-300">
-                      <span className="group-hover:animate-bounce-subtle mr-2">
-                        📊
-                      </span>
-                      Step-by-Step Visualization
-                    </div>
-                    <div className="group liquid-glass-filter cursor-default px-4 py-2 text-purple-700 transition-all duration-300 hover:scale-105 dark:text-purple-300">
-                      <span className="group-hover:animate-bounce-subtle mr-2">
-                        ⚡
-                      </span>
-                      Performance Analysis
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                  {featuredAlgorithms.map(({ topic, item }) => (
-                    <Card
-                      key={`${topic}/${item.slug}`}
-                      variant="elevated"
-                      className="group liquid-glass-card liquid-glass-glow relative cursor-pointer overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
-                      onClick={() => {
-                        logger.info(
-                          LogCategory.USER_INTERACTION,
-                          "Featured algorithm clicked",
-                          {
-                            algorithm: item.title,
-                            topic,
-                            slug: item.slug,
-                            difficulty: item.difficulty,
-                            section: "featured",
-                            timestamp: new Date().toISOString(),
-                          }
-                        );
-
-                        navigate(`/viz/${topic}/${item.slug}`);
-                      }}
-                    >
-                      {/* Gradient overlay */}
-                      <div className="to-primary-50/30 dark:to-primary-900/20 absolute inset-0 bg-gradient-to-br from-transparent via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                      <div className="relative p-6 text-center">
-                        <div className="mb-4 text-4xl filter transition-transform duration-300 group-hover:scale-125 group-hover:drop-shadow-lg">
-                          {TOPIC_META[topic]?.icon ?? "📘"}
-                        </div>
-
-                        <h4 className="group-hover:text-primary-700 dark:group-hover:text-primary-300 mb-3 text-lg font-bold text-slate-900 transition-colors duration-300 dark:text-slate-100">
-                          {item.title}
-                        </h4>
-
-                        <p className="mb-6 min-h-[3rem] text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                          {item.summary ||
-                            `Master the fundamentals of ${pretty(topic)}`}
-                        </p>
-
-                        <div className="space-y-3">
-                          {/* Difficulty Badge */}
-                          <div
-                            className={cn(
-                              "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
-                              item.difficulty === "Easy"
-                                ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
-                                : item.difficulty === "Medium"
-                                  ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
-                                  : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "h-2 w-2 rounded-full",
-                                item.difficulty === "Easy"
-                                  ? "bg-green-500"
-                                  : item.difficulty === "Medium"
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500"
-                              )}
-                            />
-                            {formatDifficulty(item.difficulty)}
-                          </div>
-
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            className="touch-target from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 min-h-[44px] w-full bg-gradient-to-r transition-all duration-300 group-hover:shadow-lg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-
-                              logger.info(
-                                LogCategory.USER_INTERACTION,
-                                "Algorithm try now clicked",
-                                {
-                                  algorithm: item.title,
-                                  topic,
-                                  slug: item.slug,
-                                  difficulty: item.difficulty,
-                                  autostart: true,
-                                  source: "main_grid",
-                                  timestamp: new Date().toISOString(),
-                                }
-                              );
-
-                              navigate(
-                                `/viz/${topic}/${item.slug}?autostart=true`
-                              );
-                            }}
-                          >
-                            <span className="mr-2">🎯</span>
-                            Try Now
-                            <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
-                              →
-                            </span>
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
+        {/* Main Content */}
 
         {/* Main Content */}
         <main className="px-4 py-8">
@@ -1398,16 +1145,12 @@ export default function HomePage() {
 
                 <div className="mx-auto mb-8 max-w-md">
                   <h3 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl dark:text-slate-100">
-                    {t("common.noAlgorithmsFound", {
-                      defaultValue: "No algorithms found",
-                    })}
+                    No algorithms found
                   </h3>
 
                   <p className="mb-6 leading-relaxed text-slate-600 dark:text-slate-400">
-                    {t("common.adjustSearchTerms", {
-                      defaultValue:
-                        "Don't worry! Try adjusting your search terms or filters to discover the perfect algorithm.",
-                    })}
+                    Don't worry! Try adjusting your search terms or filters to
+                    discover the perfect algorithm.
                   </p>
 
                   {/* Helpful suggestions */}
@@ -1458,9 +1201,7 @@ export default function HomePage() {
                     className="from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 bg-gradient-to-r shadow-lg transition-all duration-300 hover:shadow-xl"
                   >
                     <span className="mr-2">✨</span>
-                    {t("common.clearAllFilters", {
-                      defaultValue: "Clear All Filters",
-                    })}
+                    Clear All Filters
                   </Button>
 
                   <Button
@@ -1616,7 +1357,7 @@ export default function HomePage() {
                 <button
                   onClick={() => {
                     resetOnboardingTour();
-                    setShowOnboarding(true);
+                    // setShowOnboarding(true);
                   }}
                   className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
                 >
@@ -1624,6 +1365,7 @@ export default function HomePage() {
                   Take the Tour
                 </button>
 
+                {/*
                 <button
                   onClick={() => toggleHeroSection()}
                   className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-200 hover:text-white"
@@ -1641,28 +1383,30 @@ export default function HomePage() {
                   <span>⭐</span>
                   {showFeaturedAlgorithms ? "Hide Featured" : "Show Featured"}
                 </button>
+                */}
               </div>
             </div>
           </div>
         </footer>
 
         {/* Debug Panel (Dev Mode) */}
-        {import.meta.env.DEV && (
+        {/* {import.meta.env.DEV && (
           <DebugPanel
-            isOpen={showDebugPanel}
-            onClose={() => {
-              logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
-                timestamp: new Date().toISOString(),
-              });
-              setShowDebugPanel(false);
-            }}
+            // isOpen={showDebugPanel}
+            // onClose={() => {
+            //   // logger.info(LogCategory.USER_INTERACTION, "Debug panel closed", {
+            //   //   timestamp: new Date().toISOString(),
+            //   // });
+            //   setShowDebugPanel(false);
+            // }}
           />
-        )}
+        )} */}
 
         {/* Performance Monitor (Dev Mode) */}
-        {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
+        {/* {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />} */}
 
         {/* Onboarding Tour */}
+        {/*
         <OnboardingTour
           isOpen={showOnboarding}
           onClose={() => setShowOnboarding(false)}
@@ -1672,11 +1416,13 @@ export default function HomePage() {
           }}
           tourType="homepage"
         />
-      </div>{" "}
+        */}
+      </div>
       {/* end scroll area */}
       {/* Keep "fixed" floating buttons outside the scroll area so they anchor to the viewport */}
       {/* Floating Action Buttons - Fixed to viewport */}
       {/* Performance Monitor Button */}
+      {/*
       {import.meta.env.DEV && (
         <div className="fixed right-6 bottom-[100px] z-50">
           <div className="relative">
@@ -1694,27 +1440,28 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      */}
       {/* Keyboard Shortcuts Button - Bottom position */}
-      <KeyboardShortcutsButton />
+      {/* <KeyboardShortcutsButton /> */}
       {/* Debug Tools (Dev Mode) */}
+      {/*
       {import.meta.env.DEV && (
         <>
-          {/* Debug Toggle Button */}
           <div className="fixed right-6 bottom-[160px] z-50">
             <div className="relative">
               <button
                 className="group flex min-w-[3rem] transform items-center gap-3 overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-600 to-pink-600 p-4 text-white shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:from-red-700 hover:to-pink-700 hover:shadow-2xl active:scale-95"
                 title="Debug Panel (Dev) - Ctrl+Shift+D"
                 onClick={() => {
-                  logger.info(
-                    LogCategory.USER_INTERACTION,
-                    "Debug panel opened via floating button",
-                    {
-                      method: "floating_button_click",
-                      timestamp: new Date().toISOString(),
-                    }
-                  );
-                  setShowDebugPanel(true);
+                  // logger.info(
+                  //   LogCategory.USER_INTERACTION,
+                  //   "Debug panel opened via floating button",
+                  //   {
+                  //     method: "floating_button_click",
+                  //     timestamp: new Date().toISOString(),
+                  //   }
+                  // );
+                  // setShowDebugPanel(true);
                 }}
               >
                 🐛
@@ -1727,6 +1474,7 @@ export default function HomePage() {
           </div>
         </>
       )}
+      */}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/react";
-import React, { Suspense, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   createBrowserRouter,
   isRouteErrorResponse,
@@ -8,23 +8,27 @@ import {
   useRouteError,
 } from "react-router-dom";
 
-import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
+import HomePage from "@/pages/HomePage";
+import VisualizerPage from "@/pages/VisualizerPage";
 
+// import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
 import { AppLayout } from "./AppLayout";
 
-// Lazy load pages to reduce initial bundle size
-const HomePage = React.lazy(() => import("@/pages/HomePage"));
-const VisualizerPage = React.lazy(() => import("@/pages/VisualizerPage"));
+// Lazy load pages to reduce initial bundle size (commented out to avoid loading screens)
+// const HomePage = React.lazy(() => import("@/pages/HomePage"));
+// const VisualizerPage = React.lazy(() => import("@/pages/VisualizerPage"));
 
-// Loading component for lazy-loaded routes
+// Loading component for lazy-loaded routes (commented out since not using lazy loading)
+/*
 const RouteLoadingFallback = () => (
   <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
     <div className="text-center">
-      <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-      <p className="text-sm text-slate-600 dark:text-slate-400">Loading...</p>
+      <div className="mx-auto mb-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+      <p className="text-xs text-slate-500 dark:text-slate-500">Loading...</p>
     </div>
   </div>
 );
+*/
 
 /** Used ONLY as errorElement (has access to useRouteError) */
 function ErrorBoundary() {
@@ -45,12 +49,18 @@ function ErrorBoundary() {
         : null;
 
   // Log the routing error
-  logger.error(LogCategory.ROUTER, `Route error: ${status} - ${statusText}`, {
+  // logger.error(LogCategory.ROUTER, `Route error: ${status} - ${statusText}`, {
+  //   status,
+  //   statusText,
+  //   message: msg,
+  //   error: err,
+  //   url: window.location.href,
+  // });
+  console.error(`Route error: ${status} - ${statusText}`, {
     status,
     statusText,
     message: msg,
     error: err,
-    url: window.location.href,
   });
 
   return (
@@ -85,11 +95,11 @@ function ErrorBoundary() {
 function Static404() {
   useEffect(() => {
     // Log 404 navigation
-    logger.warn(LogCategory.ROUTER, "404 route accessed", {
-      url: window.location.href,
-      path: window.location.pathname,
-      search: window.location.search,
-    });
+    // logger.warn(LogCategory.ROUTER, "404 route accessed", {
+    //   url: window.location.href,
+    //   path: window.location.pathname,
+    //   search: window.location.search,
+    // });
 
     // Respect Vite base path if you ever set one
     const href = `${import.meta.env.BASE_URL}404.html`;
@@ -103,7 +113,7 @@ function Static404() {
     // Optional signal (non-fatal)
     Sentry.captureMessage("route_not_found");
 
-    logger.info(LogCategory.ROUTER, "Redirecting to static 404 page", { href });
+    // logger.info(LogCategory.ROUTER, "Redirecting to static 404 page", { href });
 
     // Hard navigate to the static file
     window.location.replace(href);
@@ -150,14 +160,14 @@ const getBasename = () => {
 };
 
 // Log router creation
-logger.debug(LogCategory.ROUTER, "Creating application router", {
-  sentryIntegration: hasWrap(Sentry),
-  routes: [
-    { path: "/", component: "HomePage" },
-    { path: "/viz/:topic/:slug", component: "VisualizerPage" },
-    { path: "*", component: "Static404" },
-  ],
-});
+// logger.debug(LogCategory.ROUTER, "Creating application router", {
+//   sentryIntegration: hasWrap(Sentry),
+//   routes: [
+//     { path: "/", component: "HomePage" },
+//     { path: "/viz/:topic/:slug", component: "VisualizerPage" },
+//     { path: "*", component: "Static404" },
+//   ],
+// });
 
 const router = createRouter(
   [
@@ -168,19 +178,11 @@ const router = createRouter(
       children: [
         {
           index: true,
-          element: (
-            <Suspense fallback={<RouteLoadingFallback />}>
-              <HomePage />
-            </Suspense>
-          ),
+          element: <HomePage />,
         },
         {
           path: "viz/:topic/:slug",
-          element: (
-            <Suspense fallback={<RouteLoadingFallback />}>
-              <VisualizerPage />
-            </Suspense>
-          ),
+          element: <VisualizerPage />,
         },
       ],
     },
@@ -193,20 +195,20 @@ const router = createRouter(
 );
 
 export default function AppRouter() {
-  logger.info(LogCategory.ROUTER, "Rendering AppRouter");
+  // logger.info(LogCategory.ROUTER, "Rendering AppRouter");
 
   // Log page views
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname;
-      logger.info(LogCategory.ROUTER, "Route changed", {
-        path,
-        search: window.location.search,
-        hash: window.location.hash,
-        timestamp: new Date().toISOString(),
-      });
+      const _path = window.location.pathname;
+      // logger.info(LogCategory.ROUTER, "Route changed", {
+      //   path,
+      //   search: window.location.search,
+      //   hash: window.location.hash,
+      //   timestamp: new Date().toISOString(),
+      // });
 
-      sessionTracker.logPageView(path);
+      // sessionTracker.logPageView(path);
     };
 
     // Log initial page view

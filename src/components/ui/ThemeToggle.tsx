@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo } from "react";
 
 import { useTheme } from "@/providers/ThemeProvider";
-import { log } from "@/services/monitoring";
+// import { log } from "@/services/monitoring";
 
 const ThemeToggle = React.memo(() => {
   const { theme, toggle } = useTheme();
 
   const handleToggle = useCallback(() => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    log.user.action("Theme toggle", { from: theme, to: newTheme });
+    const _newTheme = theme === "dark" ? "light" : "dark";
+    // log.user.action("Theme toggle", { from: theme, to: _newTheme });
 
     // Immediate toggle for responsiveness
     toggle();

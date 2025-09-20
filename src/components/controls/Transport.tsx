@@ -13,7 +13,7 @@ import {
 import React from "react";
 
 import { useI18n } from "@/i18n";
-import { LogCategory, logger } from "@/services/monitoring";
+// import { LogCategory, logger } from "@/services/monitoring";
 import { cn } from "@/utils";
 
 type Props = {
@@ -101,11 +101,11 @@ export default function Transport(p: Props) {
         {/* Step Backward */}
         <button
           onClick={() => {
-            logger.info(LogCategory.USER_INTERACTION, "Step backward clicked", {
-              currentStep: idx,
-              totalSteps: total,
-              timestamp: new Date().toISOString(),
-            });
+            // logger.info(LogCategory.USER_INTERACTION, "Step backward clicked", {
+            //   currentStep: idx,
+            //   totalSteps: total,
+            //   timestamp: new Date().toISOString(),
+            // });
             onPrev();
           }}
           disabled={idx === 0}
@@ -126,12 +126,12 @@ export default function Transport(p: Props) {
         {/* Play Backward */}
         <button
           onClick={() => {
-            logger.info(LogCategory.USER_INTERACTION, "Play backward clicked", {
-              currentStep: idx,
-              totalSteps: total,
-              currentSpeed: speed,
-              timestamp: new Date().toISOString(),
-            });
+            // logger.info(LogCategory.USER_INTERACTION, "Play backward clicked", {
+            //   currentStep: idx,
+            //   totalSteps: total,
+            //   currentSpeed: speed,
+            //   timestamp: new Date().toISOString(),
+            // });
             onPlayBackward();
           }}
           disabled={playing && direction === -1}
@@ -154,18 +154,18 @@ export default function Transport(p: Props) {
         {/* Play/Pause */}
         <button
           onClick={() => {
-            const action = playing ? "pause" : "play_forward";
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              `Transport ${action} clicked`,
-              {
-                currentStep: idx,
-                totalSteps: total,
-                currentSpeed: speed,
-                direction: playing ? direction : 1,
-                timestamp: new Date().toISOString(),
-              }
-            );
+            const _action = playing ? "pause" : "play_forward";
+            // logger.info(
+            //   LogCategory.USER_INTERACTION,
+            //   `Transport ${_action} clicked`,
+            //   {
+            //     currentStep: idx,
+            //     totalSteps: total,
+            //     currentSpeed: speed,
+            //     direction: playing ? direction : 1,
+            //     timestamp: new Date().toISOString(),
+            //   }
+            // );
 
             if (playing) {
               onPause();

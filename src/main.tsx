@@ -56,23 +56,27 @@ import "./config/env";
 
 // Initialize axe for accessibility testing in development
 import "./config/axe";
-import "./services/monitoring/sessionTracker"; // Initialize session tracking
+// import "./services/monitoring/sessionTracker"; // Initialize session tracking
 import "@/styles/globals.css";
+
+// Force dark theme immediately
+document.documentElement.classList.add("dark");
+document.documentElement.style.colorScheme = "dark";
 
 import React from "react";
 import ReactDOM from "react-dom/client";
 
 import AppRouter from "@/app/router";
-import { I18nProvider } from "@/i18n";
+// import { I18nProvider } from "@/i18n";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { log, LogCategory, logger } from "@/services/monitoring";
+// import { log, LogCategory, logger } from "@/services/monitoring";
 import {
   initSentry,
   MaybeSentryErrorBoundary,
 } from "@/services/monitoring/sentry.client.config";
 
-import { initAnalytics } from "./services/analytics/analytics";
-import { initWebVitals } from "./services/analytics/webVitals";
+// import { initAnalytics } from "./services/analytics/analytics";
+// import { initWebVitals } from "./services/analytics/webVitals";
 
 // Enhanced Error Boundary
 class AppErrorBoundary extends React.Component<
@@ -90,7 +94,7 @@ class AppErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("App Error:", error, errorInfo);
-    logger.error(LogCategory.GENERAL, error.message, { error, errorInfo });
+    // logger.error(LogCategory.GENERAL, error.message, { error, errorInfo });
   }
 
   render() {
@@ -167,27 +171,27 @@ const preloadCriticalResources = () => {
 };
 
 // Initialize logging first
-log.info("🚀 AlgoLens application starting...");
+// log.info("🚀 AlgoLens application starting...");
 
 // Preload critical resources for better performance
 preloadCriticalResources();
 
 // Initialize Sentry first (critical for error tracking)
-logger.time("app-initialization");
-log.debug("Initializing Sentry...");
+// logger.time("app-initialization");
+// log.debug("Initializing Sentry...");
 initSentry();
 
 // Defer heavy analytics initialization to reduce main thread blocking
-setTimeout(() => {
-  log.debug("Initializing analytics...");
-  initAnalytics();
+// setTimeout(() => {
+//   log.debug("Initializing analytics...");
+//   initAnalytics();
 
-  log.debug("Initializing web vitals monitoring...");
-  initWebVitals();
+//   log.debug("Initializing web vitals monitoring...");
+//   initWebVitals();
 
-  logger.timeEnd("app-initialization");
-  log.info("Background services initialized");
-}, 100);
+//   logger.timeEnd("app-initialization");
+//   log.info("Background services initialized");
+// }, 100);
 
 // Handle GitHub Pages SPA routing
 try {
@@ -196,14 +200,14 @@ try {
     sessionStorage.removeItem("ALGO_REDIRECT_PATH");
     // Use history.replaceState to avoid adding to history
     window.history.replaceState(null, "", redirectPath);
-    logger.info(LogCategory.ROUTER, "Restored GitHub Pages redirect path", {
-      path: redirectPath,
-    });
+    // logger.info(LogCategory.ROUTER, "Restored GitHub Pages redirect path", {
+    //   path: redirectPath,
+    // });
   }
-} catch (error) {
-  logger.warn(LogCategory.ROUTER, "Failed to handle GitHub Pages redirect", {
-    error: error instanceof Error ? error.message : String(error),
-  });
+} catch {
+  // logger.warn(LogCategory.ROUTER, "Failed to handle GitHub Pages redirect", {
+  //   error: error instanceof Error ? error.message : String(error),
+  // });
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -212,11 +216,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <MaybeSentryErrorBoundary
         fallback={<div>Something went wrong with Sentry.</div>}
       >
-        <I18nProvider>
-          <ThemeProvider>
-            <AppRouter />
-          </ThemeProvider>
-        </I18nProvider>
+        {/* <I18nProvider> */}
+        <ThemeProvider>
+          <AppRouter />
+        </ThemeProvider>
+        {/* </I18nProvider> */}
       </MaybeSentryErrorBoundary>
     </AppErrorBoundary>
   </React.StrictMode>

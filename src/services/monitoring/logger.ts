@@ -38,8 +38,8 @@ interface LogEntry {
   stack?: string;
 }
 
-class Logger {
-  private static instance: Logger;
+class _Logger {
+  private static instance: _Logger;
   private logLevel: LogLevel;
   private enabledCategories: Set<LogCategory>;
   private logs: LogEntry[] = [];
@@ -68,11 +68,11 @@ class Logger {
     this.isInitialized = true;
   }
 
-  public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
+  public static getInstance(): _Logger {
+    if (!_Logger.instance) {
+      _Logger.instance = new _Logger();
     }
-    return Logger.instance;
+    return _Logger.instance;
   }
 
   private getLogLevelFromEnv(): LogLevel {
@@ -400,126 +400,126 @@ class Logger {
 }
 
 // Export singleton instance
-export const logger = Logger.getInstance();
+// export const logger = Logger.getInstance();
 
 // Convenience functions for common logging patterns
-export const log = {
-  error: (message: string, data?: unknown, component?: string) =>
-    logger.error(LogCategory.GENERAL, message, data, component),
-  warn: (message: string, data?: unknown, component?: string) =>
-    logger.warn(LogCategory.GENERAL, message, data, component),
-  info: (message: string, data?: unknown, component?: string) =>
-    logger.info(LogCategory.GENERAL, message, data, component),
-  debug: (message: string, data?: unknown, component?: string) =>
-    logger.debug(LogCategory.GENERAL, message, data, component),
-  trace: (message: string, data?: unknown, component?: string) =>
-    logger.trace(LogCategory.GENERAL, message, data, component),
+// export const log = {
+//   error: (message: string, data?: unknown, component?: string) =>
+//     logger.error(LogCategory.GENERAL, message, data, component),
+//   warn: (message: string, data?: unknown, component?: string) =>
+//     logger.warn(LogCategory.GENERAL, message, data, component),
+//   info: (message: string, data?: unknown, component?: string) =>
+//     logger.info(LogCategory.GENERAL, message, data, component),
+//   debug: (message: string, data?: unknown, component?: string) =>
+//     logger.debug(LogCategory.GENERAL, message, data, component),
+//   trace: (message: string, data?: unknown, component?: string) =>
+//     logger.trace(LogCategory.GENERAL, message, data, component),
 
-  // Category-specific helpers
-  algorithm: {
-    start: (name: string, input: unknown) =>
-      logger.info(LogCategory.ALGORITHM, `Algorithm started: ${name}`, {
-        input,
-      }),
-    step: (step: number, operation: string, data?: unknown) =>
-      logger.debug(LogCategory.ALGORITHM, `Step ${step}: ${operation}`, data),
-    complete: (name: string, result: unknown, duration?: number) =>
-      logger.info(LogCategory.ALGORITHM, `Algorithm completed: ${name}`, {
-        result,
-        duration,
-      }),
-    error: (name: string, error: unknown) =>
-      logger.error(LogCategory.ALGORITHM, `Algorithm error: ${name}`, error),
-  },
+//   // Category-specific helpers
+//   algorithm: {
+//     start: (name: string, input: unknown) =>
+//       logger.info(LogCategory.ALGORITHM, `Algorithm started: ${name}`, {
+//         input,
+//       }),
+//     step: (step: number, operation: string, data?: unknown) =>
+//       logger.debug(LogCategory.ALGORITHM, `Step ${step}: ${operation}`, data),
+//     complete: (name: string, result: unknown, duration?: number) =>
+//       logger.info(LogCategory.ALGORITHM, `Algorithm completed: ${name}`, {
+//         result,
+//         duration,
+//       }),
+//     error: (name: string, error: unknown) =>
+//       logger.error(LogCategory.ALGORITHM, `Algorithm error: ${name}`, error),
+//   },
 
-  performance: {
-    mark: (label: string) => logger.time(label, LogCategory.PERFORMANCE),
-    measure: (label: string) => logger.timeEnd(label, LogCategory.PERFORMANCE),
-    metric: (name: string, value: number, unit: string) =>
-      logger.info(LogCategory.PERFORMANCE, `${name}: ${value}${unit}`),
-  },
+//   performance: {
+//     mark: (label: string) => logger.time(label, LogCategory.PERFORMANCE),
+//     measure: (label: string) => logger.timeEnd(label, LogCategory.PERFORMANCE),
+//     metric: (name: string, value: number, unit: string) =>
+//       logger.info(LogCategory.PERFORMANCE, `${name}: ${value}${unit}`),
+//   },
 
-  user: {
-    action: (action: string, details?: unknown) =>
-      logger.debug(
-        LogCategory.USER_INTERACTION,
-        `User action: ${action}`,
-        details
-      ),
-    click: (element: string, details?: unknown) =>
-      logger.debug(LogCategory.USER_INTERACTION, `Click: ${element}`, details),
-    input: (field: string, value: unknown) =>
-      logger.debug(LogCategory.USER_INTERACTION, `Input: ${field}`, { value }),
-  },
+//   user: {
+//     action: (action: string, details?: unknown) =>
+//       logger.debug(
+//         LogCategory.USER_INTERACTION,
+//         `User action: ${action}`,
+//         details
+//       ),
+//     click: (element: string, details?: unknown) =>
+//       logger.debug(LogCategory.USER_INTERACTION, `Click: ${element}`, details),
+//     input: (field: string, value: unknown) =>
+//       logger.debug(LogCategory.USER_INTERACTION, `Input: ${field}`, { value }),
+//   },
 
-  canvas: {
-    render: (component: string, frameCount?: number) =>
-      logger.trace(LogCategory.CANVAS, `Render: ${component}`, { frameCount }),
-    resize: (width: number, height: number) =>
-      logger.debug(LogCategory.CANVAS, "Canvas resized", { width, height }),
-    interaction: (type: string, coords?: { x: number; y: number }) =>
-      logger.debug(LogCategory.CANVAS, `Canvas interaction: ${type}`, coords),
-  },
+//   canvas: {
+//     render: (component: string, frameCount?: number) =>
+//       logger.trace(LogCategory.CANVAS, `Render: ${component}`, { frameCount }),
+//     resize: (width: number, height: number) =>
+//       logger.debug(LogCategory.CANVAS, "Canvas resized", { width, height }),
+//     interaction: (type: string, coords?: { x: number; y: number }) =>
+//       logger.debug(LogCategory.CANVAS, `Canvas interaction: ${type}`, coords),
+//   },
 
-  animation: {
-    start: (name: string, duration?: number) =>
-      logger.debug(LogCategory.ANIMATION, `Animation started: ${name}`, {
-        duration,
-      }),
-    frame: (frame: number, data?: unknown) =>
-      logger.trace(LogCategory.ANIMATION, `Frame ${frame}`, data),
-    complete: (name: string) =>
-      logger.debug(LogCategory.ANIMATION, `Animation completed: ${name}`),
-    pause: (name: string, frame: number) =>
-      logger.debug(LogCategory.ANIMATION, `Animation paused: ${name}`, {
-        frame,
-      }),
-  },
+//   animation: {
+//     start: (name: string, duration?: number) =>
+//       logger.debug(LogCategory.ANIMATION, `Animation started: ${name}`, {
+//         duration,
+//       }),
+//     frame: (frame: number, data?: unknown) =>
+//       logger.trace(LogCategory.ANIMATION, `Frame ${frame}`, data),
+//     complete: (name: string) =>
+//       logger.debug(LogCategory.ANIMATION, `Animation completed: ${name}`),
+//     pause: (name: string, frame: number) =>
+//       logger.debug(LogCategory.ANIMATION, `Animation paused: ${name}`, {
+//         frame,
+//       }),
+//   },
 
-  state: {
-    change: (component: string, oldState: unknown, newState: unknown) =>
-      logger.debug(LogCategory.STATE, `State change: ${component}`, {
-        oldState,
-        newState,
-      }),
-    update: (key: string, value: unknown) =>
-      logger.trace(LogCategory.STATE, `State update: ${key}`, { value }),
-  },
-};
+//   state: {
+//     change: (component: string, oldState: unknown, newState: unknown) =>
+//       logger.debug(LogCategory.STATE, `State change: ${component}`, {
+//         oldState,
+//         newState,
+//       }),
+//     update: (key: string, value: unknown) =>
+//       logger.trace(LogCategory.STATE, `State update: ${key}`, { value }),
+//   },
+// };
 
-// React hook for component lifecycle logging
-export function useComponentLogger(componentName: string) {
-  const componentLogger = {
-    mount: () =>
-      log.debug(`${componentName} mounted`, undefined, componentName),
-    unmount: () =>
-      log.debug(`${componentName} unmounted`, undefined, componentName),
-    render: () =>
-      log.trace(`${componentName} rendering`, undefined, componentName),
-    update: (reason?: string) =>
-      log.debug(`${componentName} updated`, { reason }, componentName),
-    error: (error: unknown) =>
-      log.error(`${componentName} error`, error, componentName),
-  };
+// // React hook for component lifecycle logging
+// export function useComponentLogger(componentName: string) {
+//   const componentLogger = {
+//     mount: () =>
+//       log.debug(`${componentName} mounted`, undefined, componentName),
+//     unmount: () =>
+//       log.debug(`${componentName} unmounted`, undefined, componentName),
+//     render: () =>
+//       log.trace(`${componentName} rendering`, undefined, componentName),
+//     update: (reason?: string) =>
+//       log.debug(`${componentName} updated`, { reason }, componentName),
+//     error: (error: unknown) =>
+//       log.error(`${componentName} error`, error, componentName),
+//   };
 
-  return componentLogger;
-}
+//   return componentLogger;
+// }
 
 // Global error handler
-if (typeof window !== "undefined") {
-  window.addEventListener("error", (event) => {
-    logger.error(LogCategory.GENERAL, "Uncaught error", {
-      message: event.message,
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno,
-      error: event.error,
-    });
-  });
+// if (typeof window !== "undefined") {
+//   window.addEventListener("error", (event) => {
+//     logger.error(LogCategory.GENERAL, "Uncaught error", {
+//       message: event.message,
+//       filename: event.filename,
+//       lineno: event.lineno,
+//       colno: event.colno,
+//       error: event.error,
+//     });
+//   });
 
-  window.addEventListener("unhandledrejection", (event) => {
-    logger.error(LogCategory.GENERAL, "Unhandled promise rejection", {
-      reason: event.reason,
-    });
-  });
-}
+//   window.addEventListener("unhandledrejection", (event) => {
+//     logger.error(LogCategory.GENERAL, "Unhandled promise rejection", {
+//       reason: event.reason,
+//     });
+//   });
+// }

@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { usePreferences } from "@/hooks/usePreferences";
-import { log } from "@/services/monitoring";
+// import { log } from "@/services/monitoring";
 import { cn } from "@/utils";
 
 interface TourStep {
@@ -176,10 +176,10 @@ export default function OnboardingTour({
   // Log tour interactions
   useEffect(() => {
     if (isOpen) {
-      log.user.action("Onboarding tour started", {
-        tourType,
-        totalSteps: steps.length,
-      });
+      // log.user.action("Onboarding tour started", {
+      //   tourType,
+      //   totalSteps: steps.length,
+      // });
       // Always start from step 1 (index 0)
       setCurrentStep(0);
       // Set checkbox state based on current preferences - if tour is disabled, checkbox should be checked
@@ -259,7 +259,7 @@ export default function OnboardingTour({
   }, [currentStep, isOpen, step, highlightElement, highlightedElement]);
 
   const handleComplete = useCallback(() => {
-    log.user.action("Tour completed", { tourType, totalSteps: steps.length });
+    // log.user.action("Tour completed", { tourType, totalSteps: steps.length });
 
     // Mark onboarding as seen if "don't show again" was checked and not already marked
     // (it may have already been marked when the checkbox was checked)
@@ -269,14 +269,7 @@ export default function OnboardingTour({
 
     onComplete();
     onClose();
-  }, [
-    tourType,
-    steps.length,
-    onComplete,
-    onClose,
-    dontShowAgain,
-    markOnboardingTourSeen,
-  ]);
+  }, [onComplete, onClose, dontShowAgain, markOnboardingTourSeen]);
 
   const nextStep = useCallback(() => {
     if (import.meta.env.DEV) {
@@ -291,10 +284,10 @@ export default function OnboardingTour({
         console.log("Moving to step:", nextStepIndex);
       }
       setCurrentStep(nextStepIndex);
-      log.user.action("Tour step forward", {
-        step: nextStepIndex,
-        stepId: steps[nextStepIndex]?.id,
-      });
+      // log.user.action("Tour step forward", {
+      //   step: nextStepIndex,
+      //   stepId: steps[nextStepIndex]?.id,
+      // });
     } else {
       if (import.meta.env.DEV) {
         console.log("Tour complete");
@@ -306,28 +299,28 @@ export default function OnboardingTour({
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      log.user.action("Tour step backward", {
-        step: currentStep - 1,
-        stepId: steps[currentStep - 1]?.id,
-      });
+      // log.user.action("Tour step backward", {
+      //   step: currentStep - 1,
+      //   stepId: steps[currentStep - 1]?.id,
+      // });
     }
-  }, [currentStep, steps]);
+  }, [currentStep]);
 
   const skipTour = useCallback(() => {
-    log.user.action("Tour skipped", { atStep: currentStep, stepId: step?.id });
+    // log.user.action("Tour skipped", { atStep: currentStep, stepId: step?.id });
     onClose();
-  }, [currentStep, step, onClose]);
+  }, [onClose]);
 
   // moved handleComplete earlier
 
   const restartTour = useCallback(() => {
     setCurrentStep(0);
-    log.user.action("Tour restarted", { tourType });
-  }, [tourType]);
+    // log.user.action("Tour restarted", { tourType });
+  }, []);
 
   const runDemo = useCallback(() => {
     if (step?.demo) {
-      log.user.action("Tour demo triggered", { stepId: step.id });
+      // log.user.action("Tour demo triggered", { stepId: step.id });
       step.demo();
     }
   }, [step]);

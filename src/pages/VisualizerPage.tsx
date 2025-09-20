@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { AIChatPanel } from "@/components/ai/AIChatPanel";
+// import { AIChatPanel } from "@/components/ai/AIChatPanel";
 import ArrayCanvas, {
   ArrayCanvasHandle,
 } from "@/components/canvas/Array/ArrayCanvas";
@@ -13,30 +13,30 @@ import EnhancedArrayVisualization, {
 import ArrayViewPanel from "@/components/controls/ArrayViewPanel";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
-import DebugPanel from "@/components/debug/DebugPanel";
-import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
+// import DebugPanel from "@/components/debug/DebugPanel";
+// import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
 import AboutPanel from "@/components/panels/AboutPanel";
 import CodePanel from "@/components/panels/CodePanel";
 import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
 import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
-import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
+// import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
 import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
-import ThemeToggle from "@/components/ui/ThemeToggle";
-import { ENABLE_AI_UI } from "@/config/featureFlags";
+// import ThemeToggle from "@/components/ui/ThemeToggle";
+// import { ENABLE_AI_UI } from "@/config/featureFlags";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
 import { useMobileOrientation } from "@/hooks/useOrientation";
-import { LanguageSwitcher, useI18n } from "@/i18n";
-import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
+// import { LanguageSwitcher, useI18n } from "@/i18n";
+// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
 
 export default function VisualizerPage() {
-  const { t } = useI18n();
-  const componentLogger = useComponentLogger("VisualizerPage");
-  const navigate = useNavigate();
+  // const { t } = useI18n();
+  // const componentLogger = useComponentLogger("VisualizerPage");
+  const _navigate = useNavigate();
   const { topic = "", slug = "" } = useParams();
 
   // Mobile orientation detection
@@ -44,56 +44,66 @@ export default function VisualizerPage() {
 
   // Log page navigation
   useEffect(() => {
-    logger.info(LogCategory.ROUTER, "VisualizerPage accessed", {
-      topic,
-      slug,
-      url: window.location.href,
-      isMobile,
-      orientation: isMobilePortrait ? "portrait" : "landscape",
-    });
-    componentLogger.mount();
-
-    return () => componentLogger.unmount();
-  }, [topic, slug, componentLogger, isMobile, isMobilePortrait]);
+    // logger.info(LogCategory.ROUTER, "VisualizerPage accessed", {
+    //   topic,
+    //   slug,
+    //   url: window.location.href,
+    //   isMobile,
+    //   orientation: isMobilePortrait ? "portrait" : "landscape",
+    // });
+    // componentLogger.mount();
+    // return () => componentLogger.unmount();
+  }, [topic, slug, isMobile, isMobilePortrait]);
 
   const [meta, setMeta] = useState<AlgoMeta | null>(null);
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
+  const [showLoadingUI, setShowLoadingUI] = useState(false);
 
   // Debug panel state (Dev Mode)
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  // const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Performance monitor hook (Dev Mode)
-  const performanceMonitor = usePerformanceMonitor();
+  // const performanceMonitor = usePerformanceMonitor();
 
   // Load algorithm metadata asynchronously
   useEffect(() => {
     const loadMeta = async () => {
       setIsLoadingMeta(true);
+      setShowLoadingUI(false);
+
+      // Show loading UI after 200ms to prevent flash for fast loads
+      const loadingTimer = setTimeout(() => {
+        setShowLoadingUI(true);
+      }, 200);
+
       try {
         const loadedMeta = await findAlgo(topic, slug);
         setMeta(loadedMeta);
 
         // Log algorithm resolution
         if (loadedMeta) {
-          logger.info(LogCategory.ALGORITHM, "Algorithm found", {
-            topic,
-            slug,
-            title: loadedMeta.title,
-            algoTopic: loadedMeta.topic,
-          });
+          // logger.info(LogCategory.ALGORITHM, "Algorithm found", {
+          //   topic,
+          //   slug,
+          //   title: loadedMeta.title,
+          //   algoTopic: loadedMeta.topic,
+          // });
         } else {
-          logger.warn(LogCategory.ALGORITHM, "Algorithm not found", {
-            topic,
-            slug,
-          });
+          // logger.warn(LogCategory.ALGORITHM, "Algorithm not found", {
+          //   topic,
+          //   slug,
+          // });
         }
       } catch (error) {
-        logger.error(LogCategory.ALGORITHM, "Error loading algorithm", {
-          error,
-        });
+        // logger.error(LogCategory.ALGORITHM, "Error loading algorithm", {
+        //   error,
+        // });
+        console.error("Error loading algorithm:", error);
         setMeta(null);
       } finally {
+        clearTimeout(loadingTimer);
         setIsLoadingMeta(false);
+        setShowLoadingUI(false);
       }
     };
 
@@ -102,9 +112,9 @@ export default function VisualizerPage() {
 
   const params = useMemo(() => {
     const urlParams = url.read();
-    logger.debug(LogCategory.STATE, "URL parameters parsed", {
-      params: Object.fromEntries(urlParams.entries()),
-    });
+    // logger.debug(LogCategory.STATE, "URL parameters parsed", {
+    //   params: Object.fromEntries(urlParams.entries()),
+    // });
     return urlParams;
   }, []);
 
@@ -114,11 +124,11 @@ export default function VisualizerPage() {
 
   // Log initialization parameters
   useEffect(() => {
-    logger.debug(LogCategory.ALGORITHM, "Initialization parameters", {
-      arraySize: initialN,
-      seed: initialSeed,
-      speed: initialSpeed,
-    });
+    // logger.debug(LogCategory.ALGORITHM, "Initialization parameters", {
+    //   arraySize: initialN,
+    //   seed: initialSeed,
+    //   speed: initialSpeed,
+    // });
   }, [initialN, initialSeed, initialSpeed]);
 
   const [frames, setFrames] = useState<unknown[]>([]);
@@ -129,13 +139,13 @@ export default function VisualizerPage() {
       array = array.sort((a, b) => a - b);
     }
 
-    logger.debug(LogCategory.ALGORITHM, "Initial array generated", {
-      size: array.length,
-      seed: initialSeed,
-      array: array.slice(0, 10), // Log first 10 elements
-      topic: meta?.topic,
-      sorted: meta?.topic === "searching" && meta.slug === "binary-search",
-    });
+    // logger.debug(LogCategory.ALGORITHM, "Initial array generated", {
+    //   size: array.length,
+    //   seed: initialSeed,
+    //   array: array.slice(0, 10), // Log first 10 elements
+    //   topic: meta?.topic,
+    //   sorted: meta?.topic === "searching" && meta.slug === "binary-search",
+    // });
     return array;
   });
 
@@ -163,7 +173,7 @@ export default function VisualizerPage() {
   const [enhancedMode, setEnhancedMode] = useState(false);
 
   // AI Chat Panel state
-  const [showAIChat, setShowAIChat] = useState(false);
+  // const [showAIChat, setShowAIChat] = useState(false);
 
   // Refs must be declared unconditionally (before any early return)
   const surfaceRef = useRef<HTMLDivElement | null>(null);
@@ -239,6 +249,7 @@ export default function VisualizerPage() {
   }, [runner.idx, runner.speed, input.length, initialSeed]);
 
   // Keyboard shortcuts for visualizer controls
+  /*
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if we're not in an input field
@@ -466,6 +477,7 @@ export default function VisualizerPage() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [runner, navigate]);
+  */
 
   // Handle custom algolens events from KeyboardProvider and clickable shortcuts
   useEffect(() => {
@@ -547,13 +559,14 @@ export default function VisualizerPage() {
   }, [runner]);
 
   // Show loading state while algorithm is being loaded
-  if (isLoadingMeta) {
+  if (isLoadingMeta && showLoadingUI) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {t("loading.algorithm", { defaultValue: "Loading algorithm..." })}
+          <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+          <p className="text-xs text-slate-500 dark:text-slate-500">
+            {/* {t("loading.algorithm", { defaultValue: "Loading algorithm..." })} */}
+            Loading algorithm...
           </p>
         </div>
       </div>
@@ -581,9 +594,10 @@ export default function VisualizerPage() {
             </svg>
           </div>
           <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {t("errors.algorithmNotFound", {
+            {/* {t("errors.algorithmNotFound", {
               defaultValue: "Algorithm not found",
-            })}
+            })} */}
+            Algorithm not found
           </h2>
           <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
             The algorithm "{topic}/{slug}" could not be found.
@@ -592,7 +606,8 @@ export default function VisualizerPage() {
             onClick={() => window.history.back()}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-900"
           >
-            {t("navigation.goBack", { defaultValue: "Go Back" })}
+            {/* {t("navigation.goBack", { defaultValue: "Go Back" })} */}
+            Go Back
           </button>
         </div>
       </div>
@@ -628,12 +643,13 @@ export default function VisualizerPage() {
             )}
           >
             {meta.title ||
-              t("navigation.visualizer", { defaultValue: "Visualizer" })}
+              /* t("navigation.visualizer", { defaultValue: "Visualizer" }) */
+              "Visualizer"}
           </h1>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher variant="dropdown" />
-            <ThemeToggle />
-            {ENABLE_AI_UI && meta && (
+            {/* <LanguageSwitcher variant="dropdown" /> */}
+            {/* <ThemeToggle /> */}
+            {/* {ENABLE_AI_UI && meta && (
               <button
                 onClick={() => setShowAIChat(true)}
                 className="flex items-center gap-2 rounded bg-gradient-to-r from-blue-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors hover:from-blue-600 hover:to-indigo-700"
@@ -654,7 +670,7 @@ export default function VisualizerPage() {
                 </svg>
                 <span className="hidden sm:inline">AI Help</span>
               </button>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -1006,7 +1022,7 @@ export default function VisualizerPage() {
         </div>
 
         {/* Debug Panel (Dev Mode) */}
-        {import.meta.env.DEV && (
+        {/* {import.meta.env.DEV && (
           <DebugPanel
             isOpen={showDebugPanel}
             onClose={() => {
@@ -1016,18 +1032,19 @@ export default function VisualizerPage() {
               setShowDebugPanel(false);
             }}
           />
-        )}
+        )} */}
 
         {/* Performance Monitor (Dev Mode) */}
-        {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />}
+        {/* {import.meta.env.DEV && <performanceMonitor.PerformanceMonitor />} */}
 
         {/* Keyboard Shortcuts - Hidden on mobile */}
-        {!isMobile && <KeyboardShortcutsButton />}
+        {/* {!isMobile && <KeyboardShortcutsButton />} */}
 
         {/* Floating Debug Tools (Dev Mode) */}
         {import.meta.env.DEV && !isMobile && (
           <>
             {/* Performance Monitor Button */}
+            {/*
             <div className="fixed right-6 bottom-[100px] z-50">
               <div className="relative">
                 <button
@@ -1043,8 +1060,10 @@ export default function VisualizerPage() {
                 </button>
               </div>
             </div>
+            */}
 
             {/* Debug Toggle Button */}
+            {/*
             <div className="fixed right-6 bottom-[160px] z-50">
               <div className="relative">
                 <button
@@ -1070,18 +1089,19 @@ export default function VisualizerPage() {
                 </button>
               </div>
             </div>
+            */}
           </>
         )}
 
         {/* AI Chat Panel (feature flagged) */}
-        {ENABLE_AI_UI && meta && (
+        {/* {ENABLE_AI_UI && meta && (
           <AIChatPanel
             meta={meta}
             isOpen={showAIChat}
             onClose={() => setShowAIChat(false)}
             currentStep={frame.pcLine}
           />
-        )}
+        )} */}
       </div>
     </>
   );
