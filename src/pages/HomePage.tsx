@@ -6,7 +6,12 @@ import { useNavigate } from "react-router-dom";
 // import { AIRecommendationPanel } from "@/components/home/AIRecommendationPanel";
 // import { AISearchHelper } from "@/components/home/AISearchHelper";
 import AlgoCard, { AlgoItem } from "@/components/home/AlgoCard";
-import FilterBar from "@/components/home/FilterBar";
+import FilterBar, {
+  type AlgorithmType,
+  type ComplexityLevel,
+  type DataStructureType,
+  type SortKey,
+} from "@/components/home/FilterBar";
 // import OnboardingTour from "@/components/onboarding/OnboardingTour";
 // import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import { Button } from "@/components/ui/Button";
@@ -21,17 +26,18 @@ import type { AlgoMeta } from "@/types/algorithms";
 import {
   cn,
   // createSearchableFromAlgoMeta,
-  formatDifficulty,
   scrollToElement,
 } from "@/utils";
 import { getAllAlgorithmTags } from "@/utils/algorithmTags";
+import {
+  type FilterAction,
+  parseSearchTermForFilters,
+} from "@/utils/searchFilters";
 import {
   processInChunks,
   runWhenIdle,
   yieldToMain,
 } from "@/utils/taskScheduler";
-
-type SortKey = "relevance" | "title" | "difficulty" | "recent" | "popularity";
 
 const normDiff = (v?: AlgoItem["difficulty"]) =>
   v == null
@@ -140,13 +146,24 @@ export default function HomePage() {
 
   const [q, setQ] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [sortKey, setSortKey] = useState<SortKey>("relevance");
+  // const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTagsOnCards, setShowTagsOnCards] = useState(true);
+
+  // New filter state variables
+  const [selectedAlgorithmTypes, setSelectedAlgorithmTypes] = useState<
+    AlgorithmType[]
+  >([]);
+  const [selectedComplexityLevels, setSelectedComplexityLevels] = useState<
+    ComplexityLevel[]
+  >([]);
+  const [selectedDataStructures, setSelectedDataStructures] = useState<
+    DataStructureType[]
+  >([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(
     []
   );
-  const [sortKey, setSortKey] = useState<SortKey>("relevance");
-  // const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showTagsOnCards, setShowTagsOnCards] = useState(true);
   // const [showFeaturedAlgorithms, setShowFeaturedAlgorithms] = useState(true);
   // const [showDebugPanel, setShowDebugPanel] = useState(false);
 
@@ -254,7 +271,39 @@ export default function HomePage() {
   }, []);
 
   const topics = useMemo(() => Object.keys(catalog), [catalog]);
-  const difficulties = ["Easy", "Medium", "Hard"];
+
+  const allTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    Object.entries(catalog).forEach(([topic, items]) => {
+      (items ?? []).forEach((item) => {
+        const itemTags = getAllAlgorithmTags(item, topic);
+        itemTags.forEach((tag) => tagsSet.add(tag));
+      });
+    });
+    return Array.from(tagsSet).sort();
+  }, [catalog]);
+
+  const allDifficulties = useMemo(() => {
+    const difficultiesSet = new Set<string>();
+    Object.values(catalog).forEach((items) => {
+      (items ?? []).forEach((item) => {
+        if (item.difficulty) {
+          const diffStr =
+            typeof item.difficulty === "string"
+              ? item.difficulty
+              : typeof item.difficulty === "number"
+                ? item.difficulty <= 2
+                  ? "Easy"
+                  : item.difficulty <= 4
+                    ? "Medium"
+                    : "Hard"
+                : "Medium";
+          difficultiesSet.add(diffStr);
+        }
+      });
+    });
+    return Array.from(difficultiesSet).sort();
+  }, [catalog]);
 
   const allItems = useMemo(
     () =>
@@ -290,17 +339,213 @@ export default function HomePage() {
     return m;
   }, [catalog]);
 
+  // Helper functions for categorizing algorithms
+  const getAlgorithmType = (
+    item: AlgoItem,
+    topic: string,
+    allTags: string[]
+  ): AlgorithmType => {
+    const lowerTitle = item.title.toLowerCase();
+    const lowerTopic = topic.toLowerCase();
+    const tagsStr = allTags.join(" ").toLowerCase();
+
+    // Sorting algorithms
+    if (
+      lowerTitle.includes("sort") ||
+      tagsStr.includes("sorting") ||
+      [
+        "bubble",
+        "quick",
+        "merge",
+        "heap",
+        "insertion",
+        "selection",
+        "radix",
+        "counting",
+        "shell",
+        "bucket",
+      ].some((s) => lowerTitle.includes(s))
+    ) {
+      return "sorting";
+    }
+
+    // Search algorithms
+    if (
+      lowerTitle.includes("search") ||
+      tagsStr.includes("searching") ||
+      [
+        "binary",
+        "linear",
+        "depth",
+        "breadth",
+        "dijkstra",
+        "a-star",
+        "jump",
+        "interpolation",
+      ].some((s) => lowerTitle.includes(s))
+    ) {
+      return "searching";
+    }
+
+    // Graph algorithms
+    if (
+      lowerTopic.includes("graph") ||
+      tagsStr.includes("graph") ||
+      [
+        "dfs",
+        "bfs",
+        "dijkstra",
+        "bellman",
+        "floyd",
+        "prim",
+        "kruskal",
+        "tarjan",
+      ].some((s) => lowerTitle.includes(s))
+    ) {
+      return "graph";
+    }
+
+    // Tree algorithms
+    if (
+      lowerTopic.includes("tree") ||
+      tagsStr.includes("tree") ||
+      [
+        "binary-tree",
+        "bst",
+        "avl",
+        "red-black",
+        "trie",
+        "segment",
+        "heap",
+      ].some((s) => lowerTitle.includes(s))
+    ) {
+      return "tree";
+    }
+
+    // Dynamic Programming
+    if (
+      lowerTopic.includes("dp") ||
+      lowerTopic.includes("dynamic") ||
+      tagsStr.includes("dynamic-programming") ||
+      [
+        "fibonacci",
+        "knapsack",
+        "lcs",
+        "lis",
+        "edit-distance",
+        "coin-change",
+        "matrix-chain",
+      ].some((s) => lowerTitle.includes(s))
+    ) {
+      return "dynamic-programming";
+    }
+
+    // Greedy algorithms
+    if (tagsStr.includes("greedy") || lowerTitle.includes("greedy")) {
+      return "greedy";
+    }
+
+    // Backtracking
+    if (tagsStr.includes("backtracking") || lowerTitle.includes("backtrack")) {
+      return "backtracking";
+    }
+
+    // Divide and Conquer
+    if (tagsStr.includes("divide") || lowerTitle.includes("divide")) {
+      return "divide-conquer";
+    }
+
+    // Default fallback
+    return "searching";
+  };
+
+  const getComplexityLevel = (
+    item: AlgoItem,
+    _topic: string
+  ): ComplexityLevel => {
+    const summary = (item.summary || "").toLowerCase();
+    const title = item.title.toLowerCase();
+
+    // Check for complexity mentions in summary or title
+    if (summary.includes("o(1)") || summary.includes("constant"))
+      return "constant";
+    if (summary.includes("o(log") || summary.includes("logarithmic"))
+      return "logarithmic";
+    if (summary.includes("o(n log n)") || summary.includes("linearithmic"))
+      return "linearithmic";
+    if (
+      summary.includes("o(n²)") ||
+      summary.includes("o(n^2)") ||
+      summary.includes("quadratic")
+    )
+      return "quadratic";
+    if (
+      summary.includes("o(n³)") ||
+      summary.includes("o(n^3)") ||
+      summary.includes("cubic")
+    )
+      return "cubic";
+    if (summary.includes("o(2^n)") || summary.includes("exponential"))
+      return "exponential";
+    if (summary.includes("o(n)") || summary.includes("linear")) return "linear";
+
+    // Heuristic based on algorithm type
+    const lowerTitle = title.toLowerCase();
+    if (["hash", "array", "direct"].some((s) => lowerTitle.includes(s)))
+      return "constant";
+    if (["binary", "log", "tree"].some((s) => lowerTitle.includes(s)))
+      return "logarithmic";
+    if (["merge", "quick", "heap"].some((s) => lowerTitle.includes(s)))
+      return "linearithmic";
+    if (
+      ["bubble", "selection", "insertion"].some((s) => lowerTitle.includes(s))
+    )
+      return "quadratic";
+
+    // Default to linear for most algorithms
+    return "linear";
+  };
+
+  const getDataStructures = (
+    item: AlgoItem,
+    topic: string
+  ): DataStructureType[] => {
+    const structures: DataStructureType[] = [];
+    const lowerTitle = item.title.toLowerCase();
+    const lowerTopic = topic.toLowerCase();
+    const summary = (item.summary || "").toLowerCase();
+    const allText = `${lowerTitle} ${lowerTopic} ${summary}`;
+
+    if (allText.includes("array") || allText.includes("list"))
+      structures.push("array");
+    if (allText.includes("linked") || allText.includes("node"))
+      structures.push("linked-list");
+    if (allText.includes("stack")) structures.push("stack");
+    if (allText.includes("queue")) structures.push("queue");
+    if (
+      lowerTopic.includes("tree") ||
+      allText.includes("tree") ||
+      allText.includes("bst")
+    )
+      structures.push("tree");
+    if (
+      lowerTopic.includes("graph") ||
+      allText.includes("graph") ||
+      allText.includes("vertex")
+    )
+      structures.push("graph");
+    if (allText.includes("hash") || allText.includes("map"))
+      structures.push("hash-table");
+    if (allText.includes("heap") || allText.includes("priority"))
+      structures.push("heap");
+
+    // Default to array if no specific structure found
+    return structures.length > 0 ? structures : ["array"];
+  };
+
   const filteredGrouped = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    const activeTagSet = new Set(selectedTags);
     const activeCategorySet = new Set(selectedCategories);
-    const activeDifficultySet = new Set(selectedDifficulties);
-
-    const allow = (d?: AlgoItem["difficulty"]) => {
-      if (selectedDifficulties.length === 0) return true;
-      const label = formatDifficulty(d);
-      return activeDifficultySet.has(label);
-    };
 
     const score = (t: string, it: AlgoItem) => {
       if (!ql) return 0;
@@ -313,20 +558,144 @@ export default function HomePage() {
       const allTags = getAllAlgorithmTags(it, t);
       const allTagsText = allTags.join(" ").toLowerCase();
 
-      // Exact matches get highest scores
-      if (title === ql) s += 500;
-      if (allTags.some((tag) => tag.toLowerCase() === ql)) s += 450; // Exact tag match
+      // Enhanced exact matches with higher scores
+      if (title === ql) s += 1000; // Perfect title match
+      if (allTags.some((tag) => tag.toLowerCase() === ql)) s += 800; // Perfect tag match
 
-      // Prefix matches
-      if (title.startsWith(ql)) s += 250;
-      if (allTags.some((tag) => tag.toLowerCase().startsWith(ql))) s += 200; // Tag prefix match
+      // Algorithm family bonuses for better categorization
+      const algorithmFamilies = {
+        sorting: [
+          "bubble",
+          "quick",
+          "merge",
+          "heap",
+          "insertion",
+          "selection",
+          "radix",
+          "counting",
+          "shell",
+          "bucket",
+        ],
+        searching: [
+          "binary",
+          "linear",
+          "depth",
+          "breadth",
+          "dijkstra",
+          "a-star",
+          "jump",
+          "interpolation",
+        ],
+        tree: [
+          "binary-tree",
+          "bst",
+          "avl",
+          "red-black",
+          "trie",
+          "segment",
+          "heap",
+        ],
+        graph: [
+          "dfs",
+          "bfs",
+          "dijkstra",
+          "bellman",
+          "floyd",
+          "prim",
+          "kruskal",
+          "tarjan",
+        ],
+        dynamic: [
+          "fibonacci",
+          "knapsack",
+          "lcs",
+          "lis",
+          "edit-distance",
+          "coin-change",
+          "matrix-chain",
+        ],
+        greedy: [
+          "activity",
+          "huffman",
+          "fractional-knapsack",
+          "job-scheduling",
+        ],
+      };
 
-      // Contains matches
-      if (title.includes(ql)) s += 120;
-      if (summary.includes(ql)) s += 60;
-      if (allTagsText.includes(ql)) s += 100; // Higher score for tag matches
-      if (originalTags.includes(ql)) s += 80; // Still score original tags for backward compatibility
-      if (t.toLowerCase().includes(ql)) s += 20; // Topic match
+      // Check if query matches algorithm family and boost related algorithms
+      for (const [family, keywords] of Object.entries(algorithmFamilies)) {
+        if (
+          ql.includes(family) ||
+          keywords.some((keyword) => ql.includes(keyword))
+        ) {
+          const titleMatches = keywords.some(
+            (keyword) =>
+              title.includes(keyword) || it.slug.toLowerCase().includes(keyword)
+          );
+          const tagMatches = allTags.some((tag) =>
+            keywords.some((keyword) => tag.toLowerCase().includes(keyword))
+          );
+
+          if (titleMatches) s += 600; // Strong family match
+          if (tagMatches) s += 400; // Tag family match
+          if (t.toLowerCase() === family) s += 200; // Category family match
+        }
+      }
+
+      // Complexity-based scoring for technical queries
+      const complexityQueries = {
+        "o(1)": ["constant", "o(1)"],
+        "o(log n)": ["logarithmic", "o(log n)", "log"],
+        "o(n)": ["linear", "o(n)"],
+        "o(n log n)": ["n log n", "linearithmic", "o(n log n)"],
+        "o(n²)": ["quadratic", "o(n^2)", "o(n2)", "n squared"],
+        "o(2^n)": ["exponential", "o(2^n)", "2^n"],
+      };
+
+      // Complexity-based scoring (note: using summary/tags since complexity field is not available)
+      for (const [complexity, queries] of Object.entries(complexityQueries)) {
+        if (queries.some((query) => ql.includes(query))) {
+          // Search in summary and tags for complexity mentions
+          if (
+            summary.includes(complexity) ||
+            allTagsText.includes(complexity) ||
+            title.includes(complexity)
+          ) {
+            s += 400; // Complexity mention match
+          }
+        }
+      }
+
+      // Enhanced prefix matches
+      if (title.startsWith(ql)) s += 400;
+      if (allTags.some((tag) => tag.toLowerCase().startsWith(ql))) s += 300; // Tag prefix match
+
+      // Enhanced contains matches
+      if (title.includes(ql)) s += 200;
+      if (summary.includes(ql)) s += 150;
+      if (allTagsText.includes(ql)) s += 180; // Higher score for tag matches
+
+      // Concept-based scoring for algorithm properties
+      const conceptMatches = {
+        stable: ["stable", "stability"],
+        inplace: ["in-place", "inplace", "space-efficient"],
+        recursive: ["recursive", "recursion", "divide-conquer"],
+        iterative: ["iterative", "loop"],
+        comparison: ["comparison", "compare"],
+        optimal: ["optimal", "best", "efficient", "fastest"],
+        adaptive: ["adaptive", "best-case"],
+      };
+
+      for (const [concept, variations] of Object.entries(conceptMatches)) {
+        if (variations.some((variant) => ql.includes(variant))) {
+          if (allTagsText.includes(concept)) s += 300;
+          if (summary.includes(concept)) s += 250;
+        }
+      }
+
+      // Legacy scoring for backwards compatibility
+      if (originalTags.includes(ql)) s += 120;
+      if (t.toLowerCase().includes(ql)) s += 100; // Topic match
 
       return s;
     };
@@ -343,17 +712,37 @@ export default function HomePage() {
 
       const pool = Array.isArray(items) ? items : [];
       const keep = pool.filter((it) => {
-        if (!allow(it.difficulty)) return false;
-        if (activeTagSet.size) {
-          // Get all tags for this algorithm (original + generated)
-          const allTags = getAllAlgorithmTags(it, topic);
-          const algorithmTagSet = new Set(allTags);
+        // Apply all filter criteria
 
-          // Check if all selected tags are present in the algorithm's tags
-          for (const tag of activeTagSet) {
-            if (!algorithmTagSet.has(tag)) return false;
+        // Algorithm Type Filter
+        if (selectedAlgorithmTypes.length > 0) {
+          const allTags = getAllAlgorithmTags(it, topic);
+          const algorithmType = getAlgorithmType(it, topic, allTags);
+          if (!selectedAlgorithmTypes.includes(algorithmType)) {
+            return false;
           }
         }
+
+        // Complexity Level Filter
+        if (selectedComplexityLevels.length > 0) {
+          const complexityLevel = getComplexityLevel(it, topic);
+          if (!selectedComplexityLevels.includes(complexityLevel)) {
+            return false;
+          }
+        }
+
+        // Data Structure Filter
+        if (selectedDataStructures.length > 0) {
+          const dataStructures = getDataStructures(it, topic);
+          const hasMatchingStructure = dataStructures.some((ds) =>
+            selectedDataStructures.includes(ds)
+          );
+          if (!hasMatchingStructure) {
+            return false;
+          }
+        }
+
+        // Text search filter
         if (!ql) return true;
 
         // Get all tags for comprehensive search
@@ -390,8 +779,9 @@ export default function HomePage() {
   }, [
     q,
     selectedCategories,
-    selectedTags,
-    selectedDifficulties,
+    selectedAlgorithmTypes,
+    selectedComplexityLevels,
+    selectedDataStructures,
     sortKey,
     catalog,
   ]);
@@ -410,8 +800,9 @@ export default function HomePage() {
     if (
       q ||
       selectedCategories.length ||
-      selectedTags.length ||
-      selectedDifficulties.length ||
+      selectedAlgorithmTypes.length ||
+      selectedComplexityLevels.length ||
+      selectedDataStructures.length ||
       sortKey !== "relevance"
     ) {
       // logger.info(LogCategory.USER_INTERACTION, "Search/filter applied", {
@@ -431,8 +822,9 @@ export default function HomePage() {
   }, [
     q,
     selectedCategories,
-    selectedTags,
-    selectedDifficulties,
+    selectedAlgorithmTypes,
+    selectedComplexityLevels,
+    selectedDataStructures,
     sortKey,
     totalShown,
     catalog,
@@ -453,28 +845,71 @@ export default function HomePage() {
 
     setQ("");
     setSelectedCategories([]);
+    setSelectedAlgorithmTypes([]);
+    setSelectedComplexityLevels([]);
+    setSelectedDataStructures([]);
     setSelectedTags([]);
     setSelectedDifficulties([]);
     setSortKey("relevance");
   }, []);
 
   const handleTagClick = useCallback((tag: string) => {
-    // Toggle the tag in selected tags if not already selected, or just select it
-    setSelectedTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev; // Already selected, don't change
-      } else {
-        return [...prev, tag]; // Add to selection
-      }
-    });
+    // Since we removed tags from filter UI, we can add the tag to search instead
+    setQ(tag);
+  }, []);
 
-    // logger.info(LogCategory.USER_INTERACTION, "Tag clicked from card", {
-    //   tag,
-    //   selectedTags: selectedTags.includes(tag)
-    //     ? selectedTags
-    //     : [...selectedTags, tag],
-    //   timestamp: new Date().toISOString(),
-    // });
+  // Enhanced search handler that processes filter terms
+  const handleEnhancedSearch = useCallback((searchTerm: string) => {
+    // Parse the search term for filter actions first
+    const filterActions = parseSearchTermForFilters(searchTerm);
+
+    // Debug logging
+    if (filterActions.length > 0) {
+      console.log("Filter actions found for:", searchTerm, filterActions);
+    }
+
+    if (filterActions.length > 0) {
+      // If filter actions are found, apply them and clear the search term
+      filterActions.forEach((action: FilterAction) => {
+        switch (action.type) {
+          case "complexity":
+            // Add to complexity levels if not already selected
+            setSelectedComplexityLevels((prev) => {
+              const newComplexities = action.values.filter(
+                (val) => !prev.includes(val as ComplexityLevel)
+              ) as ComplexityLevel[];
+              console.log("Adding complexities:", newComplexities);
+              return [...prev, ...newComplexities];
+            });
+            break;
+          case "algorithmType":
+            // Add to algorithm types if not already selected
+            setSelectedAlgorithmTypes((prev) => {
+              const newTypes = action.values.filter(
+                (val) => !prev.includes(val as AlgorithmType)
+              ) as AlgorithmType[];
+              console.log("Adding algorithm types:", newTypes);
+              return [...prev, ...newTypes];
+            });
+            break;
+          case "dataStructure":
+            // Add to data structures if not already selected
+            setSelectedDataStructures((prev) => {
+              const newStructures = action.values.filter(
+                (val) => !prev.includes(val as DataStructureType)
+              ) as DataStructureType[];
+              console.log("Adding data structures:", newStructures);
+              return [...prev, ...newStructures];
+            });
+            break;
+        }
+      });
+      // Clear search term after applying filters to avoid confusion
+      setQ("");
+    } else {
+      // No filter actions found, just update the search term normally
+      setQ(searchTerm);
+    }
   }, []);
 
   // Home page keyboard shortcuts
@@ -517,34 +952,6 @@ export default function HomePage() {
           }
           break;
         }
-
-        // Difficulty filters
-        case event.altKey && event.key === "1":
-          event.preventDefault();
-          setSelectedDifficulties((prev) =>
-            prev.includes("Easy")
-              ? prev.filter((d) => d !== "Easy")
-              : [...prev, "Easy"]
-          );
-          break;
-
-        case event.altKey && event.key === "2":
-          event.preventDefault();
-          setSelectedDifficulties((prev) =>
-            prev.includes("Medium")
-              ? prev.filter((d) => d !== "Medium")
-              : [...prev, "Medium"]
-          );
-          break;
-
-        case event.altKey && event.key === "3":
-          event.preventDefault();
-          setSelectedDifficulties((prev) =>
-            prev.includes("Hard")
-              ? prev.filter((d) => d !== "Hard")
-              : [...prev, "Hard"]
-          );
-          break;
 
         // Quick category access
         case event.ctrlKey && event.key === "1":
@@ -650,7 +1057,6 @@ export default function HomePage() {
     resetOnboardingTour,
     // setShowOnboarding,
     setSelectedCategories,
-    setSelectedDifficulties,
     setQ,
     q,
   ]);
@@ -688,11 +1094,21 @@ export default function HomePage() {
 
   return (
     <div className="grid h-screen grid-rows-[auto,1fr] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-      {/* Background sits behind everything */}
+      {/* iOS-style background reflection and refraction layers */}
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         style={{ contain: "layout style" }}
-      ></div>
+      >
+        {/* Base refraction layer */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-slate-200/10 dark:from-slate-800/5 dark:to-slate-700/10"></div>
+
+        {/* Reflection highlights */}
+        <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10"></div>
+        <div className="absolute top-0 bottom-0 left-0 w-px bg-gradient-to-b from-white/15 via-transparent to-transparent dark:from-white/8"></div>
+
+        {/* Subtle glass texture */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent_50%)]"></div>
+      </div>
       {/* Header now lives in row 1 and sticks at top */}
       <header
         className={cn(
@@ -1082,14 +1498,14 @@ export default function HomePage() {
         <FilterBar
           data-tour="search-bar"
           q={q}
-          setQ={setQ}
+          setQ={handleEnhancedSearch}
           categories={topics}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
-          tags={tagUniverse}
+          tags={allTags}
           selectedTags={selectedTags}
           setSelectedTags={setSelectedTags}
-          difficulties={difficulties}
+          difficulties={allDifficulties}
           selectedDifficulties={selectedDifficulties}
           setSelectedDifficulties={setSelectedDifficulties}
           sortKey={sortKey}
@@ -1099,6 +1515,12 @@ export default function HomePage() {
           showTagsOnCards={showTagsOnCards}
           setShowTagsOnCards={setShowTagsOnCards}
           onTagClick={handleTagClick}
+          selectedAlgorithmTypes={selectedAlgorithmTypes}
+          setSelectedAlgorithmTypes={setSelectedAlgorithmTypes}
+          selectedComplexityLevels={selectedComplexityLevels}
+          setSelectedComplexityLevels={setSelectedComplexityLevels}
+          selectedDataStructures={selectedDataStructures}
+          setSelectedDataStructures={setSelectedDataStructures}
         />
 
         {/* AI Recommendation Panel - Show when no search/filters active */}
@@ -1106,6 +1528,9 @@ export default function HomePage() {
         {ENABLE_AI_UI &&
           !q &&
           selectedCategories.length === 0 &&
+          selectedAlgorithmTypes.length === 0 &&
+          selectedComplexityLevels.length === 0 &&
+          selectedDataStructures.length === 0 &&
           selectedTags.length === 0 &&
           selectedDifficulties.length === 0 && (
             <section className="px-4 py-8">
@@ -1269,14 +1694,24 @@ export default function HomePage() {
           </div>
         </main>
 
-        {/* Enhanced Footer */}
-        <footer className="liquid-glass-section relative mt-16 overflow-hidden border-t border-white/20 dark:border-white/10">
+        {/* Enhanced Footer with iOS-style glass effects */}
+        <footer className="relative mt-16 overflow-hidden border-t border-white/20 bg-gradient-to-br from-slate-100/80 via-white/60 to-slate-200/40 backdrop-blur-lg dark:border-white/10 dark:from-slate-900/80 dark:via-slate-800/60 dark:to-slate-900/40">
+          {/* iOS-style reflection layers */}
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/8 to-white/20 opacity-60 dark:via-slate-700/8 dark:to-slate-600/20"></div>
+
+          {/* Top edge reflection */}
+          <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/20"></div>
+
+          {/* Corner reflections */}
+          <div className="absolute top-0 left-0 h-20 w-20 bg-gradient-to-br from-white/15 to-transparent opacity-50 dark:from-white/8"></div>
+          <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-bl from-white/15 to-transparent opacity-50 dark:from-white/8"></div>
+
           {/* Background Pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZm9vdGVyR3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2Zvb3RlckdyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZm9vdGVyR3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2Zvb3RlckdyaWQpIiAvPjwvc3ZnPg==')] opacity-20"></div>
 
           {/* Gradient Overlays */}
-          <div className="from-primary-600/10 absolute top-0 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
-          <div className="from-secondary-600/10 absolute right-1/4 bottom-0 h-40 w-40 rounded-full bg-gradient-to-r to-transparent blur-3xl"></div>
+          <div className="absolute top-0 left-1/4 h-32 w-32 rounded-full bg-gradient-to-r from-blue-500/15 to-transparent blur-3xl"></div>
+          <div className="absolute right-1/4 bottom-0 h-40 w-40 rounded-full bg-gradient-to-r from-purple-500/15 to-transparent blur-3xl"></div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -1284,59 +1719,94 @@ export default function HomePage() {
               <div className="text-center md:text-left">
                 <div className="mb-4 flex items-center justify-center gap-3 md:justify-start">
                   <span className="text-3xl">🔬</span>
-                  <h3 className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-xl font-black text-transparent">
+                  <h3 className="bg-gradient-to-r from-slate-700 to-slate-500 bg-clip-text text-xl font-black text-transparent dark:from-white dark:to-slate-300">
                     AlgoLens
                   </h3>
                 </div>
-                <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-400 md:mx-0">
+                <p className="mx-auto max-w-xs text-sm leading-relaxed text-slate-600 md:mx-0 dark:text-slate-400">
                   Making algorithms and data structures accessible through
                   interactive visualizations and hands-on learning.
                 </p>
+
+                {/* Social/Contact Links */}
+                <div className="mt-6 flex items-center justify-center gap-4 md:justify-start">
+                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                    <span className="text-blue-500">🌐</span>
+                  </div>
+                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                    <span className="text-purple-500">📧</span>
+                  </div>
+                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                    <span className="text-green-500">💬</span>
+                  </div>
+                </div>
               </div>
 
               {/* Features Section */}
               <div className="text-center">
-                <h4 className="mb-4 font-semibold text-white">What We Offer</h4>
-                <ul className="space-y-2 text-sm text-slate-400">
-                  <li className="flex items-center justify-center gap-2">
-                    <span className="text-primary-400">📊</span>
-                    Interactive Visualizations
+                <h4 className="mb-4 font-semibold text-slate-700 dark:text-white">
+                  What We Offer
+                </h4>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-center justify-center gap-3 rounded-lg bg-white/50 p-3 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/70 dark:bg-slate-800/50 dark:hover:bg-slate-700/50">
+                    <span className="text-blue-500">📊</span>
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Interactive Visualizations
+                    </span>
                   </li>
-                  <li className="flex items-center justify-center gap-2">
-                    <span className="text-secondary-400">⚡</span>
-                    Real-time Performance Analysis
+                  <li className="flex items-center justify-center gap-3 rounded-lg bg-white/50 p-3 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/70 dark:bg-slate-800/50 dark:hover:bg-slate-700/50">
+                    <span className="text-orange-500">⚡</span>
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Real-time Performance Analysis
+                    </span>
                   </li>
-                  <li className="flex items-center justify-center gap-2">
-                    <span className="text-green-400">🎯</span>
-                    Step-by-step Learning
+                  <li className="flex items-center justify-center gap-3 rounded-lg bg-white/50 p-3 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/70 dark:bg-slate-800/50 dark:hover:bg-slate-700/50">
+                    <span className="text-green-500">🎯</span>
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Step-by-step Learning
+                    </span>
                   </li>
-                  <li className="flex items-center justify-center gap-2">
-                    <span className="text-purple-400">🌟</span>
-                    Multiple Programming Languages
+                  <li className="flex items-center justify-center gap-3 rounded-lg bg-white/50 p-3 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/70 dark:bg-slate-800/50 dark:hover:bg-slate-700/50">
+                    <span className="text-purple-500">🌟</span>
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Multiple Programming Languages
+                    </span>
                   </li>
                 </ul>
               </div>
 
               {/* Stats Section */}
               <div className="text-center md:text-right">
-                <h4 className="mb-4 font-semibold text-white">
+                <h4 className="mb-4 font-semibold text-slate-700 dark:text-white">
                   Learning Stats
                 </h4>
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
-                    <div className="text-primary-400 text-2xl font-bold">
-                      {stats.algorithms}
-                    </div>
-                    <div className="text-xs tracking-wider text-slate-400 uppercase">
-                      Algorithms
+                <div className="space-y-4">
+                  <div className="group relative rounded-xl border border-white/30 bg-gradient-to-br from-white/80 to-white/40 p-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/40">
+                    {/* iOS-style inner reflections */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 dark:from-white/10"></div>
+                    <div className="absolute top-0 right-2 left-2 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/20"></div>
+
+                    <div className="relative">
+                      <div className="text-3xl font-bold text-blue-600 transition-colors group-hover:text-blue-500 dark:text-blue-400 dark:group-hover:text-blue-300">
+                        {stats.algorithms}
+                      </div>
+                      <div className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                        Algorithms
+                      </div>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3 backdrop-blur-sm">
-                    <div className="text-secondary-400 text-2xl font-bold">
-                      {stats.categories}
-                    </div>
-                    <div className="text-xs tracking-wider text-slate-400 uppercase">
-                      Categories
+                  <div className="group relative rounded-xl border border-white/30 bg-gradient-to-br from-white/80 to-white/40 p-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/40">
+                    {/* iOS-style inner reflections */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-60 dark:from-white/10"></div>
+                    <div className="absolute top-0 right-2 left-2 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/20"></div>
+
+                    <div className="relative">
+                      <div className="text-3xl font-bold text-purple-600 transition-colors group-hover:text-purple-500 dark:text-purple-400 dark:group-hover:text-purple-300">
+                        {stats.categories}
+                      </div>
+                      <div className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                        Categories
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1344,16 +1814,21 @@ export default function HomePage() {
             </div>
 
             {/* Bottom Section */}
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700/50 pt-8 sm:flex-row">
-              <div className="text-center text-sm text-slate-400 sm:text-left">
-                <p className="flex items-center justify-center gap-2 sm:justify-start">
+            <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-300/50 pt-8 sm:flex-row dark:border-slate-700/50">
+              <div className="text-center text-sm sm:text-left">
+                <p className="flex items-center justify-center gap-2 text-slate-600 sm:justify-start dark:text-slate-400">
                   Built with
-                  <span className="animate-pulse text-red-400">❤️</span>
+                  <span className="animate-pulse text-red-500">❤️</span>
                   for learning algorithms and data structures
+                </p>
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
+                  © 2025 AlgoLens. Empowering developers through visual
+                  learning.
                 </p>
               </div>
 
               <div className="flex items-center gap-4">
+                {/*
                 <button
                   onClick={() => {
                     resetOnboardingTour();
@@ -1364,6 +1839,7 @@ export default function HomePage() {
                   <span>🎯</span>
                   Take the Tour
                 </button>
+                */}
 
                 {/*
                 <button

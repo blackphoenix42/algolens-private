@@ -63,18 +63,59 @@ const defaultOptions: Required<SearchOptions> = {
  * Common abbreviations and acronyms in computer science
  */
 const ABBREVIATION_MAPPINGS: Record<string, string[]> = {
+  // Search algorithms
   dfs: ["depth first search", "depth-first"],
   bfs: ["breadth first search", "breadth-first"],
-  mst: ["minimum spanning tree"],
+  ucs: ["uniform cost search"],
+  iddfs: ["iterative deepening depth first search"],
+
+  // Tree structures
   bst: ["binary search tree"],
   avl: ["adelson velsky landis"],
+  rbt: ["red black tree"],
+  bt: ["binary tree"],
+
+  // Graph algorithms
+  mst: ["minimum spanning tree"],
+  scc: ["strongly connected components"],
+  dag: ["directed acyclic graph"],
+
+  // String algorithms
   lcs: ["longest common subsequence"],
-  dp: ["dynamic programming"],
-  bf: ["brute force", "bellman ford"],
+  lis: ["longest increasing subsequence"],
   kmp: ["knuth morris pratt"],
+
+  // Dynamic programming
+  dp: ["dynamic programming"],
+  memo: ["memoization"],
+
+  // Other algorithms
+  bf: ["brute force", "bellman ford"],
+  dc: ["divide and conquer"],
+  greedy: ["greedy algorithm"],
+
+  // Data structures
+  ll: ["linked list"],
+  dll: ["doubly linked list"],
+  heap: ["heap", "priority queue"],
+  stack: ["stack", "lifo"],
+  queue: ["queue", "fifo"],
+
+  // Cache algorithms
   lru: ["least recently used"],
+  lfu: ["least frequently used"],
   fifo: ["first in first out"],
   lifo: ["last in first out"],
+
+  // Complexity notation
+  "big o": ["time complexity", "space complexity"],
+  "o(1)": ["constant time"],
+  "o(n)": ["linear time"],
+  "o(log n)": ["logarithmic time"],
+  "o(n log n)": ["linearithmic time"],
+  "o(n²)": ["quadratic time", "o(n^2)"],
+
+  // System terms
   api: ["application programming interface"],
   ui: ["user interface"],
   db: ["database"],
@@ -99,27 +140,60 @@ const ABBREVIATION_MAPPINGS: Record<string, string[]> = {
  * Synonym mappings for common terms
  */
 const SYNONYM_MAPPINGS: Record<string, string[]> = {
-  find: ["search", "locate", "discover"],
-  search: ["find", "lookup", "seek"],
-  sort: ["order", "arrange", "organize"],
-  order: ["sort", "arrange", "sequence"],
-  fast: ["quick", "rapid", "speedy", "efficient"],
-  slow: ["sluggish", "inefficient", "poor"],
-  big: ["large", "huge", "massive"],
-  small: ["tiny", "little", "minimal"],
-  best: ["optimal", "ideal", "perfect"],
-  worst: ["poor", "bad", "terrible"],
-  good: ["excellent", "great", "fine"],
-  simple: ["easy", "basic", "elementary"],
-  complex: ["complicated", "difficult", "hard"],
-  traverse: ["visit", "walk", "iterate"],
-  path: ["route", "way", "connection"],
-  distance: ["length", "cost", "weight"],
-  connect: ["link", "join", "attach"],
-  remove: ["delete", "eliminate", "erase"],
-  add: ["insert", "include", "append"],
-  update: ["modify", "change", "alter"],
-  compare: ["contrast", "match", "check"],
+  // Action words
+  find: ["search", "locate", "discover", "seek", "lookup"],
+  search: ["find", "lookup", "seek", "hunt", "explore"],
+  sort: ["order", "arrange", "organize", "rank", "sequence"],
+  order: ["sort", "arrange", "sequence", "rank"],
+  traverse: ["visit", "walk", "iterate", "explore", "navigate"],
+  insert: ["add", "include", "append", "place", "put"],
+  remove: ["delete", "eliminate", "erase", "extract", "take out"],
+  update: ["modify", "change", "alter", "edit", "revise"],
+  compare: ["contrast", "match", "check", "evaluate", "assess"],
+
+  // Performance descriptors
+  fast: ["quick", "rapid", "speedy", "efficient", "swift", "optimal"],
+  slow: ["sluggish", "inefficient", "poor", "suboptimal", "bad"],
+  optimal: ["best", "ideal", "perfect", "efficient", "maximum"],
+  efficient: ["fast", "optimal", "good", "effective", "streamlined"],
+
+  // Size descriptors
+  big: ["large", "huge", "massive", "enormous", "giant"],
+  small: ["tiny", "little", "minimal", "compact", "micro"],
+
+  // Quality descriptors
+  best: ["optimal", "ideal", "perfect", "excellent", "top"],
+  worst: ["poor", "bad", "terrible", "awful", "suboptimal"],
+  good: ["excellent", "great", "fine", "solid", "decent"],
+  bad: ["poor", "terrible", "awful", "suboptimal", "inefficient"],
+
+  // Difficulty descriptors
+  simple: ["easy", "basic", "elementary", "straightforward", "trivial"],
+  complex: ["complicated", "difficult", "hard", "intricate", "sophisticated"],
+  easy: ["simple", "basic", "straightforward", "trivial", "elementary"],
+  hard: ["difficult", "complex", "challenging", "tough", "intricate"],
+
+  // Structure terms
+  path: ["route", "way", "connection", "link", "trail"],
+  distance: ["length", "cost", "weight", "span", "measure"],
+  connect: ["link", "join", "attach", "bind", "associate"],
+  node: ["vertex", "element", "item", "point"],
+  edge: ["connection", "link", "arc", "branch"],
+
+  // Algorithm properties
+  stable: ["consistent", "reliable", "predictable"],
+  unstable: ["inconsistent", "unreliable", "unpredictable"],
+  recursive: ["self-calling", "iterative approach"],
+  iterative: ["looping", "repetitive", "cyclical"],
+
+  // Data structure terms
+  array: ["list", "collection", "sequence", "vector"],
+  list: ["array", "sequence", "collection"],
+  tree: ["hierarchy", "structure", "branching"],
+  graph: ["network", "connections", "relationships"],
+  stack: ["pile", "lifo", "last in first out"],
+  queue: ["line", "fifo", "first in first out"],
+  heap: ["priority queue", "binary heap"],
 };
 
 /**
@@ -298,12 +372,189 @@ function ngramSimilarity(str1: string, str2: string, n: number = 2): number {
 }
 
 /**
- * Contextual search based on user's search history and patterns
+ * Advanced search analytics and insights
  */
+class SearchAnalytics {
+  private static searchQueries: Map<string, number> = new Map();
+  private static failedQueries: Map<string, number> = new Map();
+  private static queryTimestamps: Array<{
+    query: string;
+    timestamp: number;
+    resultCount: number;
+  }> = [];
+  private static userSessions: Map<
+    string,
+    { queries: string[]; selections: string[] }
+  > = new Map();
+  private static currentSessionId: string = this.generateSessionId();
+
+  private static generateSessionId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  static trackSearchQuery(query: string, resultCount: number): void {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (normalizedQuery.length < 2) return;
+
+    // Track query frequency
+    const currentCount = this.searchQueries.get(normalizedQuery) || 0;
+    this.searchQueries.set(normalizedQuery, currentCount + 1);
+
+    // Track failed searches
+    if (resultCount === 0) {
+      const failedCount = this.failedQueries.get(normalizedQuery) || 0;
+      this.failedQueries.set(normalizedQuery, failedCount + 1);
+    }
+
+    // Track query patterns over time
+    this.queryTimestamps.push({
+      query: normalizedQuery,
+      timestamp: Date.now(),
+      resultCount,
+    });
+
+    // Keep only recent queries (last 1000)
+    if (this.queryTimestamps.length > 1000) {
+      this.queryTimestamps = this.queryTimestamps.slice(-1000);
+    }
+
+    // Track session queries
+    const session = this.userSessions.get(this.currentSessionId) || {
+      queries: [],
+      selections: [],
+    };
+    session.queries.push(normalizedQuery);
+    this.userSessions.set(this.currentSessionId, session);
+  }
+
+  static trackSearchSelection(
+    query: string,
+    selectedItem: SearchableItem
+  ): void {
+    const session = this.userSessions.get(this.currentSessionId) || {
+      queries: [],
+      selections: [],
+    };
+    session.selections.push(selectedItem.id);
+    this.userSessions.set(this.currentSessionId, session);
+  }
+
+  static getPopularQueries(
+    limit = 10
+  ): Array<{ query: string; count: number }> {
+    return Array.from(this.searchQueries.entries())
+      .map(([query, count]) => ({ query, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
+  static getFailedQueries(limit = 10): Array<{ query: string; count: number }> {
+    return Array.from(this.failedQueries.entries())
+      .map(([query, count]) => ({ query, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
+  static getTrendingQueries(
+    hoursBack = 24
+  ): Array<{ query: string; count: number }> {
+    const cutoff = Date.now() - hoursBack * 60 * 60 * 1000;
+    const recentQueries = this.queryTimestamps.filter(
+      (q) => q.timestamp > cutoff
+    );
+
+    const trendingCounts = new Map<string, number>();
+    recentQueries.forEach((q) => {
+      const count = trendingCounts.get(q.query) || 0;
+      trendingCounts.set(q.query, count + 1);
+    });
+
+    return Array.from(trendingCounts.entries())
+      .map(([query, count]) => ({ query, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  static getSearchSuggestions(currentQuery = ""): string[] {
+    const suggestions = new Set<string>();
+
+    // Add popular queries that match current input
+    const popular = this.getPopularQueries(20);
+    popular.forEach((p) => {
+      if (!currentQuery || p.query.includes(currentQuery.toLowerCase())) {
+        suggestions.add(p.query);
+      }
+    });
+
+    // Add trending queries
+    const trending = this.getTrendingQueries(48);
+    trending.forEach((t) => {
+      if (!currentQuery || t.query.includes(currentQuery.toLowerCase())) {
+        suggestions.add(t.query);
+      }
+    });
+
+    // Add category-based suggestions
+    const categoryQueries = [
+      "sorting algorithms",
+      "graph algorithms",
+      "search algorithms",
+      "dynamic programming",
+      "greedy algorithms",
+      "divide and conquer",
+      "tree traversal",
+      "shortest path",
+      "minimum spanning tree",
+    ];
+
+    categoryQueries.forEach((cat) => {
+      if (!currentQuery || cat.includes(currentQuery.toLowerCase())) {
+        suggestions.add(cat);
+      }
+    });
+
+    return Array.from(suggestions).slice(0, 8);
+  }
+
+  static getSearchInsights() {
+    const totalQueries = Array.from(this.searchQueries.values()).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+    const totalFailed = Array.from(this.failedQueries.values()).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+    const successRate =
+      totalQueries > 0
+        ? ((totalQueries - totalFailed) / totalQueries) * 100
+        : 100;
+
+    return {
+      totalQueries,
+      totalFailed,
+      successRate: Math.round(successRate * 100) / 100,
+      uniqueQueries: this.searchQueries.size,
+      mostPopular: this.getPopularQueries(5),
+      mostFailed: this.getFailedQueries(5),
+      trending: this.getTrendingQueries(24),
+    };
+  }
+
+  static newSession(): string {
+    this.currentSessionId = this.generateSessionId();
+    return this.currentSessionId;
+  }
+}
 class SearchContext {
   private static searchHistory: string[] = [];
   private static algorithmPreferences: Map<string, number> = new Map();
   private static categoryPreferences: Map<string, number> = new Map();
+  private static searchCache: Map<string, SearchResult<SearchableItem>[]> =
+    new Map();
+  private static maxCacheSize = 100;
+  private static cacheHitCount = 0;
+  private static cacheMissCount = 0;
 
   static addSearch(query: string, selectedResult?: SearchableItem): void {
     this.searchHistory.unshift(query.toLowerCase());
@@ -358,6 +609,54 @@ class SearchContext {
       .map(([category]) => category);
 
     return [...recentSearches, ...popularCategories];
+  }
+
+  static cacheSearchResults(
+    query: string,
+    results: SearchResult<SearchableItem>[]
+  ): void {
+    const normalizedQuery = query.toLowerCase().trim();
+
+    // Don't cache very short queries or empty results
+    if (normalizedQuery.length < 2 || results.length === 0) {
+      return;
+    }
+
+    // Clear cache if it gets too large
+    if (this.searchCache.size >= this.maxCacheSize) {
+      const keysToDelete = Array.from(this.searchCache.keys()).slice(0, 20);
+      keysToDelete.forEach((key) => this.searchCache.delete(key));
+    }
+
+    this.searchCache.set(normalizedQuery, [...results]);
+  }
+
+  static getCachedResults(
+    query: string
+  ): SearchResult<SearchableItem>[] | null {
+    const normalizedQuery = query.toLowerCase().trim();
+    const cached = this.searchCache.get(normalizedQuery);
+
+    if (cached) {
+      this.cacheHitCount++;
+      return [...cached]; // Return a copy to prevent mutation
+    }
+
+    this.cacheMissCount++;
+    return null;
+  }
+
+  static getCacheStats(): { hits: number; misses: number; ratio: number } {
+    const total = this.cacheHitCount + this.cacheMissCount;
+    return {
+      hits: this.cacheHitCount,
+      misses: this.cacheMissCount,
+      ratio: total > 0 ? this.cacheHitCount / total : 0,
+    };
+  }
+
+  static clearCache(): void {
+    this.searchCache.clear();
   }
 }
 
@@ -420,62 +719,105 @@ export function isFuzzyMatch(
  */
 const JARGON_MAPPINGS: Record<string, string[]> = {
   // Performance related
-  fast: ["quick", "merge", "heap", "radix", "binary", "hash"],
-  slow: ["bubble", "selection", "insertion", "linear", "sequential"],
-  efficient: ["binary", "quick", "merge", "heap", "hash"],
-  inefficient: ["bubble", "selection", "linear"],
+  fast: [
+    "quick",
+    "merge",
+    "heap",
+    "radix",
+    "binary",
+    "hash",
+    "logarithmic",
+    "efficient",
+  ],
+  slow: [
+    "bubble",
+    "selection",
+    "insertion",
+    "linear",
+    "sequential",
+    "brute force",
+  ],
+  efficient: [
+    "binary",
+    "quick",
+    "merge",
+    "heap",
+    "hash",
+    "optimal",
+    "logarithmic",
+  ],
+  inefficient: ["bubble", "selection", "linear", "brute force", "exponential"],
+  optimal: ["binary", "merge", "dijkstra", "a star", "efficient"],
 
-  // Stability
-  stable: ["merge", "bubble", "insertion", "counting"],
-  unstable: ["quick", "heap", "selection"],
+  // Stability and properties
+  stable: ["merge", "bubble", "insertion", "counting", "preserves order"],
+  unstable: ["quick", "heap", "selection", "does not preserve"],
 
   // Space complexity
-  inplace: ["quick", "heap", "bubble", "selection", "insertion"],
-  extra: ["merge", "counting", "radix"],
-  memory: ["merge", "counting", "radix"],
+  inplace: [
+    "quick",
+    "heap",
+    "bubble",
+    "selection",
+    "insertion",
+    "constant space",
+  ],
+  extra: ["merge", "counting", "radix", "requires additional"],
+  memory: ["merge", "counting", "radix", "space complexity"],
+  "constant space": ["inplace", "no extra memory", "o(1) space"],
 
   // Algorithm paradigms
-  divide: ["quick", "merge", "binary"],
-  conquer: ["quick", "merge", "binary"],
-  recursive: ["merge", "quick", "binary", "dfs", "fibonacci"],
-  iterative: ["bubble", "selection", "insertion", "bfs"],
-  greedy: ["dijkstra", "prim", "kruskal", "huffman"],
+  divide: ["quick", "merge", "binary", "divide and conquer"],
+  conquer: ["quick", "merge", "binary", "divide and conquer"],
+  recursive: ["merge", "quick", "binary", "dfs", "fibonacci", "self calling"],
+  iterative: ["bubble", "selection", "insertion", "bfs", "loops"],
+  greedy: ["dijkstra", "prim", "kruskal", "huffman", "local optimal"],
   dynamic: [
     "longest common subsequence",
     "knapsack",
     "fibonacci",
-    "edit distance",
+    "memoization",
   ],
-  backtrack: ["n-queens", "sudoku", "maze"],
+  backtrack: ["n queens", "sudoku", "maze", "trial and error"],
 
-  // Data structures
-  tree: ["binary", "bst", "avl", "red-black", "heap"],
-  balanced: ["avl", "red-black", "b-tree"],
-  heap: ["binary heap", "max heap", "min heap", "priority queue"],
-  queue: ["priority", "circular", "deque", "bfs"],
-  stack: ["lifo", "push", "pop", "dfs"],
-  linked: ["linked list", "singly", "doubly"],
-  array: ["sorting", "searching", "matrix"],
+  // Search related
+  "breadth first": ["bfs", "level order", "queue based", "layer by layer"],
+  "depth first": ["dfs", "stack based", "go deep", "recursive"],
+  "best first": ["a star", "dijkstra", "heuristic", "priority"],
+  "binary search": ["logarithmic", "sorted array", "divide and conquer"],
 
   // Graph algorithms
-  shortest: ["dijkstra", "bellman", "floyd", "a-star"],
-  path: ["dijkstra", "a-star", "bfs", "dfs"],
-  traversal: ["bfs", "dfs", "topological"],
-  minimum: ["prim", "kruskal", "mst"],
-  spanning: ["prim", "kruskal", "mst"],
-  cycle: ["dfs", "topological"],
+  "shortest path": ["dijkstra", "bellman ford", "floyd warshall", "a star"],
+  "minimum spanning tree": ["prim", "kruskal", "mst", "connects all"],
+  "strongly connected": ["tarjan", "kosaraju", "scc", "bidirectional"],
+  "topological sort": ["dfs", "bfs", "dependency", "ordering"],
+  cycle: ["floyd", "dfs", "union find", "loop detection"],
 
-  // Complexity classes
-  logarithmic: ["binary", "heap"],
-  logn: ["binary", "heap"],
-  linear: ["linear search", "counting sort"],
-  nlogn: ["merge", "heap", "quick"],
-  quadratic: ["bubble", "selection", "insertion"],
-  n2: ["bubble", "selection", "insertion"],
-  constant: ["hash", "array access"],
-  exponential: ["brute force", "subset"],
+  // Tree algorithms
+  balanced: ["avl", "red black", "height balanced", "logarithmic"],
+  "binary tree": ["bst", "traversal", "inorder", "preorder", "postorder"],
+  traversal: ["inorder", "preorder", "postorder", "level order", "dfs", "bfs"],
 
-  // Search specific
+  // Complexity terms
+  "time complexity": ["big o", "runtime", "performance", "efficiency"],
+  "space complexity": ["memory", "storage", "auxiliary space"],
+  "constant time": ["o(1)", "immediate", "fixed time"],
+  "linear time": ["o(n)", "proportional", "sequential"],
+  logarithmic: ["o(log n)", "binary search", "tree height"],
+  quadratic: ["o(n²)", "nested loops", "bubble sort"],
+  exponential: ["o(2^n)", "brute force", "very slow"],
+
+  // Data structures
+  array: ["list", "vector", "sequence", "indexed"],
+  "linked list": ["nodes", "pointers", "dynamic", "sequential access"],
+  stack: ["lifo", "last in first out", "push", "pop"],
+  queue: ["fifo", "first in first out", "enqueue", "dequeue"],
+  heap: ["priority queue", "binary heap", "max heap", "min heap"],
+  "hash table": ["dictionary", "map", "key value", "constant lookup"],
+  tree: ["hierarchy", "nodes", "edges", "root", "leaf"],
+  graph: ["vertices", "edges", "network", "connections"],
+
+  // Algorithm approach
   sequential: ["linear", "brute force"],
   binary: ["binary search", "binary tree"],
   hash: ["hash table", "hash map"],
@@ -929,8 +1271,11 @@ export function advancedSearch<T extends SearchableItem>(
   const results: SearchResult<T>[] = [];
   const lowerQuery = query.toLowerCase().trim();
 
+  // Performance optimization: precompute query characteristics
+  const isShortQuery = query.length <= 2;
+
   // Fast path for very short queries - only check title starts and exact matches
-  if (query.length <= 2) {
+  if (isShortQuery) {
     for (const item of items) {
       const lowerTitle = item.title.toLowerCase();
 
@@ -978,71 +1323,106 @@ export function advancedSearch<T extends SearchableItem>(
     return results.sort((a, b) => b.score - a.score);
   }
 
-  // Full search for longer queries
-  for (const item of items) {
-    const score = calculateAdvancedRelevanceScore(query, item, opts);
+  // Performance optimization: batch process items for better cache utilization
+  const batchSize = 50;
+  const batches = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    batches.push(items.slice(i, i + batchSize));
+  }
 
-    if (score >= opts.minScore) {
-      let resultType: SearchResult<T>["type"] = "fuzzy";
-      let explanation = "";
+  // Process batches with early termination
+  let processedItems = 0;
+  for (const batch of batches) {
+    for (const item of batch) {
+      processedItems++;
 
-      // Determine result type and explanation based on score and matching methods
-      if (score >= 0.9) {
-        resultType = "exact";
-      } else if (score >= 0.6) {
-        resultType = "partial";
-      } else if (score >= 0.4) {
-        resultType = "fuzzy";
-        explanation = "Fuzzy match based on similarity";
-      } else {
-        resultType = "semantic";
-        explanation =
-          "Found through advanced matching (phonetic, semantic, or contextual)";
-      }
-
-      const result: SearchResult<T> = {
-        item,
-        score,
-        type: resultType,
-        explanation: explanation || undefined,
-      };
-
-      if (opts.highlightMatches) {
-        result.highlightedTitle = highlightMatches(item.title, query);
-        result.matches = [];
-
-        // Find what matched (optimized - early exit when enough matches found)
-        const lowerTitle = item.title.toLowerCase();
-        const lowerCategory = item.category?.toLowerCase() || "";
-        const lowerSummary = item.summary?.toLowerCase() || "";
-
-        if (lowerTitle.includes(lowerQuery)) result.matches.push("title");
-        if (lowerCategory.includes(lowerQuery)) result.matches.push("category");
-        if (result.matches.length < 2 && lowerSummary.includes(lowerQuery))
-          result.matches.push("summary");
-
-        // Check tags only if we don't have enough matches yet
-        if (
-          result.matches.length < 2 &&
-          item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
-        ) {
-          result.matches.push("tags");
+      // Performance checkpoint - if we have enough high-quality results, can exit early
+      if (results.length >= opts.maxResults * 2 && results.length > 10) {
+        const highQualityResults = results.filter((r) => r.score >= 0.7).length;
+        if (highQualityResults >= opts.maxResults) {
+          break;
         }
       }
 
-      results.push(result);
-    }
+      const score = calculateAdvancedRelevanceScore(query, item, opts);
 
-    // Early exit if we have enough high-quality results
-    if (results.length >= opts.maxResults * 1.5) {
-      results.sort((a, b) => b.score - a.score);
-      results.splice(opts.maxResults);
-      break;
+      if (score >= opts.minScore) {
+        let resultType: SearchResult<T>["type"] = "fuzzy";
+        let explanation = "";
+
+        // Determine result type and explanation based on score and matching methods
+        if (score >= 0.9) {
+          resultType = "exact";
+        } else if (score >= 0.6) {
+          resultType = "partial";
+        } else if (score >= 0.4) {
+          resultType = "fuzzy";
+          explanation = "Fuzzy match based on similarity";
+        } else {
+          resultType = "semantic";
+          explanation =
+            "Found through advanced matching (phonetic, semantic, or contextual)";
+        }
+
+        const result: SearchResult<T> = {
+          item,
+          score,
+          type: resultType,
+          explanation: explanation || undefined,
+        };
+
+        if (opts.highlightMatches) {
+          result.highlightedTitle = highlightMatches(item.title, query);
+          result.matches = [];
+
+          // Find what matched (optimized - early exit when enough matches found)
+          const lowerTitle = item.title.toLowerCase();
+          const lowerCategory = item.category?.toLowerCase() || "";
+          const lowerSummary = item.summary?.toLowerCase() || "";
+
+          if (lowerTitle.includes(lowerQuery)) result.matches.push("title");
+          if (lowerCategory.includes(lowerQuery))
+            result.matches.push("category");
+          if (result.matches.length < 2 && lowerSummary.includes(lowerQuery))
+            result.matches.push("summary");
+
+          // Check tags only if we don't have enough matches yet
+          if (
+            result.matches.length < 2 &&
+            item.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
+          ) {
+            result.matches.push("tags");
+          }
+        }
+
+        results.push(result);
+      }
+
+      // Throttling for very large datasets
+      if (processedItems % 100 === 0) {
+        // Allow other operations to run
+        setTimeout(() => {}, 0);
+      }
     }
   }
 
-  // Sort by relevance score
-  results.sort((a, b) => b.score - a.score);
+  // Sort by relevance score (stable sort for consistent results)
+  results.sort((a, b) => {
+    if (Math.abs(a.score - b.score) < 0.001) {
+      // If scores are very close, prefer exact matches, then partial, then others
+      const typeOrder = {
+        exact: 0,
+        partial: 1,
+        fuzzy: 2,
+        semantic: 3,
+        suggested: 4,
+        phonetic: 5,
+        contextual: 6,
+      };
+      return typeOrder[a.type] - typeOrder[b.type];
+    }
+    return b.score - a.score;
+  });
 
   // Phase 2: If no good results and typo suggestions enabled, find suggestions
   if (results.length === 0 && opts.suggestTypos && query.length > 2) {
@@ -1134,6 +1514,92 @@ export function trackSearchInteraction(
  */
 export function getSearchSuggestions(): string[] {
   return SearchContext.getSearchSuggestions();
+}
+
+/**
+ * Cache search results for performance optimization
+ */
+export function cacheSearchResults(
+  query: string,
+  results: SearchResult<SearchableItem>[]
+): void {
+  SearchContext.cacheSearchResults(query, results);
+}
+
+/**
+ * Get cached search results
+ */
+export function getCachedSearchResults(
+  query: string
+): SearchResult<SearchableItem>[] | null {
+  return SearchContext.getCachedResults(query);
+}
+
+/**
+ * Get cache performance statistics
+ */
+export function getSearchCacheStats(): {
+  hits: number;
+  misses: number;
+  ratio: number;
+} {
+  return SearchContext.getCacheStats();
+}
+
+/**
+ * Clear search result cache
+ */
+export function clearSearchCache(): void {
+  SearchContext.clearCache();
+}
+
+/**
+ * Track search query for analytics
+ */
+export function trackSearchQuery(query: string, resultCount: number): void {
+  SearchAnalytics.trackSearchQuery(query, resultCount);
+}
+
+/**
+ * Track search result selection
+ */
+export function trackSearchSelection(
+  query: string,
+  selectedItem: SearchableItem
+): void {
+  SearchAnalytics.trackSearchSelection(query, selectedItem);
+}
+
+/**
+ * Get popular search queries
+ */
+export function getPopularQueries(
+  limit = 10
+): Array<{ query: string; count: number }> {
+  return SearchAnalytics.getPopularQueries(limit);
+}
+
+/**
+ * Get trending search queries
+ */
+export function getTrendingQueries(
+  hoursBack = 24
+): Array<{ query: string; count: number }> {
+  return SearchAnalytics.getTrendingQueries(hoursBack);
+}
+
+/**
+ * Get enhanced search suggestions with analytics
+ */
+export function getEnhancedSearchSuggestions(currentQuery = ""): string[] {
+  return SearchAnalytics.getSearchSuggestions(currentQuery);
+}
+
+/**
+ * Get comprehensive search analytics
+ */
+export function getSearchAnalytics() {
+  return SearchAnalytics.getSearchInsights();
 }
 
 /**

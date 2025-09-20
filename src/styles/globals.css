@@ -43,6 +43,38 @@
   transition-timing-function: var(--smooth-easing);
 }
 
+/* Enhanced animations for filter components */
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0%;
+    transform: scale(0.9) translateZ(0);
+  }
+
+  100% {
+    opacity: 100%;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgb(59 130 246 / 30%);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgb(59 130 246 / 60%);
+  }
+}
+
+.animate-fade-in-scale {
+  animation: fade-in-scale 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 /* Line clamp utility for text truncation */
 .line-clamp-1 {
   -webkit-box-orient: vertical;

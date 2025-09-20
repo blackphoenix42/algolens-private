@@ -8,11 +8,19 @@ import React, {
 
 import { cn, debounce } from "@/utils";
 import {
+  recordSearchMetrics,
+  recordSearchSelection,
+} from "@/utils/searchMonitor";
+import {
+  cacheSearchResults,
+  getCachedSearchResults,
   getDidYouMeanSuggestions,
   type SearchableItem,
   type SearchOptions,
   type SearchResult,
   smartSearch,
+  trackSearchQuery,
+  trackSearchSelection,
 } from "@/utils/searchUtils";
 
 import { Input } from "./Input";
@@ -40,6 +48,12 @@ export interface SearchInputProps {
   enableFuzzySearch?: boolean;
   maxDisplayedResults?: number;
 
+  // Enhanced UI props
+  showResultPreviews?: boolean;
+  showSearchStats?: boolean;
+  _enableSearchHistory?: boolean;
+  showKeyboardHints?: boolean;
+
   // UI props
   loading?: boolean;
   disabled?: boolean;
@@ -52,7 +66,7 @@ export interface SearchInputProps {
 export function SearchInput({
   value,
   onChange,
-  placeholder = "Search algorithms...",
+  placeholder = "Search algorithms, complexity (O(1), O(log n)), data structures...",
   className,
   debounceMs = 100,
   onSearch,
@@ -71,6 +85,12 @@ export function SearchInput({
   enableTypoCorrection = true,
   enableFuzzySearch = true,
   maxDisplayedResults = 8,
+
+  // Enhanced UI props
+  showResultPreviews = true,
+  showSearchStats = false,
+  _enableSearchHistory = true,
+  showKeyboardHints = true,
 
   // UI props
   loading = false,
@@ -101,17 +121,50 @@ export function SearchInput({
     if (useAdvancedSearch && searchValue.trim()) {
       setIsSearching(true);
 
+      // Check cache first for performance boost
+      const cachedResults = getCachedSearchResults(searchValue);
+      if (cachedResults) {
+        setSearchResults(cachedResults);
+        setDidYouMeanSuggestions([]);
+        setShowDropdown(true);
+        setIsSearching(false);
+        return;
+      }
+
       // Use setTimeout to allow UI to update with loading state
       setTimeout(() => {
         try {
+          // Start performance timer
+          const startTime = performance.now();
+
           // Perform smart search with all advanced features
           const results = smartSearch(searchValue, searchableItems, {
             maxResults: maxDisplayedResults,
             suggestTypos: enableTypoCorrection,
             fuzzyThreshold: enableFuzzySearch ? 0.6 : 0.9,
             highlightMatches: true,
+            enableSemanticSearch: true,
+            enablePhoneticSearch: true,
+            enableContextualSearch: true,
+            enableAbbreviationSearch: true,
+            enableSynonymSearch: true,
             ...searchOptions,
           });
+
+          // Record performance metrics
+          const searchTime = performance.now() - startTime;
+          recordSearchMetrics(
+            searchValue,
+            results,
+            searchTime,
+            !!cachedResults
+          );
+
+          // Cache results for future searches
+          cacheSearchResults(searchValue, results);
+
+          // Track search analytics
+          trackSearchQuery(searchValue, results.length);
 
           setSearchResults(results);
 
@@ -219,6 +272,11 @@ export function SearchInput({
       } else {
         // Advanced search result
         const result = item as SearchResult<SearchableItem>;
+
+        // Track analytics for result selection
+        trackSearchSelection(internalValue, result.item);
+        recordSearchSelection(internalValue, result.item);
+
         setInternalValue(result.item.title);
         setShowDropdown(false);
         setSelectedIndex(-1);
@@ -227,7 +285,7 @@ export function SearchInput({
         onResultSelect?.(result);
       }
     },
-    [onChange, onSearch, onResultSelect]
+    [onChange, onSearch, onResultSelect, internalValue]
   );
 
   // Handle "Did you mean?" suggestion click - Memoized
@@ -332,7 +390,7 @@ export function SearchInput({
   }, [autoFocus]);
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div className={cn("group relative w-full", className)}>
       <Input
         ref={inputRef}
         type="text"
@@ -358,7 +416,7 @@ export function SearchInput({
         aria-label={ariaLabel}
         leftIcon={
           <svg
-            className="h-4 w-4"
+            className="h-4 w-4 text-slate-500 transition-colors duration-200 group-focus-within:text-blue-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -446,68 +504,153 @@ export function SearchInput({
               {/* Search Results */}
               {searchResults.length > 0 && !isSearching ? (
                 <div>
+                  {/* Results header with stats */}
+                  {showSearchStats && (
+                    <div className="border-b border-slate-100 px-4 py-2 dark:border-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {searchResults.length} result
+                        {searchResults.length !== 1 ? "s" : ""} found
+                        {searchResults.length > 0 &&
+                          ` • Best match: ${Math.round(searchResults[0].score * 100)}%`}
+                      </p>
+                    </div>
+                  )}
+
                   {searchResults.map((result, index) => (
                     <button
                       key={result.item.id}
                       type="button"
                       className={cn(
-                        "group w-full px-4 py-3 text-left transition-colors",
-                        "hover:bg-slate-50 dark:hover:bg-slate-800/50",
-                        "focus:bg-slate-50 focus:outline-none dark:focus:bg-slate-800/50",
+                        "group w-full px-4 py-3 text-left transition-all duration-150",
+                        "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20",
+                        "focus:bg-gradient-to-r focus:from-blue-50/50 focus:to-indigo-50/50 focus:outline-none dark:focus:from-blue-900/20 dark:focus:to-indigo-900/20",
                         selectedIndex === index &&
-                          "bg-slate-50 dark:bg-slate-800/50"
+                          "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30",
+                        "border-l-4 border-transparent",
+                        result.score >= 0.9 && "border-l-green-400",
+                        result.score >= 0.7 &&
+                          result.score < 0.9 &&
+                          "border-l-blue-400",
+                        result.score >= 0.5 &&
+                          result.score < 0.7 &&
+                          "border-l-yellow-400",
+                        result.score < 0.5 && "border-l-gray-300"
                       )}
                       onClick={() => handleItemClick(result)}
                       aria-label={`Select ${result.item.title}`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
+                          {/* Title and badges */}
+                          <div className="mb-1 flex items-center gap-2">
                             <span
-                              className="font-medium text-slate-900 dark:text-slate-100"
+                              className="font-semibold text-slate-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400"
                               dangerouslySetInnerHTML={{
                                 __html:
                                   result.highlightedTitle || result.item.title,
                               }}
                             />
+
+                            {/* Result type badge */}
+                            {result.type === "exact" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                Exact
+                              </span>
+                            )}
+                            {result.type === "fuzzy" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-yellow-500"></span>
+                                Fuzzy
+                              </span>
+                            )}
+                            {result.type === "semantic" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                                Smart
+                              </span>
+                            )}
+
+                            {/* Category badge */}
                             {showCategories && result.item.category && (
-                              <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 transition-colors group-hover:bg-blue-100 dark:bg-slate-700 dark:text-slate-300 dark:group-hover:bg-blue-900/50">
                                 {result.item.category}
                               </span>
                             )}
-                            {result.type === "exact" && (
-                              <span className="text-xs text-green-500">✓</span>
-                            )}
-                            {result.type === "fuzzy" && (
-                              <span className="text-xs text-yellow-500">~</span>
-                            )}
                           </div>
-                          {result.item.summary && (
-                            <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+
+                          {/* Enhanced preview with summary */}
+                          {showResultPreviews && result.item.summary && (
+                            <p className="mt-1 line-clamp-2 text-sm text-slate-600 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-300">
                               {result.item.summary}
                             </p>
                           )}
+
+                          {/* Match indicators */}
                           {result.matches && result.matches.length > 0 && (
-                            <div className="mt-2 flex gap-1">
-                              {result.matches.map((match) => (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {result.matches.slice(0, 3).map((match) => (
                                 <span
                                   key={match}
-                                  className="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                                  className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 transition-colors group-hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:group-hover:bg-blue-900/50"
                                 >
-                                  {match}
+                                  matches: {match}
                                 </span>
                               ))}
+                              {result.matches.length > 3 && (
+                                <span className="text-xs text-slate-400">
+                                  +{result.matches.length - 3} more
+                                </span>
+                              )}
                             </div>
                           )}
+
+                          {/* Result explanation */}
+                          {result.explanation && (
+                            <p className="mt-1 text-xs text-slate-500 italic dark:text-slate-500">
+                              {result.explanation}
+                            </p>
+                          )}
                         </div>
-                        {showScores && (
-                          <div className="ml-3 text-xs text-slate-400">
-                            {Math.round(result.score * 100)}%
-                          </div>
-                        )}
+
+                        {/* Score and keyboard hint */}
+                        <div className="ml-3 flex flex-col items-end gap-1">
+                          {showScores && (
+                            <div
+                              className={cn(
+                                "text-xs font-medium",
+                                result.score >= 0.9 &&
+                                  "text-green-600 dark:text-green-400",
+                                result.score >= 0.7 &&
+                                  result.score < 0.9 &&
+                                  "text-blue-600 dark:text-blue-400",
+                                result.score >= 0.5 &&
+                                  result.score < 0.7 &&
+                                  "text-yellow-600 dark:text-yellow-400",
+                                result.score < 0.5 && "text-slate-400"
+                              )}
+                            >
+                              {Math.round(result.score * 100)}%
+                            </div>
+                          )}
+                          {showKeyboardHints && selectedIndex === index && (
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-400 dark:bg-slate-700">
+                              ↵
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                   ))}
+
+                  {/* Footer with keyboard navigation hints */}
+                  {showKeyboardHints && searchResults.length > 0 && (
+                    <div className="border-t border-slate-100 px-4 py-2 dark:border-slate-800">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        ↑↓ Navigate • ↵ Select • Esc Close
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 internalValue.trim() &&
