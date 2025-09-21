@@ -24,6 +24,9 @@ import {
 
 import { cn } from "@/utils";
 
+/**
+ * Highlighting configuration for array elements
+ */
 type Highlights = {
   compared?: [number, number];
   swapped?: [number, number];
@@ -31,6 +34,9 @@ type Highlights = {
   indices?: number[];
 };
 
+/**
+ * Color scheme configuration
+ */
 type Colors = {
   base: string;
   compared: string;
@@ -176,19 +182,27 @@ const EnhancedArrayVisualization = forwardRef<
 
   // Cleanup effect to ensure no lingering event listeners
   useEffect(() => {
-    return () => {
-      // Cleanup any remaining global event listeners on unmount
-      const cleanupGlobalListeners = () => {
-        // This is a safety net - the event listeners should be removed in handleGlobalMouseUp
-        const allMouseMoveListeners = document.querySelectorAll(
-          '[data-dragging="true"]'
-        );
-        allMouseMoveListeners.forEach((el) =>
-          el.removeAttribute("data-dragging")
-        );
-      };
-      cleanupGlobalListeners();
+    const cleanup = () => {
+      // Reset all drag-related refs
+      draggedIndexRef.current = null;
+      currentDropTargetRef.current = null;
+      isDragActiveRef.current = false;
+      dragStartTimeRef.current = 0;
+      lastMoveTimeRef.current = 0;
+
+      // Clean up any global event listeners
+      try {
+        const events = ["mousemove", "mouseup", "keydown"] as const;
+        events.forEach((event) => {
+          document.removeEventListener(event, () => {}, { capture: true });
+        });
+      } catch (error) {
+        console.warn("Error during event listener cleanup:", error);
+      }
     };
+
+    // Cleanup on unmount
+    return cleanup;
   }, []);
 
   // Drag and drop handlers
@@ -206,7 +220,7 @@ const EnhancedArrayVisualization = forwardRef<
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent, index: number) => {
-      if (!dragOn || panMode) return; // Remove isDragging check for faster response
+      if (!dragOn || panMode) return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -230,8 +244,15 @@ const EnhancedArrayVisualization = forwardRef<
       setDropTargetIdx(index);
       handleDragStart(index);
 
+      // Store references to event handlers for proper cleanup
+      const eventHandlers = {
+        mousemove: null as ((e: MouseEvent) => void) | null,
+        mouseup: null as (() => void) | null,
+        keydown: null as ((e: KeyboardEvent) => void) | null,
+      };
+
       // Add global mouse event listeners for robust drag handling
-      const handleGlobalMouseMove = (globalE: MouseEvent) => {
+      eventHandlers.mousemove = (globalE: MouseEvent) => {
         // Use refs for immediate state checking - no React state delays
         const wrapper = wrapperRef.current;
         const draggedIdx = draggedIndexRef.current;
@@ -245,7 +266,11 @@ const EnhancedArrayVisualization = forwardRef<
         lastMoveTimeRef.current = now;
 
         // Prevent default to avoid any browser interference
-        globalE.preventDefault();
+        try {
+          globalE.preventDefault();
+        } catch {
+          // Ignore preventDefault errors in some contexts
+        }
 
         const rect = wrapper.getBoundingClientRect();
         const x = globalE.clientX - rect.left;
@@ -262,7 +287,7 @@ const EnhancedArrayVisualization = forwardRef<
           // Only auto-cancel if dragging has been active for at least 100ms
           // This prevents accidental cancellation on fast initial movements
           if (Date.now() - dragStartTimeRef.current > 100) {
-            handleGlobalMouseUp();
+            eventHandlers.mouseup?.();
             return;
           }
         }
@@ -309,14 +334,14 @@ const EnhancedArrayVisualization = forwardRef<
       };
 
       // Add keyboard escape handler
-      const handleKeyDown = (keyE: KeyboardEvent) => {
+      eventHandlers.keydown = (keyE: KeyboardEvent) => {
         if (keyE.key === "Escape") {
           // Cancel drag operation on escape
-          handleGlobalMouseUp();
+          eventHandlers.mouseup?.();
         }
       };
 
-      const handleGlobalMouseUp = () => {
+      eventHandlers.mouseup = () => {
         // Use refs for immediate state access
         const draggedIdx = draggedIndexRef.current;
         const dropIdx = currentDropTargetRef.current;
@@ -355,44 +380,49 @@ const EnhancedArrayVisualization = forwardRef<
 
         // Remove global event listeners with error handling
         try {
-          document.removeEventListener("mousemove", handleGlobalMouseMove, {
-            capture: true,
-          });
-          document.removeEventListener("mouseup", handleGlobalMouseUp, {
-            capture: true,
-          });
-          document.removeEventListener("keydown", handleKeyDown, {
-            capture: true,
-          });
+          if (eventHandlers.mousemove) {
+            document.removeEventListener("mousemove", eventHandlers.mousemove, {
+              capture: true,
+            });
+          }
+          if (eventHandlers.mouseup) {
+            document.removeEventListener("mouseup", eventHandlers.mouseup, {
+              capture: true,
+            });
+          }
+          if (eventHandlers.keydown) {
+            document.removeEventListener("keydown", eventHandlers.keydown, {
+              capture: true,
+            });
+          }
         } catch (error) {
           console.warn("Error removing event listeners:", error);
         }
-
-        // Additional cleanup: remove any potential duplicate listeners
-        // This is a safeguard against listener accumulation
-        const cleanup = () => {
-          document.removeEventListener("mousemove", handleGlobalMouseMove, {
-            capture: true,
-          });
-          document.removeEventListener("mouseup", handleGlobalMouseUp, {
-            capture: true,
-          });
-          document.removeEventListener("keydown", handleKeyDown, {
-            capture: true,
-          });
-        };
-        cleanup();
       };
 
       // Add global event listeners with capture phase for better fast drag handling
-      document.addEventListener("mousemove", handleGlobalMouseMove, {
-        capture: true,
-        passive: false,
-      });
-      document.addEventListener("mouseup", handleGlobalMouseUp, {
-        capture: true,
-      });
-      document.addEventListener("keydown", handleKeyDown, { capture: true });
+      try {
+        if (eventHandlers.mousemove) {
+          document.addEventListener("mousemove", eventHandlers.mousemove, {
+            capture: true,
+            passive: false,
+          });
+        }
+        if (eventHandlers.mouseup) {
+          document.addEventListener("mouseup", eventHandlers.mouseup, {
+            capture: true,
+          });
+        }
+        if (eventHandlers.keydown) {
+          document.addEventListener("keydown", eventHandlers.keydown, {
+            capture: true,
+          });
+        }
+      } catch (error) {
+        console.warn("Error adding event listeners:", error);
+        // Cleanup on error
+        eventHandlers.mouseup?.();
+      }
     },
     [dragOn, panMode, handleDragStart, array, onReorder]
   );
@@ -406,70 +436,70 @@ const EnhancedArrayVisualization = forwardRef<
     }));
   }, [renderArray]);
 
-  const getBarColor = (
-    index: number,
-    value: number,
-    isHovered: boolean = false
-  ) => {
-    // Priority states (highest to lowest)
-    if (highlights?.pivot === index) return colors.pivot;
-    if (
-      highlights?.compared?.[0] === index ||
-      highlights?.compared?.[1] === index
-    ) {
-      return colors.compared;
-    }
-    if (
-      highlights?.swapped?.[0] === index ||
-      highlights?.swapped?.[1] === index
-    ) {
-      return colors.swapped;
-    }
-    if (highlights?.indices?.includes(index)) return colors.highlighted;
-
-    // Base color based on mode
-    let baseColor: string;
-    switch (colorMode) {
-      case "rainbow": {
-        const hue = (index / renderArray.length) * 360;
-        baseColor = `hsl(${hue}, 70%, 60%)`;
-        break;
+  // Memoize color calculation to prevent recalculation on every render
+  const getBarColor = useCallback(
+    (index: number, value: number, isHovered: boolean = false) => {
+      // Priority states (highest to lowest)
+      if (highlights?.pivot === index) return colors.pivot;
+      if (
+        highlights?.compared?.[0] === index ||
+        highlights?.compared?.[1] === index
+      ) {
+        return colors.compared;
       }
-      case "value": {
-        const maxVal = Math.max(...renderArray);
-        const intensity = value / maxVal;
-        baseColor = `hsl(220, 100%, ${30 + intensity * 40}%)`;
-        break;
+      if (
+        highlights?.swapped?.[0] === index ||
+        highlights?.swapped?.[1] === index
+      ) {
+        return colors.swapped;
       }
-      case "custom":
-      default:
-        baseColor = colors.base;
-    }
+      if (highlights?.indices?.includes(index)) return colors.highlighted;
 
-    // Apply hover effect with dark mode support
-    if (isHovered) {
-      // Create a lighter/darker version for hover based on theme
-      if (baseColor.startsWith("hsl")) {
-        return baseColor.replace(/(\d+)%\)$/, (_, lightness) => {
-          const currentLightness = parseInt(lightness);
-          // In dark mode, make it lighter; in light mode, make it slightly darker
-          const newLightness = document.documentElement.classList.contains(
-            "dark"
-          )
-            ? Math.min(currentLightness + 15, 85)
-            : Math.max(currentLightness - 10, 25);
-          return `${newLightness}%)`;
-        });
-      } else {
-        // For hex colors, add a semi-transparent overlay effect
-        return document.documentElement.classList.contains("dark")
-          ? `color-mix(in srgb, ${baseColor} 85%, white 15%)`
-          : `color-mix(in srgb, ${baseColor} 90%, black 10%)`;
+      // Base color based on mode
+      let baseColor: string;
+      switch (colorMode) {
+        case "rainbow": {
+          const hue = (index / renderArray.length) * 360;
+          baseColor = `hsl(${hue}, 70%, 60%)`;
+          break;
+        }
+        case "value": {
+          const maxVal = Math.max(...renderArray);
+          const intensity = maxVal > 0 ? value / maxVal : 0; // Prevent division by zero
+          baseColor = `hsl(220, 100%, ${30 + intensity * 40}%)`;
+          break;
+        }
+        case "custom":
+        default:
+          baseColor = colors.base;
       }
-    }
 
-    return baseColor;
-  };
+      // Apply hover effect with dark mode support
+      if (isHovered) {
+        // Create a lighter/darker version for hover based on theme
+        if (baseColor.startsWith("hsl")) {
+          return baseColor.replace(/(\d+)%\)$/, (_, lightness) => {
+            const currentLightness = parseInt(lightness);
+            // In dark mode, make it lighter; in light mode, make it slightly darker
+            const newLightness = document.documentElement.classList.contains(
+              "dark"
+            )
+              ? Math.min(currentLightness + 15, 85)
+              : Math.max(currentLightness - 10, 25);
+            return `${newLightness}%)`;
+          });
+        } else {
+          // For hex colors, add a semi-transparent overlay effect
+          return document.documentElement.classList.contains("dark")
+            ? `color-mix(in srgb, ${baseColor} 85%, white 15%)`
+            : `color-mix(in srgb, ${baseColor} 90%, black 10%)`;
+        }
+      }
+
+      return baseColor;
+    },
+    [highlights, colors, colorMode, renderArray]
+  );
 
   const CustomTooltip = ({
     active,

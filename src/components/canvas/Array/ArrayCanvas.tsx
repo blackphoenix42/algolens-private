@@ -8,6 +8,37 @@ import React, {
   useState,
 } from "react";
 
+/**
+ * Configuration constants for array visualization
+ */
+const CANVAS_CONFIG = {
+  bar: {
+    width: 24,
+    gap: 8,
+  },
+  padding: {
+    left: 48,
+    right: 28,
+    top: 6,
+    bottom: 22,
+    extra: 16,
+  },
+  chart: {
+    height: 220,
+  },
+  zoom: {
+    min: 0.2,
+    max: 5,
+    factor: 1.2,
+  },
+  grid: {
+    step: 6, // target number of ticks
+  },
+} as const;
+
+/**
+ * Highlighting configuration for array elements
+ */
 type Highlights = {
   compared?: [number, number];
   swapped?: [number, number];
@@ -15,6 +46,9 @@ type Highlights = {
   indices?: number[];
 };
 
+/**
+ * Imperative handle for controlling the array canvas externally
+ */
 export type ArrayCanvasHandle = {
   zoomIn: () => void;
   zoomOut: () => void;
@@ -27,6 +61,9 @@ export type ArrayCanvasHandle = {
   centerBars: () => void;
 };
 
+/**
+ * Color scheme configuration for array visualization
+ */
 type Colors = {
   base: string;
   compared: string;
@@ -34,28 +71,68 @@ type Colors = {
   pivot: string;
   highlighted: string;
 };
+
+/**
+ * Available visualization view modes
+ */
 type View = "bars" | "dots" | "table";
+
+/**
+ * Available color schemes
+ */
 type ColorMode = "plain" | "rainbow" | "value" | "custom";
 
+/**
+ * Props for the ArrayCanvas component
+ */
 type Props = {
+  /** Array of numbers to visualize */
   array: number[];
+  /** Highlighting configuration for specific elements */
   highlights?: Highlights;
+  /** Callback when array is reordered via drag and drop */
   onReorder?: (next: number[]) => void;
+  /** Height of the canvas container */
   height?: number | string;
+  /** Color scheme configuration */
   colors?: Colors;
+  /** External control for pan mode */
   panModeExternal?: boolean;
+  /** Whether drag and drop is enabled */
   dragEnabled?: boolean;
+  /** Callback when view settings change */
   onViewChange?: (s: {
     grid: boolean;
     snap: boolean;
     pan: boolean;
     drag: boolean;
   }) => void;
+  /** Visual representation mode */
   viewMode?: View;
+  /** Color scheme mode */
   colorMode?: ColorMode;
+  /** Whether to show coordinate plane */
   showPlane?: boolean;
+  /** Whether to show element labels */
   showLabels?: boolean;
 };
+
+/**
+ * A comprehensive canvas-based array visualization component with interactive features.
+ *
+ * Features:
+ * - Multiple view modes (bars, dots, table)
+ * - Zoom and pan functionality
+ * - Drag and drop reordering
+ * - Grid and snap-to-grid
+ * - Element highlighting
+ * - Various color schemes
+ * - Rotation and fullscreen support
+ * - Accessibility features
+ *
+ * @param props - Component properties
+ * @param ref - Imperative handle for external control
+ */
 
 export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
   {
@@ -94,16 +171,16 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
   const [dragOffset, setDragOffset] = useState(0);
   const [tempArray, setTempArray] = useState<number[] | null>(null);
 
-  // geometry
-  const BAR_W = 24;
-  const GAP = 8;
+  // geometry - using configuration constants
+  const BAR_W = CANVAS_CONFIG.bar.width;
+  const GAP = CANVAS_CONFIG.bar.gap;
   const COL_W = BAR_W + GAP;
-  const LEFT_PAD = 48;
-  const RIGHT_PAD = 28;
-  const EXTRA_LEFT = 16;
-  const TOP_PAD = 6;
-  const BOTTOM_PAD = 22;
-  const CH = 220;
+  const LEFT_PAD = CANVAS_CONFIG.padding.left;
+  const RIGHT_PAD = CANVAS_CONFIG.padding.right;
+  const EXTRA_LEFT = CANVAS_CONFIG.padding.extra;
+  const TOP_PAD = CANVAS_CONFIG.padding.top;
+  const BOTTOM_PAD = CANVAS_CONFIG.padding.bottom;
+  const CH = CANVAS_CONFIG.chart.height;
 
   const contentW = Math.max(0, array.length * COL_W - GAP);
   const axisWidth = LEFT_PAD + contentW + RIGHT_PAD;
@@ -124,7 +201,10 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
       }
 
       const prev = scale;
-      const next = Math.min(5, Math.max(0.2, prev * factor));
+      const next = Math.min(
+        CANVAS_CONFIG.zoom.max,
+        Math.max(CANVAS_CONFIG.zoom.min, prev * factor)
+      );
       setTx(tx + (mx as number) * (next - prev));
       setTy(ty + (my as number) * (next - prev));
       setScale(next);
@@ -153,21 +233,43 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
   useImperativeHandle(
     ref,
     () => ({
-      zoomIn: () => zoomAt(1.2),
-      zoomOut: () => zoomAt(1 / 1.2),
+      zoomIn: () => {
+        try {
+          zoomAt(CANVAS_CONFIG.zoom.factor);
+        } catch (error) {
+          console.warn("Error during zoom in:", error);
+        }
+      },
+      zoomOut: () => {
+        try {
+          zoomAt(1 / CANVAS_CONFIG.zoom.factor);
+        } catch (error) {
+          console.warn("Error during zoom out:", error);
+        }
+      },
       resetView: () => {
-        setScale(1);
-        setTx(0);
-        setTy(0);
-        userInteracted.current = false;
-        centerBars();
+        try {
+          setScale(1);
+          setTx(0);
+          setTy(0);
+          userInteracted.current = false;
+          centerBars();
+        } catch (error) {
+          console.warn("Error during reset view:", error);
+        }
       },
       toggleGrid: () => setGrid((g) => !g),
       toggleSnap: () => setSnap((s) => !s),
       setPanMode: (on: boolean) => setPanMode(on),
       rotate90: () => setAngle((a) => (a + 90) % 360),
       setDragEnabled: (on: boolean) => setDragOn(on),
-      centerBars: () => centerBars(),
+      centerBars: () => {
+        try {
+          centerBars();
+        } catch (error) {
+          console.warn("Error during center bars:", error);
+        }
+      },
     }),
     [centerBars, zoomAt]
   );
@@ -185,18 +287,41 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
 
   useEffect(() => {
     if (!wrapperRef.current) return;
-    const ro = new ResizeObserver(() => {
-      if (!userInteracted.current) centerBars();
-    });
-    ro.observe(wrapperRef.current);
-    return () => ro.disconnect();
+
+    let ro: ResizeObserver | null = null;
+
+    try {
+      ro = new ResizeObserver(() => {
+        if (!userInteracted.current) {
+          try {
+            centerBars();
+          } catch (error) {
+            console.warn("Error during auto-centering:", error);
+          }
+        }
+      });
+      ro.observe(wrapperRef.current);
+    } catch (error) {
+      console.warn(
+        "ResizeObserver not supported or failed to initialize:",
+        error
+      );
+    }
+
+    return () => {
+      try {
+        ro?.disconnect();
+      } catch (error) {
+        console.warn("Error disconnecting ResizeObserver:", error);
+      }
+    };
   }, [centerBars]);
 
   // domain/ticks
   const vmin = Math.min(0, ...array);
   const vmax = Math.max(0, ...array);
   const span = Math.max(1, vmax - vmin);
-  const niceStep = (s: number, target = 6) => {
+  const niceStep = (s: number, target = CANVAS_CONFIG.grid.step) => {
     const raw = s / target;
     const pow10 = Math.pow(10, Math.floor(Math.log10(raw)));
     return [1, 2, 5]

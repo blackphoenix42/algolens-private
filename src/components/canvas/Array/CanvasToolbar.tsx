@@ -4,18 +4,32 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 
 import type { ArrayCanvasHandle } from "./ArrayCanvas";
 
+/**
+ * Props for the CanvasToolbar component
+ */
 type Props = {
-  surfaceRef: React.RefObject<HTMLDivElement | null>; // FULLSCREEN targets this whole surface
+  /** Reference to the surface element for fullscreen functionality */
+  surfaceRef: React.RefObject<HTMLDivElement | null>;
+  /** Reference to the canvas handle for method calls */
   canvasHandle?: React.RefObject<ArrayCanvasHandle | null>;
+  /** Current pan mode state */
   panMode: boolean;
+  /** Callback to toggle pan mode */
   onPanMode: (on: boolean) => void;
+  /** Current drag enabled state */
   dragging: boolean;
+  /** Callback to toggle drag functionality */
   onDragging: (on: boolean) => void;
+  /** Current grid visibility state */
   gridOn: boolean;
+  /** Current snap-to-grid state */
   snapOn: boolean;
 };
 
-// Simple chevron-down icon; rotate 180° when collapsed
+/**
+ * Simple chevron-down icon component for collapse/expand functionality
+ * @param className - CSS classes to apply
+ */
 const ChevronDownIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} aria-hidden>
     <path
@@ -29,6 +43,21 @@ const ChevronDownIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
+/**
+ * A collapsible toolbar component for controlling canvas visualization features.
+ *
+ * Features:
+ * - Zoom controls
+ * - Grid and snap toggles
+ * - Pan and drag mode toggles
+ * - View reset functionality
+ * - Rotation controls
+ * - Fullscreen toggle
+ * - Collapsible interface
+ *
+ * @param props - Component properties
+ */
+
 export default function CanvasToolbar({
   surfaceRef,
   canvasHandle,
@@ -41,26 +70,26 @@ export default function CanvasToolbar({
 }: Props) {
   const { isFullscreen, enter, exit } = useFullscreen<HTMLDivElement>();
   const full = () => (isFullscreen ? exit() : enter(surfaceRef.current));
-  type NoArgKeys = {
+
+  // Type-safe method calling with better validation
+  type NoArgMethods = {
     [K in keyof ArrayCanvasHandle]: ArrayCanvasHandle[K] extends () => void
       ? K
       : never;
   }[keyof ArrayCanvasHandle];
 
-  const call = (fn: NoArgKeys) => {
-    const h = canvasHandle?.current;
-    if (!h) return;
-    // Explicitly validate method names to prevent dynamic method injection
-    const allowedMethods: Set<string> = new Set([
-      "zoomIn",
-      "zoomOut",
-      "resetView",
-      "toggleGrid",
-      "toggleSnap",
-      "rotate90",
-    ]);
-    if (allowedMethods.has(fn)) {
-      h[fn](); // typed as () => void
+  const call = (method: NoArgMethods) => {
+    const handle = canvasHandle?.current;
+    if (!handle) {
+      console.warn("Canvas handle not available");
+      return;
+    }
+
+    try {
+      // TypeScript ensures this is type-safe at compile time
+      handle[method]();
+    } catch (error) {
+      console.warn(`Error calling canvas method ${method}:`, error);
     }
   };
   // collapse / expand
