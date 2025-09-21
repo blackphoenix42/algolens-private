@@ -37,6 +37,7 @@ export default function ArrayViewPanel({
   onShowLabels,
   showPlane,
   onShowPlane,
+  isMobile = false,
 }: {
   view: View;
   onView: (v: View) => void;
@@ -48,8 +49,9 @@ export default function ArrayViewPanel({
   onShowLabels: (v: boolean) => void;
   showPlane: boolean;
   onShowPlane: (v: boolean) => void;
+  isMobile?: boolean;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(!isMobile);
   const { t } = useI18n();
 
   const upd = (k: keyof Colors) => (e: React.ChangeEvent<HTMLInputElement>) =>

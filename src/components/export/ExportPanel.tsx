@@ -107,14 +107,14 @@ export default function ExportPanel({
   }
 
   return (
-    <div className="card box-border w-full min-w-0 text-sm">
+    <div className="box-border w-full min-w-0 text-sm">
       <div className="mb-1 font-medium">Export</div>
 
       <div className="grid gap-2">
         <label className="flex min-w-0 items-center gap-2">
           <span className="w-28 shrink-0">Format</span>
           <select
-            className="min-w-0 rounded border px-2 py-1"
+            className="min-w-0 rounded border border-gray-300 bg-white px-2 py-1 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             value={fmt}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setFmt(e.currentTarget.value as typeof fmt)

@@ -30,9 +30,15 @@ function ChevronDownIcon({ open }: { open: boolean }) {
   );
 }
 
-export default function AboutPanel({ meta }: { meta: AlgoMeta }) {
+export default function AboutPanel({
+  meta,
+  isMobile = false,
+}: {
+  meta: AlgoMeta;
+  isMobile?: boolean;
+}) {
   const [modalOpen, setModalOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(isMobile);
   const { t } = useI18n();
   const { complexity: c } = meta;
 
@@ -47,13 +53,15 @@ export default function AboutPanel({ meta }: { meta: AlgoMeta }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            className="rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
-            onClick={() => setModalOpen(true)}
-            title="Open in modal"
-          >
-            <ExpandIcon />
-          </button>
+          {!isMobile && (
+            <button
+              className="rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
+              onClick={() => setModalOpen(true)}
+              title="Open in modal"
+            >
+              <ExpandIcon />
+            </button>
+          )}
           <button
             className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
             onClick={() => setCollapsed((v) => !v)}

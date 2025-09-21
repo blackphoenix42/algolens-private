@@ -24,6 +24,8 @@ type Props = {
   gridOn: boolean;
   /** Current snap-to-grid state */
   snapOn: boolean;
+  /** Whether the component is being used on mobile */
+  isMobile?: boolean;
 };
 
 /**
@@ -67,6 +69,7 @@ export default function CanvasToolbar({
   onDragging,
   gridOn,
   snapOn,
+  isMobile = false,
 }: Props) {
   const { isFullscreen, enter, exit } = useFullscreen<HTMLDivElement>();
   const full = () => (isFullscreen ? exit() : enter(surfaceRef.current));
@@ -93,7 +96,7 @@ export default function CanvasToolbar({
     }
   };
   // collapse / expand
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(!isMobile);
 
   // small helper for consistent button styling
   const baseBtn =

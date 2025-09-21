@@ -102,7 +102,11 @@ const ChevronDownIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-type Props = { value: number[]; onChange: (next: number[]) => void };
+type Props = {
+  value: number[];
+  onChange: (next: number[]) => void;
+  isMobile?: boolean;
+};
 type Dist =
   | "random"
   | "gaussian"
@@ -118,7 +122,11 @@ type Dist =
 
 type SeedMode = "fixed" | "random";
 
-export default function DatasetPanel({ value, onChange }: Props) {
+export default function DatasetPanel({
+  value,
+  onChange,
+  isMobile = false,
+}: Props) {
   const { t } = useI18n();
   const [n, setN] = useState<number>(value.length || 16);
   const [min, setMin] = useState(5);
@@ -134,7 +142,7 @@ export default function DatasetPanel({ value, onChange }: Props) {
   const [customText, setCustomText] = useState("");
 
   // Collapse / expand
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(!isMobile);
 
   useEffect(() => setN(value.length || 16), [value.length]);
 

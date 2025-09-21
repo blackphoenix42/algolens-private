@@ -94,18 +94,20 @@ export default function CodePanel({
   explain,
   fillHeight = true,
   onTabChange,
+  isMobile = false,
 }: {
   meta: AlgoMeta;
   activePcLine?: number;
   explain?: string;
   fillHeight?: boolean;
   onTabChange?: (tab: "pseudocode" | "code") => void;
+  isMobile?: boolean;
 }) {
   const [tab, setTab] = useState<"pseudocode" | "code">("pseudocode");
   const [lang, setLang] = useState<Lang>("cpp");
   const [copied, setCopied] = useState(false);
   const [wrap, setWrap] = useState(false);
-  const [collapsed, setCollapsed] = useState(false); // NEW
+  const [collapsed, setCollapsed] = useState(isMobile); // Collapsed by default on mobile
 
   useEffect(() => {
     onTabChange?.(tab);

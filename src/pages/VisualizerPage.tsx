@@ -47,6 +47,28 @@ interface BaseFrame {
   explain?: string;
 }
 
+/** Simple chevron that rotates when collapsed/expanded */
+function ChevronDownIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 transition-transform duration-200 ${
+        open ? "rotate-180" : "rotate-0"
+      }`}
+      aria-hidden
+    >
+      <path
+        d="M8 10l4 4 4-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 // Constants for the visualizer
 const VISUALIZER_CONSTANTS = {
   LOADING_DELAY: 200,
@@ -222,6 +244,9 @@ export default function VisualizerPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [activeTab, setActiveTab] = useState<"canvas" | "complexity">("canvas");
   // const [enhancedMode, setEnhancedMode] = useState(false);
+
+  // Collapsible states for mobile panels
+  const [transportCollapsed, setTransportCollapsed] = useState(true); // Always start collapsed on mobile
 
   // AI Chat Panel state
   // const [showAIChat, setShowAIChat] = useState(false);
@@ -530,129 +555,100 @@ export default function VisualizerPage() {
                 "grid grid-cols-[320px_minmax(0,1fr)_360px] gap-3 overflow-hidden"
           )}
         >
-          {/* LEFT COLUMN (panels scroll, player pinned bottom) */}
-          <div
-            className={cn(
-              "flex min-h-0 min-w-0 flex-col",
-              isMobile
-                ? "order-2 flex-shrink-0" // On mobile, show after canvas, natural height
-                : "overflow-hidden"
-            )}
-          >
-            {/* scrollable stack */}
-            <div
-              className={cn(
-                "grid min-h-0 content-start gap-3 pr-1",
-                isMobile
-                  ? "gap-2" // Smaller gaps on mobile, no overflow constraints
-                  : "overflow-auto"
-              )}
-            >
-              <DatasetPanel value={input} onChange={handleDatasetChange} />
+          {/* LEFT COLUMN (panels scroll, player pinned bottom) - DESKTOP ONLY */}
+          {!isMobile && (
+            <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
+              {/* scrollable stack */}
+              <div className="grid min-h-0 content-start gap-3 overflow-auto pr-1">
+                <DatasetPanel
+                  value={input}
+                  onChange={handleDatasetChange}
+                  isMobile={isMobile}
+                />
 
-              {/* Search Target Control for searching algorithms */}
-              {meta?.topic === "searching" && (
-                <div className={cn("card p-4", isMobile && "p-3")}>
-                  <div className="mb-3">
-                    <h3
-                      className={cn(
-                        "font-medium text-slate-900 dark:text-slate-100",
-                        isMobile && "text-sm"
-                      )}
-                    >
-                      Search Target
-                    </h3>
-                    <p
-                      className={cn(
-                        "mt-1 text-sm text-slate-600 dark:text-slate-400",
-                        isMobile && "text-xs"
-                      )}
-                    >
-                      Value to search for in the array
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <input
-                      type="number"
-                      value={searchTarget}
-                      onChange={(e) =>
-                        handleSearchTargetChange(Number(e.target.value))
-                      }
-                      className={cn(
-                        "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
-                        isMobile && "text-sm" // Smaller text on mobile
-                      )}
-                      min={VISUALIZER_CONSTANTS.VALUE_RANGE.min}
-                      max={VISUALIZER_CONSTANTS.VALUE_RANGE.max}
-                      placeholder="Enter target value"
-                      title="Target value to search for"
-                      aria-label="Search target value"
-                    />
-                    {meta.slug === "binary-search" && (
-                      <p
-                        className={cn(
-                          "text-xs text-slate-500 dark:text-slate-400",
-                          isMobile && "text-xs" // Already small
-                        )}
-                      >
-                        Array is automatically sorted for binary search
+                {/* Search Target Control for searching algorithms */}
+                {meta?.topic === "searching" && (
+                  <div className="card p-4">
+                    <div className="mb-3">
+                      <h3 className="font-medium text-slate-900 dark:text-slate-100">
+                        Search Target
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                        Value to search for in the array
                       </p>
-                    )}
+                    </div>
+                    <div className="space-y-2">
+                      <input
+                        type="number"
+                        value={searchTarget}
+                        onChange={(e) =>
+                          handleSearchTargetChange(Number(e.target.value))
+                        }
+                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        min={VISUALIZER_CONSTANTS.VALUE_RANGE.min}
+                        max={VISUALIZER_CONSTANTS.VALUE_RANGE.max}
+                        placeholder="Enter target value"
+                        title="Target value to search for"
+                        aria-label="Search target value"
+                      />
+                      {meta.slug === "binary-search" && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Array is automatically sorted for binary search
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              <ArrayViewPanel
-                view={view}
-                onView={setView}
-                colorMode={colorMode}
-                onColorMode={setColorMode}
-                colors={colors}
-                onColorsChange={setColors}
-                showLabels={showLabels}
-                onShowLabels={setShowLabels}
-                showPlane={showPlane}
-                onShowPlane={setShowPlane}
-              />
-              <CanvasToolbar
-                surfaceRef={surfaceRef}
-                canvasHandle={
-                  // enhancedMode ? enhancedCanvasHandle :
-                  canvasHandle
-                }
-                panMode={panMode}
-                onPanMode={setPanMode}
-                dragging={dragging}
-                onDragging={setDragging}
-                gridOn={gridOn}
-                snapOn={snapOn}
-              />
-            </div>
+                )}
+                <ArrayViewPanel
+                  view={view}
+                  onView={setView}
+                  colorMode={colorMode}
+                  onColorMode={setColorMode}
+                  colors={colors}
+                  onColorsChange={setColors}
+                  showLabels={showLabels}
+                  onShowLabels={setShowLabels}
+                  showPlane={showPlane}
+                  onShowPlane={setShowPlane}
+                  isMobile={isMobile}
+                />
+                <CanvasToolbar
+                  surfaceRef={surfaceRef}
+                  canvasHandle={
+                    // enhancedMode ? enhancedCanvasHandle :
+                    canvasHandle
+                  }
+                  panMode={panMode}
+                  onPanMode={setPanMode}
+                  dragging={dragging}
+                  onDragging={setDragging}
+                  gridOn={gridOn}
+                  snapOn={snapOn}
+                  isMobile={isMobile}
+                />
+              </div>
 
-            {/* player pinned at the very bottom of LEFT */}
-            <div
-              className={cn(
-                "shrink-0 pt-3",
-                isMobile && "pt-2" // Smaller top padding on mobile
-              )}
-            >
-              <Transport
-                playing={runner.playing}
-                direction={runner.direction}
-                onPlayForward={runner.playForward}
-                onPlayBackward={runner.playBackward}
-                onPause={runner.pause}
-                onPrev={runner.stepPrev}
-                onNext={runner.stepNext}
-                onToStart={runner.toStart}
-                onToEnd={runner.toEnd}
-                speed={runner.speed}
-                onSpeedChange={runner.setSpeed}
-                idx={runner.idx}
-                total={total}
-                onSeek={runner.setIdx}
-              />
+              {/* player pinned at the very bottom of LEFT */}
+              <div className="shrink-0 pt-3">
+                <Transport
+                  playing={runner.playing}
+                  direction={runner.direction}
+                  onPlayForward={runner.playForward}
+                  onPlayBackward={runner.playBackward}
+                  onPause={runner.pause}
+                  onPrev={runner.stepPrev}
+                  onNext={runner.stepNext}
+                  onToStart={runner.toStart}
+                  onToEnd={runner.toEnd}
+                  speed={runner.speed}
+                  onSpeedChange={runner.setSpeed}
+                  idx={runner.idx}
+                  total={total}
+                  onSeek={runner.setIdx}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* CENTER (canvas/complexity with tabs) */}
           <div
@@ -798,12 +794,132 @@ export default function VisualizerPage() {
             </div>
           </div>
 
+          {/* Mobile: Transport controls below canvas */}
+          {isMobile && (
+            <div className="order-2 flex-shrink-0 pt-2">
+              <div className="card relative min-w-0 text-sm">
+                {/* Header */}
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="panel-title font-medium text-slate-900 dark:text-slate-100">
+                      Player Controls
+                    </div>
+                  </div>
+                  <button
+                    className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"
+                    onClick={() => setTransportCollapsed((v) => !v)}
+                    aria-expanded={!transportCollapsed}
+                    aria-controls="transport-body"
+                    title={transportCollapsed ? "Expand" : "Collapse"}
+                  >
+                    <ChevronDownIcon open={!transportCollapsed} />
+                    <span className="sr-only">
+                      {transportCollapsed ? "Expand" : "Collapse"}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Transport Body (collapsible) */}
+                {!transportCollapsed && (
+                  <div id="transport-body">
+                    <Transport
+                      playing={runner.playing}
+                      direction={runner.direction}
+                      onPlayForward={runner.playForward}
+                      onPlayBackward={runner.playBackward}
+                      onPause={runner.pause}
+                      onPrev={runner.stepPrev}
+                      onNext={runner.stepNext}
+                      onToStart={runner.toStart}
+                      onToEnd={runner.toEnd}
+                      speed={runner.speed}
+                      onSpeedChange={runner.setSpeed}
+                      idx={runner.idx}
+                      total={total}
+                      onSeek={runner.setIdx}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile: Dataset and other controls */}
+          {isMobile && (
+            <div className="order-3 flex flex-shrink-0 flex-col gap-2">
+              <DatasetPanel
+                value={input}
+                onChange={handleDatasetChange}
+                isMobile={isMobile}
+              />
+
+              {/* Search Target Control for searching algorithms */}
+              {meta?.topic === "searching" && (
+                <div className="card p-3">
+                  <div className="mb-3">
+                    <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                      Search Target
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                      Value to search for in the array
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="number"
+                      value={searchTarget}
+                      onChange={(e) =>
+                        handleSearchTargetChange(Number(e.target.value))
+                      }
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                      min={VISUALIZER_CONSTANTS.VALUE_RANGE.min}
+                      max={VISUALIZER_CONSTANTS.VALUE_RANGE.max}
+                      placeholder="Enter target value"
+                      title="Target value to search for"
+                      aria-label="Search target value"
+                    />
+                    {meta.slug === "binary-search" && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Array is automatically sorted for binary search
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <ArrayViewPanel
+                view={view}
+                onView={setView}
+                colorMode={colorMode}
+                onColorMode={setColorMode}
+                colors={colors}
+                onColorsChange={setColors}
+                showLabels={showLabels}
+                onShowLabels={setShowLabels}
+                showPlane={showPlane}
+                onShowPlane={setShowPlane}
+                isMobile={isMobile}
+              />
+              <CanvasToolbar
+                surfaceRef={surfaceRef}
+                canvasHandle={canvasHandle}
+                panMode={panMode}
+                onPanMode={setPanMode}
+                dragging={dragging}
+                onDragging={setDragging}
+                gridOn={gridOn}
+                snapOn={snapOn}
+                isMobile={isMobile}
+              />
+            </div>
+          )}
+
           {/* RIGHT COLUMN */}
           <div
             className={cn(
               "flex min-h-0 flex-col gap-3",
               isMobile
-                ? "order-3 flex-shrink-0 gap-2" // On mobile, show last, natural height
+                ? "order-4 flex-shrink-0 gap-2" // On mobile, show last, natural height
                 : "overflow-hidden"
             )}
           >
@@ -811,7 +927,7 @@ export default function VisualizerPage() {
               className={cn(
                 "shrink-0",
                 isMobile
-                  ? "max-h-[30vh] overflow-auto" // Scrollable on mobile
+                  ? "max-h-[50vh] overflow-auto" // Increased height for mobile (was 30vh)
                   : "max-h-[65vh] overflow-auto"
               )}
             >
@@ -821,6 +937,7 @@ export default function VisualizerPage() {
                   activePcLine={frame.pcLine}
                   explain={frame.explain}
                   fillHeight={false}
+                  isMobile={isMobile}
                 />
               )}
             </div>
@@ -833,29 +950,32 @@ export default function VisualizerPage() {
                   : "min-h-0 flex-1 overflow-auto"
               )}
             >
-              {meta && <AboutPanel meta={meta} />}
-              <CollapsibleExportPanel
-                array={frame.array ?? input}
-                view={view}
-                colorMode={colorMode}
-                colors={colors}
-                showPlane={showPlane}
-                showLabels={showLabels}
-                framesProvider={() =>
-                  (frames as BaseFrame[]).map((f: BaseFrame) => ({
-                    array: f.array ?? input,
-                    highlights: f.highlights,
-                    view,
-                    colorMode,
-                    colors,
-                    showPlane,
-                    showLabels,
-                    width: VISUALIZER_CONSTANTS.CANVAS_EXPORT.width,
-                    height: VISUALIZER_CONSTANTS.CANVAS_EXPORT.height,
-                  }))
-                }
-                watermarkUrl="/brand/AlgoLens.webp"
-              />
+              {meta && <AboutPanel meta={meta} isMobile={isMobile} />}
+              {/* Hide export panel on mobile */}
+              {!isMobile && (
+                <CollapsibleExportPanel
+                  array={frame.array ?? input}
+                  view={view}
+                  colorMode={colorMode}
+                  colors={colors}
+                  showPlane={showPlane}
+                  showLabels={showLabels}
+                  framesProvider={() =>
+                    (frames as BaseFrame[]).map((f: BaseFrame) => ({
+                      array: f.array ?? input,
+                      highlights: f.highlights,
+                      view,
+                      colorMode,
+                      colors,
+                      showPlane,
+                      showLabels,
+                      width: VISUALIZER_CONSTANTS.CANVAS_EXPORT.width,
+                      height: VISUALIZER_CONSTANTS.CANVAS_EXPORT.height,
+                    }))
+                  }
+                  watermarkUrl="/brand/AlgoLens.webp"
+                />
+              )}
             </div>
           </div>
         </div>
