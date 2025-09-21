@@ -1247,26 +1247,6 @@ export default function HomePage() {
             <div className="flex items-center gap-2 md:gap-3">
               {/* Action Controls */}
               <div className="flex items-center gap-2">
-                {/* Mobile Menu Toggle - only show navigation controls on mobile */}
-                <div className="sm:hidden">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      // Toggle mobile menu or show a simple inline menu
-                      const mobileNav =
-                        document.querySelector("[data-mobile-nav]");
-                      if (mobileNav) {
-                        mobileNav.classList.toggle("hidden");
-                      }
-                    }}
-                    className="p-2 text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-white/20"
-                    title="Show menu"
-                  >
-                    <span className="text-lg">☰</span>
-                  </Button>
-                </div>
-
                 {/* Mini Search Input */}
                 {/*
                 <div className="hidden sm:block">
@@ -1300,83 +1280,6 @@ export default function HomePage() {
                   {/* <ThemeToggle data-tour="theme-toggle" /> */}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          <div
-            data-mobile-nav
-            className="mt-3 hidden border-t border-white/10 pt-3 sm:hidden"
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Show Hero button */}
-              {/*
-              {!showHero && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    toggleHeroSection();
-                    // Hide mobile menu
-                    document
-                      .querySelector("[data-mobile-nav]")
-                      ?.classList.add("hidden");
-                  }}
-                  className="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                  title="Show hero section"
-                >
-                  <span className="mr-1.5 text-sm">✨</span>
-                  <span className="text-sm">Show Hero</span>
-                </Button>
-              )}
-              */}
-              {/* Featured algorithms mobile button */}
-              {/*
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowFeaturedAlgorithms((prev) => !prev);
-                  // Hide mobile menu
-                  document
-                    .querySelector("[data-mobile-nav]")
-                    ?.classList.add("hidden");
-                }}
-                className="text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20"
-                title={`${showFeaturedAlgorithms ? "Hide" : "Show"} featured algorithms (Ctrl+Shift+F)`}
-              >
-                <span className="mr-1.5 text-sm">⭐</span>
-                <span className="text-sm">
-                  {showFeaturedAlgorithms ? "Hide" : "Show"} Featured
-                </span>
-              </Button>
-              */}
-              {/* Quick Tour mobile button */}
-              {/*
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  resetOnboardingTour();
-                  // setShowOnboarding(true);
-                  // Hide mobile menu
-                  document
-                    .querySelector("[data-mobile-nav]")
-                    ?.classList.add("hidden");
-                }}
-                className="group text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white"
-                title={t("common.quickTour", {
-                  defaultValue: "Show quick tour",
-                })}
-              >
-                <span className="group-hover:animate-bounce-subtle mr-1.5 text-sm">
-                  🎯
-                </span>
-                <span className="text-sm">
-                  {t("common.quickTour", { defaultValue: "Tour" })}
-                </span>
-              </Button>
-              */}
             </div>
           </div>
         </div>
