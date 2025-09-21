@@ -42,11 +42,7 @@ export default function AboutPanel({ meta }: { meta: AlgoMeta }) {
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="panel-title font-medium text-slate-900 dark:text-slate-100">
-            {meta.title} — {t("panels.about", { defaultValue: "About" })}
-          </div>
-          {/* Clear Value Proposition */}
-          <div className="bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full px-2 py-1 text-xs">
-            🚀 Interactive Learning
+            {meta.title}
           </div>
         </div>
 

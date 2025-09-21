@@ -67,6 +67,16 @@
   }
 }
 
+@keyframes fade-in {
+  0% {
+    opacity: 0%;
+  }
+
+  100% {
+    opacity: 100%;
+  }
+}
+
 .animate-fade-in-scale {
   animation: fade-in-scale 0.4s ease-out forwards;
 }

@@ -50,10 +50,6 @@ export default function CollapsibleExportPanel(
           <div className="panel-title font-medium text-slate-900 dark:text-slate-100">
             Export Visualization
           </div>
-          {/* Export Badge */}
-          <div className="rounded-full bg-green-50 px-2 py-1 text-xs text-green-700 dark:bg-green-900/20 dark:text-green-300">
-            📤 PNG, SVG, GIF, MP4
-          </div>
         </div>
         <button
           className="inline-flex items-center justify-center rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800/70"

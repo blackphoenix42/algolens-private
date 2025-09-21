@@ -1,6 +1,6 @@
 // src/pages/VisualizerPage.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 
 // import { AIChatPanel } from "@/components/ai/AIChatPanel";
 import ArrayCanvas, {
@@ -21,6 +21,7 @@ import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
 import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
 // import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
 // import ThemeToggle from "@/components/ui/ThemeToggle";
 // import { ENABLE_AI_UI } from "@/config/featureFlags";
@@ -33,10 +34,39 @@ import { useMobileOrientation } from "@/hooks/useOrientation";
 import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
 
+// Frame type definitions for algorithm visualization
+interface BaseFrame {
+  array?: number[];
+  highlights?: {
+    compared?: [number, number];
+    swapped?: [number, number];
+    pivot?: number;
+    indices?: number[];
+  };
+  pcLine?: number;
+  explain?: string;
+}
+
+// Constants for the visualizer
+const VISUALIZER_CONSTANTS = {
+  LOADING_DELAY: 200,
+  DEFAULT_ARRAY_SIZE: 16,
+  DEFAULT_SEED: 42,
+  DEFAULT_SPEED: 1,
+  DEFAULT_SEARCH_TARGET: 25,
+  VALUE_RANGE: { min: 5, max: 99 },
+  MOBILE_MIN_HEIGHT: "50vh",
+  MOBILE_MAX_CODE_HEIGHT: "30vh",
+  DESKTOP_MAX_CODE_HEIGHT: "65vh",
+  CANVAS_EXPORT: {
+    width: 1200,
+    height: 360,
+  },
+} as const;
+
 export default function VisualizerPage() {
   // const { t } = useI18n();
   // const componentLogger = useComponentLogger("VisualizerPage");
-  const _navigate = useNavigate();
   const { topic = "", slug = "" } = useParams();
 
   // Mobile orientation detection
@@ -44,20 +74,16 @@ export default function VisualizerPage() {
 
   // Log page navigation
   useEffect(() => {
-    // logger.info(LogCategory.ROUTER, "VisualizerPage accessed", {
-    //   topic,
-    //   slug,
-    //   url: window.location.href,
-    //   isMobile,
-    //   orientation: isMobilePortrait ? "portrait" : "landscape",
-    // });
     // componentLogger.mount();
     // return () => componentLogger.unmount();
   }, [topic, slug, isMobile, isMobilePortrait]);
 
   const [meta, setMeta] = useState<AlgoMeta | null>(null);
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
-  const [showLoadingUI, setShowLoadingUI] = useState(false);
+  const [showLoadingUI, setShowLoadingUI] = useState(true); // Show immediately
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState<string>("Initializing...");
+  const [algorithmError, setAlgorithmError] = useState<Error | null>(null);
 
   // Debug panel state (Dev Mode)
   // const [showDebugPanel, setShowDebugPanel] = useState(false);
@@ -69,39 +95,49 @@ export default function VisualizerPage() {
   useEffect(() => {
     const loadMeta = async () => {
       setIsLoadingMeta(true);
-      setShowLoadingUI(false);
+      setShowLoadingUI(true);
+      setLoadingProgress(0);
+      setLoadingPhase("Initializing...");
 
-      // Show loading UI after 200ms to prevent flash for fast loads
-      const loadingTimer = setTimeout(() => {
-        setShowLoadingUI(true);
-      }, 200);
+      const startTime = Date.now();
+      const minLoadingTime = 800; // Minimum 800ms to show loading screen
 
       try {
+        // Simulate progress phases
+        setLoadingPhase("Loading algorithm metadata...");
+        setLoadingProgress(25);
+
+        await new Promise((resolve) => setTimeout(resolve, 150)); // Small delay for UX
+
+        setLoadingPhase("Parsing algorithm structure...");
+        setLoadingProgress(50);
+
         const loadedMeta = await findAlgo(topic, slug);
+
+        setLoadingPhase("Setting up visualization...");
+        setLoadingProgress(75);
+
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Small delay for UX
+
         setMeta(loadedMeta);
 
-        // Log algorithm resolution
-        if (loadedMeta) {
-          // logger.info(LogCategory.ALGORITHM, "Algorithm found", {
-          //   topic,
-          //   slug,
-          //   title: loadedMeta.title,
-          //   algoTopic: loadedMeta.topic,
-          // });
-        } else {
-          // logger.warn(LogCategory.ALGORITHM, "Algorithm not found", {
-          //   topic,
-          //   slug,
-          // });
+        setLoadingPhase("Finalizing...");
+        setLoadingProgress(100);
+
+        // Ensure minimum loading time for better UX
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+
+        if (!loadedMeta) {
+          console.warn("Algorithm not found:", { topic, slug });
         }
       } catch (error) {
-        // logger.error(LogCategory.ALGORITHM, "Error loading algorithm", {
-        //   error,
-        // });
         console.error("Error loading algorithm:", error);
         setMeta(null);
+        setLoadingPhase("Error occurred");
+        setLoadingProgress(0);
       } finally {
-        clearTimeout(loadingTimer);
         setIsLoadingMeta(false);
         setShowLoadingUI(false);
       }
@@ -112,45 +148,60 @@ export default function VisualizerPage() {
 
   const params = useMemo(() => {
     const urlParams = url.read();
-    // logger.debug(LogCategory.STATE, "URL parameters parsed", {
-    //   params: Object.fromEntries(urlParams.entries()),
-    // });
     return urlParams;
   }, []);
 
-  const initialN = Number(params.get("n") ?? 16);
-  const initialSeed = Number(params.get("seed") ?? 42);
-  const initialSpeed = Number(params.get("speed") ?? 1);
+  const initialN = Number(
+    params.get("n") ?? VISUALIZER_CONSTANTS.DEFAULT_ARRAY_SIZE
+  );
+  const initialSeed = Number(
+    params.get("seed") ?? VISUALIZER_CONSTANTS.DEFAULT_SEED
+  );
+  const initialSpeed = Number(
+    params.get("speed") ?? VISUALIZER_CONSTANTS.DEFAULT_SPEED
+  );
 
-  // Log initialization parameters
-  useEffect(() => {
-    // logger.debug(LogCategory.ALGORITHM, "Initialization parameters", {
-    //   arraySize: initialN,
-    //   seed: initialSeed,
-    //   speed: initialSpeed,
-    // });
-  }, [initialN, initialSeed, initialSpeed]);
-
-  const [frames, setFrames] = useState<unknown[]>([]);
+  const [frames, setFrames] = useState<BaseFrame[]>([]);
   const [input, setInput] = useState<number[]>(() => {
     // For searching algorithms, we need a sorted array for binary search
-    let array = makeRandomArray(initialN, 5, 99, initialSeed);
+    let array = makeRandomArray(
+      initialN,
+      VISUALIZER_CONSTANTS.VALUE_RANGE.min,
+      VISUALIZER_CONSTANTS.VALUE_RANGE.max,
+      initialSeed
+    );
     if (meta?.topic === "searching" && meta.slug === "binary-search") {
       array = array.sort((a, b) => a - b);
     }
 
-    // logger.debug(LogCategory.ALGORITHM, "Initial array generated", {
-    //   size: array.length,
-    //   seed: initialSeed,
-    //   array: array.slice(0, 10), // Log first 10 elements
-    //   topic: meta?.topic,
-    //   sorted: meta?.topic === "searching" && meta.slug === "binary-search",
-    // });
     return array;
   });
 
   // Additional state for search algorithms
-  const [searchTarget, setSearchTarget] = useState(25);
+  const [searchTarget, setSearchTarget] = useState<number>(
+    VISUALIZER_CONSTANTS.DEFAULT_SEARCH_TARGET
+  );
+
+  // Optimized algorithm input preparation
+  const algorithmInput = useMemo(() => {
+    if (!meta) return null;
+
+    switch (meta.topic) {
+      case "searching":
+        return { array: input, target: searchTarget };
+      case "graphs":
+        return {
+          graph: input.map((_, i) =>
+            input
+              .slice(i + 1, Math.min(i + 4, input.length))
+              .map((_, j) => i + j + 1)
+          ),
+          startNode: 0,
+        };
+      default:
+        return input;
+    }
+  }, [meta, input, searchTarget]);
 
   const [colors, setColors] = useState({
     base: "#1667b7",
@@ -184,59 +235,72 @@ export default function VisualizerPage() {
     if (!meta) return;
     let mounted = true;
     (async () => {
-      const { run } = await meta.load();
+      try {
+        setAlgorithmError(null);
+        const { run } = await meta.load();
 
-      // Prepare input based on algorithm type
-      let algorithmInput: unknown;
-      switch (meta.topic) {
-        case "searching": {
-          algorithmInput = { array: input, target: searchTarget };
-          break;
-        }
-        case "graphs": {
-          // For graph algorithms, we need to create a simple graph structure
-          // For now, we'll convert the array to a simple adjacency list
-          const graph = input.map((_, i) =>
-            input
-              .slice(i + 1, Math.min(i + 4, input.length))
-              .map((_, j) => i + j + 1)
+        // Use the memoized algorithm input
+        const preparedInput = algorithmInput ?? input;
+
+        const it = run(preparedInput, { seed: initialSeed });
+        const all: BaseFrame[] = [];
+        for (let f = it.next(); !f.done; f = it.next())
+          all.push(f.value as BaseFrame);
+        if (mounted) setFrames(all);
+      } catch (error) {
+        console.error("Algorithm execution error:", error);
+        if (mounted) {
+          setAlgorithmError(
+            error instanceof Error
+              ? error
+              : new Error("Algorithm execution failed")
           );
-          algorithmInput = { graph, startNode: 0 };
-          break;
-        }
-        case "arrays":
-        case "sorting":
-        default: {
-          algorithmInput = input;
-          break;
+          setFrames([]);
         }
       }
-
-      const it = run(algorithmInput, { seed: initialSeed });
-      const all: unknown[] = [];
-      for (let f = it.next(); !f.done; f = it.next()) all.push(f.value);
-      if (mounted) setFrames(all);
     })();
     return () => {
       mounted = false;
     };
-  }, [meta, input, initialSeed, searchTarget]);
+  }, [meta, input, initialSeed, searchTarget, algorithmInput]);
 
   const total = frames.length;
   const runner = useRunner(total, initialSpeed);
-  type Frame = {
-    array?: number[];
-    highlights?: {
-      compared?: [number, number];
-      swapped?: [number, number];
-      pivot?: number;
-      indices?: number[];
-    };
-    pcLine?: number;
-    explain?: string;
-  };
 
-  const frame = (frames[runner.idx] as Frame) ?? {};
+  const frame = (frames[runner.idx] as BaseFrame) ?? {};
+
+  // Optimized event handlers with useCallback
+  const handleDatasetChange = useCallback(
+    (newArray: number[]) => {
+      setInput(newArray);
+      runner.toStart();
+    },
+    [runner]
+  );
+
+  const handleSearchTargetChange = useCallback(
+    (value: number) => {
+      setSearchTarget(value);
+      runner.toStart();
+    },
+    [runner]
+  );
+
+  const handleArrayReorder = useCallback(
+    (next: number[]) => {
+      setInput(next);
+      runner.toStart();
+    },
+    [runner]
+  );
+
+  const handleViewChange = useCallback(
+    (settings: { grid: boolean; snap: boolean }) => {
+      setGridOn(settings.grid);
+      setSnapOn(settings.snap);
+    },
+    []
+  );
 
   useEffect(() => {
     url.write({
@@ -247,237 +311,6 @@ export default function VisualizerPage() {
       theme: document.documentElement.getAttribute("data-theme") || undefined,
     });
   }, [runner.idx, runner.speed, input.length, initialSeed]);
-
-  // Keyboard shortcuts for visualizer controls
-  /*
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check if we're not in an input field
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-
-      // Prevent default for handled shortcuts
-      switch (event.key) {
-        // Play/Pause with Space
-        case " ":
-          event.preventDefault();
-          if (runner.playing) {
-            runner.pause();
-          } else {
-            runner.playForward();
-          }
-          logger.info(LogCategory.USER_INTERACTION, "Play/pause via keyboard", {
-            action: runner.playing ? "pause" : "play",
-            source: "keyboard_shortcut",
-          });
-          break;
-
-        // Step controls
-        case "ArrowRight":
-          event.preventDefault();
-          runner.stepNext();
-          logger.info(
-            LogCategory.USER_INTERACTION,
-            "Step forward via keyboard"
-          );
-          break;
-
-        case "ArrowLeft":
-          event.preventDefault();
-          runner.stepPrev();
-          logger.info(
-            LogCategory.USER_INTERACTION,
-            "Step backward via keyboard"
-          );
-          break;
-
-        // Speed controls
-        case "ArrowUp":
-          event.preventDefault();
-          runner.setSpeed(Math.min(runner.speed * 1.5, 8));
-          logger.info(
-            LogCategory.USER_INTERACTION,
-            "Speed increased via keyboard",
-            {
-              newSpeed: Math.min(runner.speed * 1.5, 8),
-            }
-          );
-          break;
-
-        case "ArrowDown":
-          event.preventDefault();
-          runner.setSpeed(Math.max(runner.speed / 1.5, 0.1));
-          logger.info(
-            LogCategory.USER_INTERACTION,
-            "Speed decreased via keyboard",
-            {
-              newSpeed: Math.max(runner.speed / 1.5, 0.1),
-            }
-          );
-          break;
-
-        // Reset animation
-        case "r":
-        case "R":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.toStart();
-            runner.pause();
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Animation reset via keyboard"
-            );
-          }
-          break;
-
-        // Jump to start/end with Ctrl+Home/End
-        case "Home":
-          if (event.ctrlKey) {
-            event.preventDefault();
-            runner.toStart();
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Jump to start via keyboard"
-            );
-          }
-          break;
-
-        case "End":
-          if (event.ctrlKey) {
-            event.preventDefault();
-            runner.toEnd();
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Jump to end via keyboard"
-            );
-          }
-          break;
-
-        // Speed presets (1-5)
-        case "1":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.setSpeed(0.25);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Speed preset 0.25× via keyboard"
-            );
-          }
-          break;
-
-        case "2":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.setSpeed(0.5);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Speed preset 0.5× via keyboard"
-            );
-          }
-          break;
-
-        case "3":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.setSpeed(1);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Speed preset 1× via keyboard"
-            );
-          }
-          break;
-
-        case "4":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.setSpeed(2);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Speed preset 2× via keyboard"
-            );
-          }
-          break;
-
-        case "5":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            runner.setSpeed(4);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Speed preset 4× via keyboard"
-            );
-          }
-          break;
-
-        // Navigation shortcuts
-        case "h":
-        case "H":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            navigate("/");
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Navigate to homepage via keyboard"
-            );
-          }
-          break;
-
-        // Theme toggle
-        case "t":
-        case "T":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            const currentTheme =
-              document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            logger.info(
-              LogCategory.USER_INTERACTION,
-              "Theme toggled via keyboard",
-              {
-                from: currentTheme,
-                to: newTheme,
-              }
-            );
-          }
-          break;
-
-        // Fullscreen toggle
-        case "f":
-        case "F":
-          if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-            event.preventDefault();
-            if (document.fullscreenElement) {
-              document.exitFullscreen();
-              logger.info(
-                LogCategory.USER_INTERACTION,
-                "Exit fullscreen via keyboard"
-              );
-            } else {
-              document.documentElement.requestFullscreen();
-              logger.info(
-                LogCategory.USER_INTERACTION,
-                "Enter fullscreen via keyboard"
-              );
-            }
-          }
-          break;
-
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [runner, navigate]);
-  */
 
   // Handle custom algolens events from KeyboardProvider and clickable shortcuts
   useEffect(() => {
@@ -561,23 +394,21 @@ export default function VisualizerPage() {
   // Show loading state while algorithm is being loaded
   if (isLoadingMeta && showLoadingUI) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
-          <p className="text-xs text-slate-500 dark:text-slate-500">
-            {/* {t("loading.algorithm", { defaultValue: "Loading algorithm..." })} */}
-            Loading algorithm...
-          </p>
-        </div>
-      </div>
+      <LoadingScreen
+        progress={loadingProgress}
+        phase={loadingPhase}
+        topic={topic}
+        slug={slug}
+        isMobile={isMobile}
+      />
     );
   }
 
-  // Show error state if algorithm is not found after loading
-  if (!meta) {
+  // Show error state for algorithm execution errors
+  if (algorithmError) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="text-center">
+        <div className="max-w-md text-center">
           <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-red-100 p-4 dark:bg-red-900/20">
             <svg
               className="h-8 w-8 text-red-600 dark:text-red-400"
@@ -594,21 +425,31 @@ export default function VisualizerPage() {
             </svg>
           </div>
           <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {/* {t("errors.algorithmNotFound", {
-              defaultValue: "Algorithm not found",
-            })} */}
-            Algorithm not found
+            Algorithm Error
           </h2>
-          <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
-            The algorithm "{topic}/{slug}" could not be found.
+          <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">
+            There was an error executing the algorithm:
           </p>
-          <button
-            onClick={() => window.history.back()}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-900"
-          >
-            {/* {t("navigation.goBack", { defaultValue: "Go Back" })} */}
-            Go Back
-          </button>
+          <p className="mb-4 rounded bg-red-50 p-2 font-mono text-xs text-red-600 dark:bg-red-900/10 dark:text-red-400">
+            {algorithmError.message}
+          </p>
+          <div className="space-x-2">
+            <button
+              onClick={() => {
+                setAlgorithmError(null);
+                setFrames([]);
+              }}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-slate-900"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => window.history.back()}
+              className="rounded-lg bg-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-400 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500 dark:focus:ring-offset-slate-900"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -621,12 +462,15 @@ export default function VisualizerPage() {
 
       <div
         className={cn(
-          "grid min-h-screen",
+          "animate-fade-in grid min-h-screen",
           // Mobile responsive: allow scrolling, remove overflow-hidden
           isMobile
             ? "grid-rows-[auto_1fr] gap-2 p-2"
             : "max-h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden p-3"
         )}
+        style={{
+          animation: "fadeIn 0.5s ease-out forwards",
+        }}
       >
         {/* Top bar */}
         <div
@@ -642,7 +486,7 @@ export default function VisualizerPage() {
               isMobile ? "text-lg sm:text-xl" : "text-2xl"
             )}
           >
-            {meta.title ||
+            {meta?.title ||
               /* t("navigation.visualizer", { defaultValue: "Visualizer" }) */
               "Visualizer"}
           </h1>
@@ -704,13 +548,7 @@ export default function VisualizerPage() {
                   : "overflow-auto"
               )}
             >
-              <DatasetPanel
-                value={input}
-                onChange={(a) => {
-                  setInput(a);
-                  runner.toStart();
-                }}
-              />
+              <DatasetPanel value={input} onChange={handleDatasetChange} />
 
               {/* Search Target Control for searching algorithms */}
               {meta?.topic === "searching" && (
@@ -737,16 +575,15 @@ export default function VisualizerPage() {
                     <input
                       type="number"
                       value={searchTarget}
-                      onChange={(e) => {
-                        setSearchTarget(Number(e.target.value));
-                        runner.toStart();
-                      }}
+                      onChange={(e) =>
+                        handleSearchTargetChange(Number(e.target.value))
+                      }
                       className={cn(
                         "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
                         isMobile && "text-sm" // Smaller text on mobile
                       )}
-                      min={5}
-                      max={99}
+                      min={VISUALIZER_CONSTANTS.VALUE_RANGE.min}
+                      max={VISUALIZER_CONSTANTS.VALUE_RANGE.max}
                       placeholder="Enter target value"
                       title="Target value to search for"
                       aria-label="Search target value"
@@ -929,18 +766,12 @@ export default function VisualizerPage() {
                       ref={canvasHandle}
                       array={frame.array ?? input}
                       highlights={frame.highlights}
-                      onReorder={(next: number[]) => {
-                        setInput(next);
-                        runner.toStart();
-                      }}
+                      onReorder={handleArrayReorder}
                       height="100%"
                       colors={colors}
                       panModeExternal={panMode}
                       dragEnabled={dragging}
-                      onViewChange={(s: { grid: boolean; snap: boolean }) => {
-                        setGridOn(s.grid);
-                        setSnapOn(s.snap);
-                      }}
+                      onViewChange={handleViewChange}
                       viewMode={view}
                       colorMode={colorMode}
                       showPlane={showPlane}
@@ -951,15 +782,17 @@ export default function VisualizerPage() {
                 </>
               ) : (
                 <div className="h-full overflow-auto p-6">
-                  <ComplexityExplorer
-                    algorithmName={meta.title}
-                    complexity={{
-                      time: meta.complexity.time,
-                      space: meta.complexity.space,
-                      stable: meta.complexity.stable,
-                      inPlace: meta.complexity.inPlace,
-                    }}
-                  />
+                  {meta && (
+                    <ComplexityExplorer
+                      algorithmName={meta.title}
+                      complexity={{
+                        time: meta.complexity.time,
+                        space: meta.complexity.space,
+                        stable: meta.complexity.stable,
+                        inPlace: meta.complexity.inPlace,
+                      }}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -982,12 +815,14 @@ export default function VisualizerPage() {
                   : "max-h-[65vh] overflow-auto"
               )}
             >
-              <CodePanel
-                meta={meta}
-                activePcLine={frame.pcLine}
-                explain={frame.explain}
-                fillHeight={false}
-              />
+              {meta && (
+                <CodePanel
+                  meta={meta}
+                  activePcLine={frame.pcLine}
+                  explain={frame.explain}
+                  fillHeight={false}
+                />
+              )}
             </div>
             {/* ExportPanel moved below AboutPanel and made collapsible */}
             <div
@@ -998,7 +833,7 @@ export default function VisualizerPage() {
                   : "min-h-0 flex-1 overflow-auto"
               )}
             >
-              <AboutPanel meta={meta} />
+              {meta && <AboutPanel meta={meta} />}
               <CollapsibleExportPanel
                 array={frame.array ?? input}
                 view={view}
@@ -1007,7 +842,7 @@ export default function VisualizerPage() {
                 showPlane={showPlane}
                 showLabels={showLabels}
                 framesProvider={() =>
-                  (frames as Frame[]).map((f: Frame) => ({
+                  (frames as BaseFrame[]).map((f: BaseFrame) => ({
                     array: f.array ?? input,
                     highlights: f.highlights,
                     view,
@@ -1015,8 +850,8 @@ export default function VisualizerPage() {
                     colors,
                     showPlane,
                     showLabels,
-                    width: 1200,
-                    height: 360,
+                    width: VISUALIZER_CONSTANTS.CANVAS_EXPORT.width,
+                    height: VISUALIZER_CONSTANTS.CANVAS_EXPORT.height,
                   }))
                 }
                 watermarkUrl="/brand/AlgoLens.webp"
