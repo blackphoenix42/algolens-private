@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+// import * as Sentry from "@sentry/react";
 import React, { useEffect } from "react";
 import {
   createBrowserRouter,
@@ -105,13 +105,13 @@ function Static404() {
     const href = `${import.meta.env.BASE_URL}404.html`;
 
     // Optional breadcrumb in Sentry for "route not found"
-    Sentry.addBreadcrumb({
-      category: "routing",
-      message: "redirecting to /404.html",
-      level: "info",
-    });
+    // Sentry.addBreadcrumb({
+    //   category: "routing",
+    //   message: "redirecting to /404.html",
+    //   level: "info",
+    // });
     // Optional signal (non-fatal)
-    Sentry.captureMessage("route_not_found");
+    // Sentry.captureMessage("route_not_found");
 
     // logger.info(LogCategory.ROUTER, "Redirecting to static 404 page", { href });
 
@@ -121,18 +121,21 @@ function Static404() {
   return null;
 }
 
-type WrapFn = (fn: typeof createBrowserRouter) => typeof createBrowserRouter;
+// type WrapFn = (fn: typeof createBrowserRouter) => typeof createBrowserRouter;
 
 // Runtime type guard to check for the wrapper without using `any`
-const hasWrap = (o: unknown): o is { wrapCreateBrowserRouterV6: WrapFn } =>
-  typeof o === "object" &&
-  o !== null &&
-  typeof (o as Record<string, unknown>).wrapCreateBrowserRouterV6 ===
-    "function";
+// const hasWrap = (o: unknown): o is { wrapCreateBrowserRouterV6: WrapFn } =>
+//   typeof o === "object" &&
+//   o !== null &&
+//   typeof (o as Record<string, unknown>).wrapCreateBrowserRouterV6 ===
+//     "function";
 
-export const createRouter: typeof createBrowserRouter = hasWrap(Sentry)
-  ? Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
-  : createBrowserRouter;
+// export const createRouter: typeof createBrowserRouter = hasWrap(Sentry)
+//   ? Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
+//   : createBrowserRouter;
+
+// Use regular createBrowserRouter without Sentry wrapper
+export const createRouter: typeof createBrowserRouter = createBrowserRouter;
 
 // Configure base path for GitHub Pages
 const getBasename = () => {

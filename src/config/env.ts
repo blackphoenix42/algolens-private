@@ -11,7 +11,7 @@ const envSchema = z.object({
     .string()
     .transform((val) => val === "true")
     .optional(),
-  VITE_SENTRY_DSN: z.string().optional(),
+  // VITE_SENTRY_DSN: z.string().optional(), // Commented out Sentry
   VITE_POSTHOG_KEY: z.string().optional(),
   VITE_POSTHOG_HOST: z.string().optional(),
   // Add more environment variables as needed
@@ -25,7 +25,7 @@ function validateEnv() {
       VITE_APP_TITLE: import.meta.env.VITE_APP_TITLE,
       VITE_API_URL: import.meta.env.VITE_API_URL,
       VITE_ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS,
-      VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+      // VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN, // Commented out Sentry
       VITE_POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
       VITE_POSTHOG_HOST: import.meta.env.VITE_POSTHOG_HOST,
     };

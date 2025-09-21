@@ -15,6 +15,7 @@ import FilterBar, {
 // import OnboardingTour from "@/components/onboarding/OnboardingTour";
 // import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import { Button } from "@/components/ui/Button";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 // import { SearchInput } from "@/components/ui/SearchInput";
 // import ThemeToggle from "@/components/ui/ThemeToggle";
 // import { ENABLE_AI_UI } from "@/config/featureFlags";
@@ -69,38 +70,70 @@ const TOPIC_META: Record<string, { icon: string; color: string }> = {
 function useSafeCatalog(): {
   catalog: Record<string, AlgoItem[]>;
   metaCatalog: Record<string, AlgoMeta[]>;
+  isLoading: boolean;
+  loadingProgress: number;
+  loadingPhase: string;
 } {
   const [catalog, setCatalog] = useState<Record<string, AlgoItem[]>>({});
   const [metaCatalog, setMetaCatalog] = useState<Record<string, AlgoMeta[]>>(
     {}
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState("Initializing...");
 
   useEffect(() => {
     const loadCatalog = async () => {
       try {
+        setIsLoading(true);
+        setLoadingProgress(0);
+        setLoadingPhase("Loading algorithm catalog...");
+
         const loadedCatalog = await loadAllTopics();
+        setLoadingProgress(40);
+        setLoadingPhase("Processing algorithms...");
+
         const safe: Record<string, AlgoItem[]> = {};
 
         // Store the full metadata catalog for search functionality
         setMetaCatalog(loadedCatalog);
+        setLoadingProgress(60);
 
         // Process topics in chunks to avoid blocking main thread
         const topics = Object.entries(loadedCatalog);
+        const totalTopics = topics.length;
+        let processedTopics = 0;
+
         await processInChunks(
           topics,
           async ([topic, items]) => {
             // Yield to main thread for heavy processing
             await yieldToMain();
             safe[topic] = Array.isArray(items) ? (items as AlgoItem[]) : [];
+            processedTopics++;
+
+            // Update progress (60% to 90% for processing)
+            const processingProgress =
+              60 + (processedTopics / totalTopics) * 30;
+            setLoadingProgress(processingProgress);
+            setLoadingPhase(`Processing ${topic}...`);
           },
           2 // Process 2 topics at a time
         );
 
         setCatalog(safe);
+        setLoadingProgress(100);
+        setLoadingPhase("Ready!");
+
+        // Small delay to show completion
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setIsLoading(false);
       } catch (error) {
         console.error("Failed to load algorithm catalog:", error);
         setCatalog({});
         setMetaCatalog({});
+        setLoadingPhase("Failed to load algorithms");
+        setIsLoading(false);
       }
     };
 
@@ -108,19 +141,30 @@ function useSafeCatalog(): {
     runWhenIdle(loadCatalog);
   }, []);
 
-  return { catalog, metaCatalog };
+  return { catalog, metaCatalog, isLoading, loadingProgress, loadingPhase };
 }
 
 export default function HomePage() {
   // const { t } = useI18n();
   // const componentLogger = useComponentLogger("HomePage");
   const _navigate = useNavigate();
-  const { catalog, metaCatalog } = useSafeCatalog();
+  const { catalog, metaCatalog, isLoading, loadingProgress, loadingPhase } =
+    useSafeCatalog();
   const {
     // shouldShowOnboardingTour,
     resetOnboardingTour,
     // markOnboardingTourSeen,
   } = usePreferences();
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile(); // Initial check
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Log homepage access
   useEffect(() => {
@@ -1091,6 +1135,17 @@ export default function HomePage() {
       tags: tagsCount,
     };
   }, [allItems.length, catalog, tagUniverse.length]);
+
+  // Show loading screen while catalog is loading
+  if (isLoading) {
+    return (
+      <LoadingScreen
+        progress={loadingProgress}
+        phase={loadingPhase}
+        isMobile={isMobile}
+      />
+    );
+  }
 
   return (
     <div className="grid h-screen grid-rows-[auto,1fr] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
