@@ -7,9 +7,9 @@ import ArrayCanvas, {
   ArrayCanvasHandle,
 } from "@/components/canvas/Array/ArrayCanvas";
 import CanvasToolbar from "@/components/canvas/Array/CanvasToolbar";
-import EnhancedArrayVisualization, {
-  EnhancedArrayVisualizationHandle,
-} from "@/components/canvas/Array/EnhancedArrayVisualization";
+// import EnhancedArrayVisualization, {
+//   EnhancedArrayVisualizationHandle,
+// } from "@/components/canvas/Array/EnhancedArrayVisualization";
 import ArrayViewPanel from "@/components/controls/ArrayViewPanel";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
@@ -170,7 +170,7 @@ export default function VisualizerPage() {
   const [showPlane, setShowPlane] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [activeTab, setActiveTab] = useState<"canvas" | "complexity">("canvas");
-  const [enhancedMode, setEnhancedMode] = useState(false);
+  // const [enhancedMode, setEnhancedMode] = useState(false);
 
   // AI Chat Panel state
   // const [showAIChat, setShowAIChat] = useState(false);
@@ -178,7 +178,7 @@ export default function VisualizerPage() {
   // Refs must be declared unconditionally (before any early return)
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const canvasHandle = useRef<ArrayCanvasHandle>(null);
-  const enhancedCanvasHandle = useRef<EnhancedArrayVisualizationHandle>(null);
+  // const enhancedCanvasHandle = useRef<EnhancedArrayVisualizationHandle>(null);
 
   useEffect(() => {
     if (!meta) return;
@@ -779,7 +779,8 @@ export default function VisualizerPage() {
               <CanvasToolbar
                 surfaceRef={surfaceRef}
                 canvasHandle={
-                  enhancedMode ? enhancedCanvasHandle : canvasHandle
+                  // enhancedMode ? enhancedCanvasHandle :
+                  canvasHandle
                 }
                 panMode={panMode}
                 onPanMode={setPanMode}
@@ -860,6 +861,7 @@ export default function VisualizerPage() {
               {activeTab === "canvas" ? (
                 <>
                   {/* Enhanced Visualization Toggle */}
+                  {/*
                   <div
                     className={cn(
                       "flex items-center justify-between border-b border-slate-200 p-3 dark:border-slate-700",
@@ -894,9 +896,11 @@ export default function VisualizerPage() {
                           : "Classic Canvas"}
                     </button>
                   </div>
+                  */}
 
                   {/* Visualization Content */}
                   <div className="min-h-0 flex-1">
+                    {/*
                     {enhancedMode ? (
                       <EnhancedArrayVisualization
                         ref={enhancedCanvasHandle}
@@ -920,29 +924,29 @@ export default function VisualizerPage() {
                         }}
                         showPlane={showPlane}
                       />
-                    ) : (
-                      <ArrayCanvas
-                        ref={canvasHandle}
-                        array={frame.array ?? input}
-                        highlights={frame.highlights}
-                        onReorder={(next: number[]) => {
-                          setInput(next);
-                          runner.toStart();
-                        }}
-                        height="100%"
-                        colors={colors}
-                        panModeExternal={panMode}
-                        dragEnabled={dragging}
-                        onViewChange={(s: { grid: boolean; snap: boolean }) => {
-                          setGridOn(s.grid);
-                          setSnapOn(s.snap);
-                        }}
-                        viewMode={view}
-                        colorMode={colorMode}
-                        showPlane={showPlane}
-                        showLabels={showLabels}
-                      />
-                    )}
+                    ) : ( */}
+                    <ArrayCanvas
+                      ref={canvasHandle}
+                      array={frame.array ?? input}
+                      highlights={frame.highlights}
+                      onReorder={(next: number[]) => {
+                        setInput(next);
+                        runner.toStart();
+                      }}
+                      height="100%"
+                      colors={colors}
+                      panModeExternal={panMode}
+                      dragEnabled={dragging}
+                      onViewChange={(s: { grid: boolean; snap: boolean }) => {
+                        setGridOn(s.grid);
+                        setSnapOn(s.snap);
+                      }}
+                      viewMode={view}
+                      colorMode={colorMode}
+                      showPlane={showPlane}
+                      showLabels={showLabels}
+                    />
+                    {/* )} */}
                   </div>
                 </>
               ) : (
