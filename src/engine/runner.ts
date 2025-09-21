@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // import { LogCategory, logger } from "@/services/monitoring";
 import { clamp } from "@/utils";
 
-export function useRunner(total: number, initialSpeed = 1) {
+export function useRunner(total: number, initialSpeed = 2) {
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
@@ -20,12 +20,17 @@ export function useRunner(total: number, initialSpeed = 1) {
     // });
   }, [total, initialSpeed]);
 
-  const pause = useCallback(() => {
+  const pauseInternal = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, []);
+
+  const pause = useCallback(() => {
+    pauseInternal();
+    setPlaying(false);
+  }, [pauseInternal]);
 
   const play = useCallback(() => {
     if (intervalRef.current) return;
@@ -76,11 +81,11 @@ export function useRunner(total: number, initialSpeed = 1) {
     if (playing) {
       play();
     } else {
-      pause();
+      pauseInternal();
     }
 
-    return () => pause(); // cleanup
-  }, [playing, play, pause]);
+    return () => pauseInternal(); // cleanup
+  }, [playing, play, pauseInternal]);
 
   const setIndex = (newIdx: number) => {
     const clampedIdx = clamp(newIdx, 0, total - 1);

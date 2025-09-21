@@ -70,14 +70,6 @@ export default function Transport(p: Props) {
   // Calculate progress percentage
   const progress = total > 1 ? (idx / (total - 1)) * 100 : 0;
 
-  // Use useEffect to update CSS custom property
-  React.useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--transport-progress",
-      `${progress}%`
-    );
-  }, [progress]);
-
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       {/* Playback Controls */}
@@ -250,31 +242,28 @@ export default function Transport(p: Props) {
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-4">
-        <div className="mb-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>
-            {t("controls.step", { defaultValue: "Step" })} {idx + 1}
-          </span>
-          <span>
-            {total} {t("controls.total", { defaultValue: "total" })}
-          </span>
+      <div className="mb-4 space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <label className="font-medium text-slate-700 dark:text-slate-300">
+            {t("controls.step", { defaultValue: "Step" })}
+          </label>
+          <div className="text-sm text-slate-700 dark:text-slate-300">
+            {idx + 1} / {total}
+          </div>
         </div>
         <div className="relative">
           <input
             type="range"
             min={0}
             max={Math.max(total - 1, 0)}
-            value={idx}
+            value={Math.min(idx, Math.max(total - 1, 0))}
             onChange={(e) => onSeek(Number(e.target.value))}
             className="transport-slider focus:ring-primary-500 h-2 w-full rounded-lg bg-slate-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:bg-slate-700"
             aria-label={t("controls.seekToStep", {
               defaultValue: "Seek to step",
             })}
           />
-          <div
-            className="progress-overlay"
-            data-progress={Math.round(progress)}
-          />
+          <div className="progress-overlay" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -304,35 +293,28 @@ export default function Transport(p: Props) {
           />
 
           {/* Speed markers */}
-          <div className="mt-1 flex justify-between px-1 text-xs text-slate-400">
-            <span>0.1×</span>
-            <span className="font-semibold">1×</span>
-            <span>4×</span>
+          <div className="relative mt-1 h-4">
+            <span className="absolute left-0 text-xs text-slate-400">0.1×</span>
+            <span
+              className="absolute text-xs font-semibold text-slate-600 dark:text-slate-300"
+              style={{ left: "23.08%", transform: "translateX(-50%)" }}
+            >
+              1×
+            </span>
+            <span
+              className="absolute text-xs text-slate-400"
+              style={{ left: "48.72%", transform: "translateX(-50%)" }}
+            >
+              2×
+            </span>
+            <span
+              className="absolute text-xs text-slate-400"
+              style={{ left: "74.36%", transform: "translateX(-50%)" }}
+            >
+              3×
+            </span>
+            <span className="absolute right-0 text-xs text-slate-400">4×</span>
           </div>
-        </div>
-
-        {/* Speed descriptions */}
-        <div className="text-center text-xs text-slate-500 dark:text-slate-400">
-          {speed < 0.5 &&
-            t("controls.speedVerySlowDesc", {
-              defaultValue: "Very slow - detailed analysis",
-            })}
-          {speed >= 0.5 &&
-            speed < 1 &&
-            t("controls.speedSlowDesc", {
-              defaultValue: "Slow - step by step",
-            })}
-          {speed === 1 &&
-            t("controls.speedNormalDesc", { defaultValue: "Normal speed" })}
-          {speed > 1 &&
-            speed <= 2 &&
-            t("controls.speedFastDesc", {
-              defaultValue: "Fast - quick overview",
-            })}
-          {speed > 2 &&
-            t("controls.speedVeryFastDesc", {
-              defaultValue: "Very fast - rapid execution",
-            })}
         </div>
       </div>
     </div>
