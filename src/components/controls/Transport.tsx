@@ -10,11 +10,20 @@ import {
   StepBack,
   StepForward,
 } from "lucide-react";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useI18n } from "@/i18n";
 // import { LogCategory, logger } from "@/services/monitoring";
 import { cn } from "@/utils";
+
+// Speed marker configuration
+const SPEED_MARKERS = [
+  { position: "0%", value: "0.1×", emphasized: false },
+  { position: "23.08%", value: "1×", emphasized: true },
+  { position: "48.72%", value: "2×", emphasized: false },
+  { position: "74.36%", value: "3×", emphasized: false },
+  { position: "100%", value: "4×", emphasized: false },
+] as const;
 
 type Props = {
   playing: boolean;
@@ -52,20 +61,56 @@ export default function Transport(p: Props) {
     onSeek,
   } = p;
 
-  const formatSpeed = (speed: number): string => {
+  const formatSpeed = useCallback((speed: number): string => {
     if (speed < 1) {
       return `${Math.round(speed * 100)}%`;
     }
     return `${speed.toFixed(1)}×`;
-  };
+  }, []);
 
-  const getSpeedColor = (speed: number): string => {
+  const getSpeedColor = useCallback((speed: number): string => {
     if (speed < 0.5) return "text-blue-600";
     if (speed < 1) return "text-green-600";
     if (speed === 1) return "text-slate-900 dark:text-slate-100 font-semibold";
     if (speed <= 2) return "text-orange-600";
     return "text-red-600";
-  };
+  }, []);
+
+  const handlePlayPause = useCallback(() => {
+    const _action = playing ? "pause" : "play_forward";
+    // logger.info(
+    //   LogCategory.USER_INTERACTION,
+    //   `Transport ${_action} clicked`,
+    //   {
+    //     currentStep: idx,
+    //     totalSteps: total,
+    //     currentSpeed: speed,
+    //     direction: playing ? direction : 1,
+    //     timestamp: new Date().toISOString(),
+    //   }
+    // );
+
+    if (playing) {
+      onPause();
+    } else {
+      onPlayForward();
+    }
+  }, [playing, onPause, onPlayForward]);
+
+  // Development-time prop validation
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      if (total < 0) {
+        console.warn("Transport: total should not be negative", { total });
+      }
+      if (idx < 0 || (total > 0 && idx >= total)) {
+        console.warn("Transport: idx is out of bounds", { idx, total });
+      }
+      if (speed <= 0) {
+        console.warn("Transport: speed should be positive", { speed });
+      }
+    }
+  }, [total, idx, speed]);
 
   // Calculate progress percentage
   const progress = total > 1 ? (idx / (total - 1)) * 100 : 0;
@@ -145,26 +190,7 @@ export default function Transport(p: Props) {
 
         {/* Play/Pause */}
         <button
-          onClick={() => {
-            const _action = playing ? "pause" : "play_forward";
-            // logger.info(
-            //   LogCategory.USER_INTERACTION,
-            //   `Transport ${_action} clicked`,
-            //   {
-            //     currentStep: idx,
-            //     totalSteps: total,
-            //     currentSpeed: speed,
-            //     direction: playing ? direction : 1,
-            //     timestamp: new Date().toISOString(),
-            //   }
-            // );
-
-            if (playing) {
-              onPause();
-            } else {
-              onPlayForward();
-            }
-          }}
+          onClick={handlePlayPause}
           className={cn(
             "rounded-lg p-3 transition-all duration-200",
             "bg-primary-600 hover:bg-primary-700 text-white shadow-sm",
@@ -294,26 +320,26 @@ export default function Transport(p: Props) {
 
           {/* Speed markers */}
           <div className="relative mt-1 h-4">
-            <span className="absolute left-0 text-xs text-slate-400">0.1×</span>
-            <span
-              className="absolute text-xs font-semibold text-slate-600 dark:text-slate-300"
-              style={{ left: "23.08%", transform: "translateX(-50%)" }}
-            >
-              1×
-            </span>
-            <span
-              className="absolute text-xs text-slate-400"
-              style={{ left: "48.72%", transform: "translateX(-50%)" }}
-            >
-              2×
-            </span>
-            <span
-              className="absolute text-xs text-slate-400"
-              style={{ left: "74.36%", transform: "translateX(-50%)" }}
-            >
-              3×
-            </span>
-            <span className="absolute right-0 text-xs text-slate-400">4×</span>
+            {SPEED_MARKERS.map((marker, index) => (
+              <span
+                key={marker.value}
+                className={cn(
+                  "absolute text-xs",
+                  marker.emphasized
+                    ? "font-semibold text-slate-600 dark:text-slate-300"
+                    : "text-slate-400"
+                )}
+                style={
+                  index === 0
+                    ? { left: marker.position }
+                    : index === SPEED_MARKERS.length - 1
+                      ? { right: "0" }
+                      : { left: marker.position, transform: "translateX(-50%)" }
+                }
+              >
+                {marker.value}
+              </span>
+            ))}
           </div>
         </div>
       </div>

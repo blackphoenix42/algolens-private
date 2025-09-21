@@ -1,4 +1,5 @@
 import React, { useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 
 export default function Modal({
   open,
@@ -30,7 +31,7 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[60] grid place-items-center bg-black/40 backdrop-blur-[1px] dark:bg-black/60"
       onClick={onClose}
@@ -64,6 +65,7 @@ export default function Modal({
           <div className="modal-body space-y-3">{children}</div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
