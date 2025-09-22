@@ -128,7 +128,7 @@
     "@percy/sdk-utils": "1.31.2",
     "@playwright/test": "1.55.0",
     "@sentry/vite-plugin": "4.3.0",
-    "@storybook/addon-a11y": "9.1.6",
+    "@storybook/addon-a11y": "9.1.7",
     "@storybook/addon-docs": "9.1.6",
     "@storybook/addon-onboarding": "9.1.6",
     "@storybook/addon-vitest": "9.1.6",
