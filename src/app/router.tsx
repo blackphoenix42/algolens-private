@@ -203,15 +203,7 @@ export default function AppRouter() {
   // Log page views
   useEffect(() => {
     const handleLocationChange = () => {
-      const _path = window.location.pathname;
-      // logger.info(LogCategory.ROUTER, "Route changed", {
-      //   path,
-      //   search: window.location.search,
-      //   hash: window.location.hash,
-      //   timestamp: new Date().toISOString(),
-      // });
-
-      // sessionTracker.logPageView(path);
+      // sessionTracker.logPageView(window.location.pathname);
     };
 
     // Log initial page view

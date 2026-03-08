@@ -10,6 +10,7 @@ import javascript from "highlight.js/lib/languages/javascript";
 import python from "highlight.js/lib/languages/python";
 import { useEffect, useMemo, useState } from "react";
 
+import { ChevronDownIcon, CopyIcon, WrapIcon } from "@/components/ui/Icons";
 import type { AlgoMeta } from "@/types/algorithms";
 
 hljs.registerLanguage("cpp", cpp);
@@ -18,75 +19,6 @@ hljs.registerLanguage("python", python);
 hljs.registerLanguage("javascript", javascript);
 
 type Lang = "cpp" | "java" | "python" | "javascript";
-
-function CopyIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path
-        d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V9Z"
-        fill="currentColor"
-        opacity=".2"
-      />
-      <path
-        d="M15 5H7a2 2 0 0 0-2 2v10"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-      />
-      <rect
-        x="9"
-        y="9"
-        width="10"
-        height="12"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-      />
-    </svg>
-  );
-}
-function WrapIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path
-        d="M3 6h18M3 10h11a4 4 0 0 1 0 8h-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-      />
-      <path
-        d="M9 14l-3 3l3 3"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`h-4 w-4 transition-transform duration-200 ${
-        open ? "rotate-180" : "rotate-0"
-      }`}
-      aria-hidden
-    >
-      <path
-        d="M8 10l4 4 4-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export default function CodePanel({
   meta,
@@ -127,8 +59,8 @@ export default function CodePanel({
       await navigator.clipboard.writeText(raw);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
-    } catch {
-      /* noop */
+    } catch (err) {
+      console.warn("Failed to copy code to clipboard:", err);
     }
   }
 
@@ -141,6 +73,8 @@ export default function CodePanel({
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="flex gap-2">
             <button
+              role="tab"
+              aria-selected={tab === "pseudocode"}
               className={`rounded px-2 py-1 ${
                 tab === "pseudocode"
                   ? "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
@@ -151,6 +85,8 @@ export default function CodePanel({
               Pseudocode
             </button>
             <button
+              role="tab"
+              aria-selected={tab === "code"}
               className={`rounded px-2 py-1 ${
                 tab === "code"
                   ? "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
@@ -245,6 +181,7 @@ export default function CodePanel({
                   className="inline-flex items-center rounded border border-slate-200 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800/70"
                   onClick={copy}
                   title="Copy code"
+                  aria-label="Copy code to clipboard"
                 >
                   <CopyIcon />
                 </button>

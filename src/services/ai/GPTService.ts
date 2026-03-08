@@ -246,7 +246,8 @@ export class GPTService {
 
       console.error("AI Service error:", error);
       throw new Error(
-        `AI service unavailable: ${error instanceof Error ? error.message : "Unknown error"}`
+        `AI service unavailable: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { cause: error }
       );
     }
   }

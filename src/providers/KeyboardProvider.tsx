@@ -64,11 +64,10 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
     document.dispatchEvent(new CustomEvent("algolens:escape"));
   }, []);
 
-  // Get context-aware hints
   const currentHints = getShortcutHints(
     location.pathname === "/"
       ? "home"
-      : location.pathname.includes("/algorithm")
+      : location.pathname.includes("/viz/")
         ? "algorithm"
         : "general"
   );
@@ -318,7 +317,7 @@ function KeyboardHintsModal() {
         { key: "Esc", description: "Close Modals" },
       ],
     },
-    ...(location.pathname.includes("/algorithm")
+    ...(location.pathname.includes("/viz/")
       ? [
           {
             category: "Algorithm Controls",
@@ -368,6 +367,7 @@ function KeyboardHintsModal() {
             <button
               onClick={() => setShowHints(false)}
               className="text-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              aria-label="Close keyboard shortcuts"
             >
               ✕
             </button>

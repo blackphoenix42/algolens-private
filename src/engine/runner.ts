@@ -35,8 +35,7 @@ export function useRunner(total: number, initialSpeed = 2) {
   const play = useCallback(() => {
     if (intervalRef.current) return;
 
-    const _startTime = Date.now();
-    // logger.time(`animation-loop-${_startTime}`, LogCategory.ANIMATION);
+    // logger.time(`animation-loop`, LogCategory.ANIMATION);
 
     intervalRef.current = setInterval(() => {
       setIdx((prevIdx) => {

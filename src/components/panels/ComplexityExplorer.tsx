@@ -331,9 +331,9 @@ export default function ComplexityExplorer({
                 stroke="#64748b"
               />
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  value?.toExponential(2) || "N/A",
-                  name,
+                formatter={(value: unknown, name: unknown) => [
+                  typeof value === "number" ? value.toExponential(2) : "N/A",
+                  String(name),
                 ]}
                 labelStyle={{ color: "#1e293b" }}
                 contentStyle={{
@@ -494,9 +494,9 @@ export default function ComplexityExplorer({
                   stroke="#64748b"
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    value?.toExponential(2) || "N/A",
-                    name,
+                  formatter={(value: unknown, name: unknown) => [
+                    typeof value === "number" ? value.toExponential(2) : "N/A",
+                    String(name),
                   ]}
                   labelStyle={{ color: "#1e293b" }}
                   contentStyle={{

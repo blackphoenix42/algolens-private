@@ -182,6 +182,15 @@ function AlgoCard({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${item.title} algorithm visualization`}
     >
       {/* Enhanced thumbnail with animations */}
       <div

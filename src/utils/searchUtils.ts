@@ -246,7 +246,6 @@ function doubleMetaphone(word: string): [string, string] {
 
   word = word.toUpperCase();
   let primary = "";
-  let secondary = "";
   let pos = 0;
 
   // Simplified rules - in a real implementation, this would be much more complex
@@ -343,7 +342,7 @@ function doubleMetaphone(word: string): [string, string] {
     pos++;
   }
 
-  secondary = primary; // Simplified - normally would have different rules
+  const secondary = primary;
   return [primary.substring(0, 4), secondary.substring(0, 4)];
 }
 
@@ -1347,7 +1346,7 @@ export function advancedSearch<T extends SearchableItem>(
       const score = calculateAdvancedRelevanceScore(query, item, opts);
 
       if (score >= opts.minScore) {
-        let resultType: SearchResult<T>["type"] = "fuzzy";
+        let resultType: SearchResult<T>["type"];
         let explanation = "";
 
         // Determine result type and explanation based on score and matching methods

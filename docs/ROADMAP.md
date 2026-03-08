@@ -1,6 +1,6 @@
 # AlgoLens — Public Roadmap
 
-_Last updated: 2025-08-29 (IST)_
+_Last updated: 2026-03-08_
 
 This roadmap is a living plan for AlgoLens. It now incorporates your full feature list, organized into phases with clear acceptance criteria. Dates are targets, not guarantees.
 

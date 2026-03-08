@@ -9,7 +9,7 @@ const changefreq = args.changefreq || "daily";
 const priority = Number(args.priority ?? 0.8);
 const lastmod = args.lastmod || new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-let routes = [];
+let routes;
 if (args.routes) {
   routes = String(args.routes)
     .split(",")

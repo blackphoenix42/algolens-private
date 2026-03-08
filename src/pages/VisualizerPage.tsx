@@ -21,6 +21,9 @@ import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
 import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
 // import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
 import HomeButton from "@/components/ui/HomeButton";
+// import { LanguageSwitcher, useI18n } from "@/i18n";
+// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
+import { ChevronDownIcon } from "@/components/ui/Icons";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
 // import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -29,12 +32,9 @@ import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
 import { useMobileOrientation } from "@/hooks/useOrientation";
-// import { LanguageSwitcher, useI18n } from "@/i18n";
-// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
 
-// Frame type definitions for algorithm visualization
 interface BaseFrame {
   array?: number[];
   highlights?: {
@@ -45,28 +45,6 @@ interface BaseFrame {
   };
   pcLine?: number;
   explain?: string;
-}
-
-/** Simple chevron that rotates when collapsed/expanded */
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`h-4 w-4 transition-transform duration-200 ${
-        open ? "rotate-180" : "rotate-0"
-      }`}
-      aria-hidden
-    >
-      <path
-        d="M8 10l4 4 4-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 // Constants for the visualizer

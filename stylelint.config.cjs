@@ -1,4 +1,3 @@
-/* eslint-env node, commonjs */
 /** Stylelint config for AlgoLens (CSS + Tailwind) */
 module.exports = {
   extends: [
@@ -14,6 +13,9 @@ module.exports = {
     // Reasonable relaxations for modern utility-first CSS
     "no-descending-specificity": null,
     "selector-class-pattern": null,
+
+    // css-tree crashes on modern clip-path / inset() syntax
+    "declaration-property-value-no-unknown": null,
 
     // Minor preferences
     "color-hex-length": "short",

@@ -172,10 +172,9 @@ export default function HomePage() {
     // componentLogger.mount();
 
     // Log catalog contents
-    const _catalogStats = Object.entries(catalog).map(([topic, items]) => ({
-      topic,
-      count: items.length,
-    }));
+    Object.entries(catalog).forEach(([topic, items]) => {
+      console.debug(`Catalog: ${topic} (${items.length} algorithms)`);
+    });
     // logger.debug(LogCategory.GENERAL, "Algorithm catalog loaded", {
     //   catalogStats,
     //   totalAlgorithms: Object.values(catalog).reduce(
@@ -215,7 +214,7 @@ export default function HomePage() {
   // const performanceMonitor = usePerformanceMonitor();
 
   // Hero section visibility from preferences
-  const { preferences: _preferences, toggleHeroSection } = usePreferences();
+  const { toggleHeroSection } = usePreferences();
   // const showHero = preferences.showHeroSection;
 
   // Check if this is a first-time user
@@ -1018,7 +1017,7 @@ export default function HomePage() {
 
         case event.ctrlKey && event.key === "4":
           event.preventDefault();
-          setSelectedCategories(["trees"]);
+          setSelectedCategories(["arrays"]);
           setQ("");
           break;
 
@@ -1780,7 +1779,7 @@ export default function HomePage() {
                   for learning algorithms and data structures
                 </p>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-                  © 2025 AlgoLens. Empowering developers through visual
+                  © 2026 AlgoLens. Empowering developers through visual
                   learning.
                 </p>
               </div>

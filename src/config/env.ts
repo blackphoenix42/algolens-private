@@ -37,7 +37,8 @@ function validateEnv() {
       throw new Error(
         `Environment validation failed:\n${error.issues
           .map((err) => `  ${err.path.join(".")}: ${err.message}`)
-          .join("\n")}`
+          .join("\n")}`,
+        { cause: error }
       );
     }
     throw error;

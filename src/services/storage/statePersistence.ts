@@ -64,7 +64,7 @@ class StatePersistence {
       return savedState.id;
     } catch (error) {
       console.error("Failed to save state:", error);
-      throw new Error("Failed to save state");
+      throw new Error("Failed to save state", { cause: error });
     }
   }
 

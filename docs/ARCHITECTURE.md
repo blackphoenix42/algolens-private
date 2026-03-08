@@ -1,12 +1,13 @@
 # AlgoLens — Architecture Overview
 
-> Vite + React + TypeScript + Tailwind. Panels & canvas for algorithm visuals, with a small engine/runner layer.
+> Vite 7 + React 19 + TypeScript 5.9 + Tailwind CSS 4. Panels & canvas for algorithm visuals, with a generator-based engine/runner layer.
 
 ## Goals
 
 - Clear separation of **UI (panels/controls)** and **simulation engine**.
-- Deterministic, stepable execution (play/pause/seek).
-- Shareable state via **URL** and export (images/video later).
+- Deterministic, stepable execution (play/pause/seek) via generator functions.
+- Shareable state via **URL** encoding and export (images/GIF/video).
+- Internationalization (i18n) with multi-language support.
 
 ## Topology
 
@@ -14,98 +15,149 @@
 [Browser]
    │
    ▼
-React App (App shell, routing, theme)
+React App (App shell, routing, theme, i18n)
    │
-   ├─ Panels (Code / About / Export / ArrayView)
-   ├─ Controls (Transport / DatasetPanel)
-   └─ Canvas (ArrayCanvas + toolbar)
-         │
-         ▼
-   Runner (useRunner)  ──> Engine (registry + algorithm impl)
-         │                     │
-         └── emits ticks ──────┘
-                │
-                ▼
-        Render to <canvas> (draw loop)
+   ├─ Providers (ThemeProvider, KeyboardProvider, PerformanceProvider)
+   ├─ Pages
+   │    ├─ HomePage (catalog, filters, search)
+   │    └─ VisualizerPage (algorithm visualization)
+   │         ├─ Panels (Code / About / Export)
+   │         ├─ Controls (Transport / DatasetPanel / ArrayViewPanel)
+   │         └─ Canvas (ArrayCanvas + CanvasToolbar)
+   │              │
+   │              ▼
+   │        Runner (useRunner)  ──> Engine (registry + algorithm impl)
+   │              │                     │
+   │              └── yields Frames ────┘
+   │                     │
+   │                     ▼
+   │             Render to <canvas> (draw loop)
+   │
+   └─ Services (export, monitoring, performance, storage, PWA)
 ```
 
 ## Key Modules (by directory)
 
+- `src/app/`
+  - **AppLayout.tsx**: root layout with providers.
+  - **router.tsx**: React Router config with GitHub Pages basename support.
 - `src/pages/`
-  - **HomePage / VisualizerPage**: route composition. Visualizer wires panels + canvas + runner.
+  - **HomePage**: algorithm catalog with search, filters (type/complexity/data structure), and keyboard shortcuts.
+  - **VisualizerPage**: wires panels + canvas + runner with mobile-responsive layout.
+- `src/algorithms/`
+  - **sorting/**: Bubble, Selection, Insertion, Merge, Quick sort generators.
+  - **searching/**: Linear, Binary search generators.
+  - **graphs/**: BFS, DFS generators.
+  - **arrays/**: Find Maximum, Reverse Array generators.
+  - Each algorithm exports a generator that yields `Frame` objects.
 - `src/components/canvas/`
-  - **ArrayCanvas**: imperative canvas renderer, exposes a handle for playhead-controlled redraws.
-  - **CanvasToolbar**: zoom/speed/grid toggles, export shortcuts.
+  - **ArrayCanvas**: imperative canvas renderer with bars/dots/table views, zoom, pan, drag support.
+  - **CanvasToolbar**: zoom/pan/grid toggles, fullscreen, export shortcuts.
 - `src/components/controls/`
-  - **Transport**: play/pause/step/seek, speed.
+  - **Transport**: play/pause/step/seek, speed control with slider.
   - **DatasetPanel**: dataset generators (random, gaussian, reversed, few-unique, custom).
-  - **ArrayViewPanel**: tabular view; useful for a11y and debugging.
+  - **ArrayViewPanel**: view mode, color mode, and display settings.
 - `src/components/panels/`
-  - **CodePanel**: shows multi-language code; highlights current line.
-  - **AboutPanel**: algorithm notes/complexity.
-  - **ExportPanel**: image/video export (uses `lib/exporter`).
+  - **CodePanel**: multi-language code (C++/Java/Python/JS) with syntax highlighting and active line tracking.
+  - **AboutPanel**: algorithm description, complexity table, pros/cons.
+  - **CollapsibleExportPanel**: image/GIF/video export.
+  - **ComplexityExplorer**: interactive complexity analysis.
+- `src/components/ui/`
+  - Shared components: Button, Card, Modal, Icons (ChevronDown, Copy, Wrap, Expand, Home), SearchInput, LoadingScreen.
+- `src/components/home/`
+  - **AlgoCard**: algorithm card with thumbnail bars, tags, difficulty pill.
+  - **FilterBar**: search input with fuzzy search, algorithm type/complexity/data structure filters.
 - `src/engine/`
-  - **registry.ts** (`findAlgo`): index of algorithms and their metadata.
-  - **runner.ts** (`useRunner`): playhead state machine; emits frames for the canvas to draw.
-- `src/lib/`
-  - **arrays.ts**: dataset factories.
-  - **exporter.ts**: typed draw options (`DrawOptions`) + image/video plumbing.
-  - **urlState.ts**: encode/decode settings in the URL for shareable links.
-- `src/services/monitoring/`
-  - **sentry.client.config.ts**: error monitoring initialization.
+  - **registry.ts** (`findAlgo`, `loadAllTopics`): lazy-loaded algorithm catalog with caching.
+  - **runner.ts** (`useRunner`): playhead state machine with play/pause/step/seek/speed control.
+  - **urlState.ts**: simple URL query param read/write for shareable links.
+- `src/providers/`
+  - **ThemeProvider**: dark/light theme with system preference detection.
+  - **KeyboardProvider**: global keyboard shortcuts with context-aware hints.
+- `src/hooks/`
+  - Custom hooks for preferences, orientation detection, etc.
+- `src/i18n/`
+  - **i18next** setup with browser language detection.
+  - Translations: English, Chinese, Japanese, Russian.
+- `src/services/`
+  - **export/**: image, GIF, video export services.
+  - **monitoring/**: Sentry error monitoring.
+  - **performance/**: web vitals and performance tracking.
+  - **pwa.ts**: service worker registration.
+- `src/utils/`
+  - Utility functions: cn, clamp, debounce, makeRandomArray, algorithmTags, searchFilters, taskScheduler.
+  - **ErrorBoundary**: React error boundary component.
 - `public/`
-  - Static assets (`/brand/AlgoLens.png`), PWA files, well-known files.
+  - PWA files (manifest, service worker, offline page), sitemap, robots.txt, security.txt.
 
-## Algorithm Contract (proposed)
+## Algorithm Contract
 
-Algorithms should be pure, stepable, and serializable.
+Algorithms are generator functions that yield `Frame` objects for deterministic step-by-step visualization:
 
 ```ts
-export interface AlgoStepContext<TState> {
-  state: TState; // current simulation state
-  emit?: (event: string, data?: unknown) => void; // optional events
+interface Frame {
+  array: number[];
+  highlights?: {
+    compared?: [number, number];
+    swapped?: [number, number];
+    pivot?: number;
+    indices?: number[];
+  };
+  pcLine?: number;
+  explain?: string;
 }
 
-export interface Algorithm<TState, TInput> {
-  id: string;
-  name: string;
-  languages?: Partial<Record<"cpp" | "java" | "py" | "js", string>>; // code snippets
-  pseudocode?: string;
-  init(input: TInput): TState; // initial state from dataset
-  step(ctx: AlgoStepContext<TState>): TState; // advance by one step
-  done(state: TState): boolean; // termination
+// Each algorithm's run() is a generator:
+function* run(input: number[] | object, options?: object): Generator<Frame> {
+  // yield frames step by step
 }
 ```
 
-Register in `engine/registry.ts` and wire in `VisualizerPage`.
+Algorithm metadata (`AlgoMeta`) includes: title, slug, topic, summary, pseudocode, code (multi-language), complexity, codeLineMap, and a `load()` function for lazy imports.
 
-## Runner Loop (simplified)
+Register in `src/algorithms/<topic>/algos/index.ts` and the engine `registry.ts` discovers them.
+
+## Runner Loop
 
 - **Idle** until user hits Play.
-- On each tick: `next = algo.step({ state }); setState(next); draw(next);`
-- Stops when `algo.done(state)` or user presses Pause/Stop.
-- Seeks by replaying steps from `init` quickly up to target index.
+- All frames are pre-computed by exhausting the generator on algorithm load.
+- `useRunner` manages a frame index with `setInterval` for playback.
+- Play/pause/step navigates through the pre-computed frame array.
+- Auto-pauses at boundaries (start/end).
 
 ## Rendering
 
-- Canvas redraw happens on runner ticks. Use a **single source of truth** (state passed into `ArrayCanvas.draw()`).
-- Prefer batched updates and avoid holding React state for per-bar animations; draw directly to 2D context.
+- `ArrayCanvas` renders the current frame with bars/dots/table views.
+- Supports zoom, pan, drag-to-reorder, grid/snap toggles.
+- Color modes: plain, rainbow, value-based, custom.
+- Imperative handle exposes zoom/reset/center methods.
 
 ## URL State
 
-- Shareable links: algorithm id, dataset seed/size, speed, theme, playhead index → encoded in query/hash.
-- On load: hydrate UI/runner from URL → avoids mismatches between panels/canvas.
+- Shareable links encode: step index, speed, array size, seed, theme.
+- Simple query param approach via `engine/urlState.ts`.
 
 ## Testing
 
-- **Vitest** for lib + hooks.
-- **Playwright** for flows: load visualizer, generate dataset, step, export.
+- **Vitest** for unit tests (algorithms, utilities).
+- **Playwright** for E2E flows (home page, visualization).
+- **pa11y-ci** for accessibility testing.
+- **Storybook** for component development and visual testing.
+
+## CI/CD
+
+- **GitHub Actions**: CI (lint/typecheck/test/build), E2E, a11y, Lighthouse, CodeQL, deploy to GitHub Pages.
+- **Changesets** for versioning and releases.
+- **Dependabot** for dependency updates.
 
 ## Observability
 
-- **Sentry** error boundary around `<App />` with low sampling for tracing/replays.
+- **Sentry** error boundary and monitoring (configurable).
+- **PostHog** analytics (opt-in).
+- **Web Vitals** performance tracking.
 
 ## Extensibility
 
-- New algorithm = new module implementing the contract + registry entry + code/pseudocode snippets.
-- Canvas variants (graphs, trees) live under `components/canvas/…`.
+- New algorithm = new generator module + metadata in `src/algorithms/<topic>/algos/` + index registration.
+- Canvas variants (graphs, trees) live under `components/canvas/`.
+- i18n: add translation JSON in `src/i18n/<locale>/`.

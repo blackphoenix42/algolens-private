@@ -83,10 +83,10 @@ export default function FilterBar(props: Props) {
     selectedCategories: _selectedCategories,
     setSelectedCategories: _setSelectedCategories,
     tags: _tags,
-    selectedTags: _selectedTags,
+    selectedTags,
     setSelectedTags: _setSelectedTags,
     difficulties: _difficulties,
-    selectedDifficulties: _selectedDifficulties,
+    selectedDifficulties,
     setSelectedDifficulties: _setSelectedDifficulties,
     sortKey,
     setSortKey,
@@ -142,9 +142,6 @@ export default function FilterBar(props: Props) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  const _toggleIn = (arr: string[], v: string) =>
-    arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
   const toggleAlgorithmType = (type: AlgorithmType) => {
     setSelectedAlgorithmTypes(
@@ -215,7 +212,7 @@ export default function FilterBar(props: Props) {
               })}
               aria-label="Search algorithms by name, tags, concepts, or difficulty. Try searching for complexity like O(1) or constant time."
               // Performance optimization for fast typing
-              debounceMs={20}
+              debounceMs={200}
               // Enhanced search props - only enable advanced search when there's a query
               searchableItems={q.length > 0 ? searchableItems : []}
               // Add filter term suggestions - only when there's a query
@@ -326,7 +323,7 @@ export default function FilterBar(props: Props) {
                         <span className="text-xs opacity-90">•</span>
                         <span
                           className="text-xs font-bold"
-                          title={`Types: ${selectedAlgorithmTypes.length}, Complexity: ${selectedComplexityLevels.length}, Data: ${selectedDataStructures.length}, Search: ${q.length > 0 ? 1 : 0}, Tags: ${_selectedTags.length}, Diff: ${_selectedDifficulties.length}`}
+                          title={`Types: ${selectedAlgorithmTypes.length}, Complexity: ${selectedComplexityLevels.length}, Data: ${selectedDataStructures.length}, Search: ${q.length > 0 ? 1 : 0}, Tags: ${selectedTags.length}, Diff: ${selectedDifficulties.length}`}
                         >
                           {activeFilterCount}
                         </span>
