@@ -182,6 +182,42 @@ export default function VisualizerPage() {
     VISUALIZER_CONSTANTS.DEFAULT_SEARCH_TARGET
   );
 
+  // Helper to build BST (level-order) from array for bst-search
+  const buildBST = useCallback((values: number[]) => {
+    const EMPTY = -1;
+    const tree: number[] = [];
+    const ensure = (idx: number) => {
+      while (tree.length <= idx) tree.push(EMPTY);
+    };
+    for (const value of values) {
+      if (tree.length === 0) {
+        tree.push(value);
+        continue;
+      }
+      let i = 0;
+      while (true) {
+        if (value < tree[i]) {
+          const left = 2 * i + 1;
+          ensure(left);
+          if (tree[left] === EMPTY) {
+            tree[left] = value;
+            break;
+          }
+          i = left;
+        } else {
+          const right = 2 * i + 2;
+          ensure(right);
+          if (tree[right] === EMPTY) {
+            tree[right] = value;
+            break;
+          }
+          i = right;
+        }
+      }
+    }
+    return tree;
+  }, []);
+
   // Optimized algorithm input preparation
   const algorithmInput = useMemo(() => {
     if (!meta) return null;
@@ -198,10 +234,17 @@ export default function VisualizerPage() {
           ),
           startNode: 0,
         };
+      case "trees":
+        if (meta.slug === "bst-search") {
+          return { array: buildBST(input), target: searchTarget };
+        }
+        return input;
+      case "strings":
+        return input;
       default:
         return input;
     }
-  }, [meta, input, searchTarget]);
+  }, [meta, input, searchTarget, buildBST]);
 
   const [colors, setColors] = useState({
     base: "#1667b7",
@@ -544,8 +587,9 @@ export default function VisualizerPage() {
                   isMobile={isMobile}
                 />
 
-                {/* Search Target Control for searching algorithms */}
-                {meta?.topic === "searching" && (
+                {/* Search Target Control for searching/trees algorithms */}
+                {(meta?.topic === "searching" ||
+                  (meta?.topic === "trees" && meta.slug === "bst-search")) && (
                   <div className="card p-4">
                     <div className="mb-3">
                       <h3 className="font-medium text-slate-900 dark:text-slate-100">
@@ -574,6 +618,13 @@ export default function VisualizerPage() {
                           Array is automatically sorted for binary search
                         </p>
                       )}
+                      {meta?.topic === "trees" &&
+                        meta.slug === "bst-search" && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            BST is built from array; target is searched in the
+                            tree
+                          </p>
+                        )}
                     </div>
                   </div>
                 )}
@@ -831,8 +882,9 @@ export default function VisualizerPage() {
                 isMobile={isMobile}
               />
 
-              {/* Search Target Control for searching algorithms */}
-              {meta?.topic === "searching" && (
+              {/* Search Target Control for searching/trees algorithms */}
+              {(meta?.topic === "searching" ||
+                (meta?.topic === "trees" && meta.slug === "bst-search")) && (
                 <div className="card p-3">
                   <div className="mb-3">
                     <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">
@@ -859,6 +911,11 @@ export default function VisualizerPage() {
                     {meta.slug === "binary-search" && (
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Array is automatically sorted for binary search
+                      </p>
+                    )}
+                    {meta?.topic === "trees" && meta.slug === "bst-search" && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        BST is built from array; target is searched in the tree
                       </p>
                     )}
                   </div>

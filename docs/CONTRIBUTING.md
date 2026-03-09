@@ -37,10 +37,46 @@ This enables `pre-commit` (lint/format) and `commit-msg` (commitlint).
 
 ## Adding a New Algorithm
 
-1. Create an implementation in `src/engine/algorithms/<id>.ts` that matches the Algorithm contract.
-2. Export metadata: name, pseudocode, language snippets.
-3. Register it in `src/engine/registry.ts`.
-4. Add a basic dataset scenario to test, and a Playwright flow if it’s interactive.
+Algorithms live in `src/algorithms/<topic>/algos/`. Current topics:
+
+| Topic        | Directory                            | Algorithms    |
+| ------------ | ------------------------------------ | ------------- |
+| sorting      | `src/algorithms/sorting/algos/`      | 10 algorithms |
+| searching    | `src/algorithms/searching/algos/`    | 5 algorithms  |
+| graphs       | `src/algorithms/graphs/algos/`       | 6 algorithms  |
+| trees        | `src/algorithms/trees/algos/`        | 2 algorithms  |
+| strings      | `src/algorithms/strings/algos/`      | 2 algorithms  |
+| dp           | `src/algorithms/dp/algos/`           | 3 algorithms  |
+| linked-lists | `src/algorithms/linked-lists/algos/` | 2 algorithms  |
+| arrays       | `src/algorithms/arrays/algos/`       | 2 algorithms  |
+
+### Steps
+
+1. Create `src/algorithms/<topic>/algos/<name>.ts`:
+
+   ```typescript
+   import type { Algorithm } from "@/engine/types";
+
+   export const run: Algorithm = function* myAlgo(input: unknown) {
+     const arr = input as number[];
+     yield {
+       array: [...arr],
+       highlights: {},
+       explain: "Starting...",
+       pcLine: 1,
+     };
+     // ... algorithm steps yielding Frame objects ...
+     yield { array: [...arr], highlights: {}, explain: "Done!", pcLine: -1 };
+   };
+   ```
+
+2. Add an `AlgoMeta` entry in `src/algorithms/<topic>/algos/index.ts` with: slug, title, topic, summary, pseudocode, complexity, about, pros/cons, code (JS/Python/Java/C++), codeLineMap, and `load: () => import("./<name>")`.
+
+3. For **new topics**, also register in `src/engine/registry.ts` and add to the topic union in `src/types/index.ts`.
+
+4. Add unit tests in `src/tests/unit/`. Use `testSortingAlgorithm` helper for sorting algorithms, or write manual frame checks for other categories.
+
+5. Each yielded frame must include `array` (spread copy), `explain`, and `pcLine`. Use `highlights` (`compared`, `swapped`, `indices`, `pivot`) for visual feedback.
 
 ## Canvas / Rendering
 
@@ -49,15 +85,15 @@ This enables `pre-commit` (lint/format) and `commit-msg` (commitlint).
 
 ## Tests
 
-- Unit: `vitest run` for lib and hooks.
+- Unit: `vitest run` for lib and hooks (151+ tests).
 - E2E: run against `vite preview` (CI does this automatically).
 - Avoid flakes (`await page.getByTestId(...).waitFor()`).
 
 ## Accessibility & i18n
 
 - Keyboard reachable controls; visible focus rings.
-- Use semantic roles (`role="slider"`, etc.).
-- Strings should be centralized for translation later.
+- Use semantic roles (`role="slider"`, etc.) and ARIA attributes.
+- Strings are centralized via i18next (`src/i18n/`); 5 languages supported.
 
 ## Performance
 
@@ -67,7 +103,7 @@ This enables `pre-commit` (lint/format) and `commit-msg` (commitlint).
 ## Docs & ADRs
 
 - Significant decisions → add an ADR in `docs/ADR/` (see template).
-- High-level architecture → `architecture.md`.
+- High-level architecture → `docs/ARCHITECTURE.md`.
 
 ## Security
 
@@ -77,7 +113,7 @@ This enables `pre-commit` (lint/format) and `commit-msg` (commitlint).
 
 - Use Changesets:
   - `npx changeset` to propose a bump.
-  - CI opens/update a **Version Packages** PR.
+  - CI opens/updates a **Version Packages** PR.
   - Merging to `master` publishes to npm and creates the GitHub release.
 
 Thanks for helping make AlgoLens better!

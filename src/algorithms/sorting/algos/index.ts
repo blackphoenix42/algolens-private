@@ -545,6 +545,621 @@ int partition(vector<int>& arr, int low, int high) {
     },
     load: () => import("./quickSort"),
   },
+  {
+    slug: "heap-sort",
+    title: "Heap Sort",
+    topic: "sorting",
+    summary:
+      "A comparison-based sorting algorithm that uses a binary heap data structure. Builds a max heap, then repeatedly extracts the maximum.",
+    pseudocode: [
+      "Build max heap from array",
+      "for end = n-1 down to 1",
+      "  swap arr[0] with arr[end]",
+      "  reduce heap size by 1",
+      "  heapify(arr, 0, end)",
+    ],
+    complexity: {
+      time: { best: "O(n log n)", average: "O(n log n)", worst: "O(n log n)" },
+      space: "O(1)",
+      stable: false,
+      inPlace: true,
+    },
+    about:
+      "Heap sort builds a max heap from the array, then repeatedly extracts the maximum element and places it at the end. Uses the heapify operation to maintain heap property.",
+    pros: [
+      "O(n log n) guaranteed",
+      "In-place sorting",
+      "No extra space needed",
+    ],
+    cons: [
+      "Not stable",
+      "Poor cache performance",
+      "Slower than quicksort in practice",
+    ],
+    code: {
+      javascript: `function heapSort(arr) {
+  const n = arr.length;
+
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    heapify(arr, n, i);
+  }
+
+  for (let end = n - 1; end > 0; end--) {
+    [arr[0], arr[end]] = [arr[end], arr[0]];
+    heapify(arr, end, 0);
+  }
+  return arr;
+}
+
+function heapify(arr, n, i) {
+  let largest = i;
+  const left = 2 * i + 1;
+  const right = 2 * i + 2;
+
+  if (left < n && arr[left] > arr[largest]) largest = left;
+  if (right < n && arr[right] > arr[largest]) largest = right;
+
+  if (largest !== i) {
+    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+    heapify(arr, n, largest);
+  }
+}`,
+      python: `def heap_sort(arr):
+    n = len(arr)
+
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    for end in range(n - 1, 0, -1):
+        arr[0], arr[end] = arr[end], arr[0]
+        heapify(arr, end, 0)
+    return arr
+
+def heapify(arr, n, i):
+    largest = i
+    left, right = 2 * i + 1, 2 * i + 2
+
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)`,
+      java: `public static void heapSort(int[] arr) {
+    int n = arr.length;
+
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    for (int end = n - 1; end > 0; end--) {
+        int temp = arr[0];
+        arr[0] = arr[end];
+        arr[end] = temp;
+        heapify(arr, end, 0);
+    }
+}
+
+static void heapify(int[] arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1, right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest]) largest = left;
+    if (right < n && arr[right] > arr[largest]) largest = right;
+
+    if (largest != i) {
+        int temp = arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = temp;
+        heapify(arr, n, largest);
+    }
+}`,
+      cpp: `void heapSort(vector<int>& arr) {
+    int n = arr.size();
+
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    for (int end = n - 1; end > 0; end--) {
+        swap(arr[0], arr[end]);
+        heapify(arr, end, 0);
+    }
+}
+
+void heapify(vector<int>& arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1, right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest]) largest = left;
+    if (right < n && arr[right] > arr[largest]) largest = right;
+
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        heapify(arr, n, largest);
+    }
+}`,
+    },
+    codeLineMap: {
+      javascript: [3, 7, 8, 9, 15],
+      python: [3, 7, 8, 9, 15],
+      java: [3, 7, 8, 9, 15],
+      cpp: [3, 7, 8, 9, 15],
+    },
+    load: () => import("./heapSort"),
+  },
+  {
+    slug: "shell-sort",
+    title: "Shell Sort",
+    topic: "sorting",
+    summary:
+      "A generalization of insertion sort that allows exchange of elements that are far apart. Uses gap sequences to improve performance.",
+    pseudocode: [
+      "Compute initial gap (Knuth: gap = gap*3+1)",
+      "while gap >= 1",
+      "  for i = gap to n-1",
+      "    while j >= gap and arr[j-gap] > temp",
+      "      arr[j] = arr[j-gap], j -= gap",
+      "    arr[j] = temp",
+    ],
+    complexity: {
+      time: { best: "O(n log n)", average: "O(n^1.3)", worst: "O(n²)" },
+      space: "O(1)",
+      stable: false,
+      inPlace: true,
+    },
+    about:
+      "Shell sort improves insertion sort by comparing elements separated by a gap. Uses Knuth's gap sequence (1, 4, 13, 40...) for better performance.",
+    pros: [
+      "Better than insertion sort for medium-sized data",
+      "In-place",
+      "Simple to implement",
+    ],
+    cons: [
+      "Not stable",
+      "Gap sequence affects performance",
+      "Complex analysis",
+    ],
+    code: {
+      javascript: `function shellSort(arr) {
+  const n = arr.length;
+  let gap = 1;
+  while (gap < n) gap = gap * 3 + 1;
+  gap = Math.floor(gap / 3);
+
+  while (gap >= 1) {
+    for (let i = gap; i < n; i++) {
+      const temp = arr[i];
+      let j = i;
+      while (j >= gap && arr[j - gap] > temp) {
+        arr[j] = arr[j - gap];
+        j -= gap;
+      }
+      arr[j] = temp;
+    }
+    gap = Math.floor(gap / 3);
+  }
+  return arr;
+}`,
+      python: `def shell_sort(arr):
+    n = len(arr)
+    gap = 1
+    while gap < n:
+        gap = gap * 3 + 1
+    gap //= 3
+
+    while gap >= 1:
+        for i in range(gap, n):
+            temp = arr[i]
+            j = i
+            while j >= gap and arr[j - gap] > temp:
+                arr[j] = arr[j - gap]
+                j -= gap
+            arr[j] = temp
+        gap //= 3
+    return arr`,
+      java: `public static void shellSort(int[] arr) {
+    int n = arr.length;
+    int gap = 1;
+    while (gap < n) gap = gap * 3 + 1;
+    gap /= 3;
+
+    while (gap >= 1) {
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j = i;
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            arr[j] = temp;
+        }
+        gap /= 3;
+    }
+}`,
+      cpp: `void shellSort(vector<int>& arr) {
+    int n = arr.size();
+    int gap = 1;
+    while (gap < n) gap = gap * 3 + 1;
+    gap /= 3;
+
+    while (gap >= 1) {
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j = i;
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            arr[j] = temp;
+        }
+        gap /= 3;
+    }
+}`,
+    },
+    codeLineMap: {
+      javascript: [2, 6, 7, 8, 9, 11],
+      python: [2, 6, 7, 8, 9, 11],
+      java: [2, 6, 7, 8, 9, 11],
+      cpp: [2, 6, 7, 8, 9, 11],
+    },
+    load: () => import("./shellSort"),
+  },
+  {
+    slug: "counting-sort",
+    title: "Counting Sort",
+    topic: "sorting",
+    summary:
+      "A non-comparison sorting algorithm that counts occurrences of each value. Works on non-negative integers with a known range.",
+    pseudocode: [
+      "Find max value in array",
+      "Create count array of size max+1",
+      "Count occurrences of each value",
+      "Compute cumulative counts (positions)",
+      "Place elements in output using positions",
+    ],
+    complexity: {
+      time: { best: "O(n+k)", average: "O(n+k)", worst: "O(n+k)" },
+      space: "O(k)",
+      stable: true,
+      inPlace: false,
+    },
+    about:
+      "Counting sort counts the number of occurrences of each value, then uses cumulative counts to determine each element's position. Works only on non-negative integers.",
+    pros: ["Linear time when k is small", "Stable sort", "No comparisons"],
+    cons: [
+      "Only for non-negative integers",
+      "Space O(k) - inefficient when range is large",
+      "Not in-place",
+    ],
+    code: {
+      javascript: `function countingSort(arr) {
+  if (arr.length === 0) return arr;
+  const max = Math.max(...arr);
+  const count = new Array(max + 1).fill(0);
+
+  for (let i = 0; i < arr.length; i++)
+    count[arr[i]]++;
+
+  for (let i = 1; i <= max; i++)
+    count[i] += count[i - 1];
+
+  const output = new Array(arr.length);
+  for (let i = arr.length - 1; i >= 0; i--) {
+    output[count[arr[i]] - 1] = arr[i];
+    count[arr[i]]--;
+  }
+  return output;
+}`,
+      python: `def counting_sort(arr):
+    if not arr:
+        return arr
+    max_val = max(arr)
+    count = [0] * (max_val + 1)
+
+    for x in arr:
+        count[x] += 1
+
+    for i in range(1, max_val + 1):
+        count[i] += count[i - 1]
+
+    output = [0] * len(arr)
+    for i in range(len(arr) - 1, -1, -1):
+        output[count[arr[i]] - 1] = arr[i]
+        count[arr[i]] -= 1
+    return output`,
+      java: `public static int[] countingSort(int[] arr) {
+    if (arr.length == 0) return arr;
+    int max = Arrays.stream(arr).max().getAsInt();
+    int[] count = new int[max + 1];
+
+    for (int x : arr) count[x]++;
+
+    for (int i = 1; i <= max; i++)
+        count[i] += count[i - 1];
+
+    int[] output = new int[arr.length];
+    for (int i = arr.length - 1; i >= 0; i--) {
+        output[count[arr[i]] - 1] = arr[i];
+        count[arr[i]]--;
+    }
+    return output;
+}`,
+      cpp: `vector<int> countingSort(vector<int>& arr) {
+    if (arr.empty()) return arr;
+    int maxVal = *max_element(arr.begin(), arr.end());
+    vector<int> count(maxVal + 1, 0);
+
+    for (int x : arr) count[x]++;
+
+    for (int i = 1; i <= maxVal; i++)
+        count[i] += count[i - 1];
+
+    vector<int> output(arr.size());
+    for (int i = arr.size() - 1; i >= 0; i--) {
+        output[count[arr[i]] - 1] = arr[i];
+        count[arr[i]]--;
+    }
+    return output;
+}`,
+    },
+    codeLineMap: {
+      javascript: [2, 4, 6, 8, 11],
+      python: [2, 5, 7, 10, 13],
+      java: [2, 5, 7, 10, 13],
+      cpp: [2, 5, 7, 10, 13],
+    },
+    load: () => import("./countingSort"),
+  },
+  {
+    slug: "radix-sort",
+    title: "Radix Sort",
+    topic: "sorting",
+    summary:
+      "A non-comparison sorting algorithm that sorts integers digit by digit from least significant to most significant (LSD).",
+    pseudocode: [
+      "Find max value",
+      "for each digit position (LSD to MSD)",
+      "  Count occurrences of each digit",
+      "  Compute cumulative positions",
+      "  Place elements in output by digit",
+      "  Copy output back to array",
+    ],
+    complexity: {
+      time: { best: "O(nk)", average: "O(nk)", worst: "O(nk)" },
+      space: "O(n+k)",
+      stable: true,
+      inPlace: false,
+    },
+    about:
+      "Radix sort processes digits from least significant to most. Each pass uses counting sort on the current digit. k is the number of digits.",
+    pros: [
+      "Linear time for fixed-width integers",
+      "Stable when counting sort is stable",
+      "Good for sorting strings",
+    ],
+    cons: [
+      "Only for integers or fixed-length keys",
+      "Extra space required",
+      "Not in-place",
+    ],
+    code: {
+      javascript: `function radixSort(arr) {
+  if (arr.length === 0) return arr;
+  const max = Math.max(...arr);
+  let exp = 1;
+
+  while (Math.floor(max / exp) > 0) {
+    const count = new Array(10).fill(0);
+    for (let i = 0; i < arr.length; i++)
+      count[Math.floor(arr[i] / exp) % 10]++;
+
+    for (let i = 1; i < 10; i++)
+      count[i] += count[i - 1];
+
+    const output = new Array(arr.length);
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const d = Math.floor(arr[i] / exp) % 10;
+      output[count[d] - 1] = arr[i];
+      count[d]--;
+    }
+    for (let i = 0; i < arr.length; i++) arr[i] = output[i];
+    exp *= 10;
+  }
+  return arr;
+}`,
+      python: `def radix_sort(arr):
+    if not arr:
+        return arr
+    max_val = max(arr)
+    exp = 1
+
+    while max_val // exp > 0:
+        count = [0] * 10
+        for x in arr:
+            count[(x // exp) % 10] += 1
+
+        for i in range(1, 10):
+            count[i] += count[i - 1]
+
+        output = [0] * len(arr)
+        for i in range(len(arr) - 1, -1, -1):
+            d = (arr[i] // exp) % 10
+            output[count[d] - 1] = arr[i]
+            count[d] -= 1
+        arr = output
+        exp *= 10
+    return arr`,
+      java: `public static void radixSort(int[] arr) {
+    if (arr.length == 0) return;
+    int max = Arrays.stream(arr).max().getAsInt();
+    int exp = 1;
+
+    while (max / exp > 0) {
+        int[] count = new int[10];
+        for (int x : arr)
+            count[(x / exp) % 10]++;
+
+        for (int i = 1; i < 10; i++)
+            count[i] += count[i - 1];
+
+        int[] output = new int[arr.length];
+        for (int i = arr.length - 1; i >= 0; i--) {
+            int d = (arr[i] / exp) % 10;
+            output[count[d] - 1] = arr[i];
+            count[d]--;
+        }
+        System.arraycopy(output, 0, arr, 0, arr.length);
+        exp *= 10;
+    }
+}`,
+      cpp: `void radixSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    int maxVal = *max_element(arr.begin(), arr.end());
+    int exp = 1;
+
+    while (maxVal / exp > 0) {
+        vector<int> count(10, 0);
+        for (int x : arr)
+            count[(x / exp) % 10]++;
+
+        for (int i = 1; i < 10; i++)
+            count[i] += count[i - 1];
+
+        vector<int> output(arr.size());
+        for (int i = arr.size() - 1; i >= 0; i--) {
+            int d = (arr[i] / exp) % 10;
+            output[count[d] - 1] = arr[i];
+            count[d]--;
+        }
+        arr = output;
+        exp *= 10;
+    }
+}`,
+    },
+    codeLineMap: {
+      javascript: [2, 5, 6, 9, 12, 15],
+      python: [2, 6, 7, 10, 13, 16],
+      java: [2, 6, 7, 10, 13, 16],
+      cpp: [2, 6, 7, 10, 13, 16],
+    },
+    load: () => import("./radixSort"),
+  },
+  {
+    slug: "bucket-sort",
+    title: "Bucket Sort",
+    topic: "sorting",
+    summary:
+      "Distributes elements into buckets based on value range, sorts each bucket (e.g. with insertion sort), then concatenates.",
+    pseudocode: [
+      "Create empty buckets",
+      "Find min and max values",
+      "Distribute elements into buckets",
+      "Sort each bucket (insertion sort)",
+      "Concatenate buckets into result",
+    ],
+    complexity: {
+      time: { best: "O(n+k)", average: "O(n+k)", worst: "O(n²)" },
+      space: "O(n)",
+      stable: true,
+      inPlace: false,
+    },
+    about:
+      "Bucket sort assumes uniform distribution. Elements are distributed into buckets, each bucket is sorted, then buckets are concatenated for the final result.",
+    pros: [
+      "Linear average case for uniform distribution",
+      "Stable when bucket sort is stable",
+      "Good for floating-point numbers",
+    ],
+    cons: [
+      "Worst case O(n²) if all in one bucket",
+      "Requires knowledge of data distribution",
+      "Extra space for buckets",
+    ],
+    code: {
+      javascript: `function bucketSort(arr) {
+  if (arr.length === 0) return arr;
+  const max = Math.max(...arr);
+  const min = Math.min(...arr);
+  const bucketCount = Math.min(arr.length, 10);
+  const bucketSize = (max - min) / bucketCount || 1;
+  const buckets = Array.from({ length: bucketCount }, () => []);
+
+  for (let i = 0; i < arr.length; i++) {
+    const idx = Math.min(Math.floor((arr[i] - min) / bucketSize), bucketCount - 1);
+    buckets[idx].push(arr[i]);
+  }
+
+  for (let b = 0; b < bucketCount; b++) {
+    buckets[b].sort((a, b) => a - b);
+  }
+
+  return buckets.flat();
+}`,
+      python: `def bucket_sort(arr):
+    if not arr:
+        return arr
+    max_val, min_val = max(arr), min(arr)
+    bucket_count = min(len(arr), 10)
+    bucket_size = (max_val - min_val) / bucket_count or 1
+    buckets = [[] for _ in range(bucket_count)]
+
+    for x in arr:
+        idx = min(int((x - min_val) / bucket_size), bucket_count - 1)
+        buckets[idx].append(x)
+
+    for b in buckets:
+        b.sort()
+
+    return [x for b in buckets for x in b]`,
+      java: `public static void bucketSort(double[] arr) {
+    int n = arr.length;
+    if (n == 0) return;
+    ArrayList<ArrayList<Double>> buckets = new ArrayList<>(n);
+    for (int i = 0; i < n; i++) buckets.add(new ArrayList<>());
+
+    double max = Arrays.stream(arr).max().getAsDouble();
+    double min = Arrays.stream(arr).min().getAsDouble();
+
+    for (double x : arr) {
+        int idx = (int) ((x - min) / (max - min + 1) * n);
+        buckets.get(idx).add(x);
+    }
+
+    for (ArrayList<Double> b : buckets) Collections.sort(b);
+
+    int i = 0;
+    for (ArrayList<Double> b : buckets)
+        for (double x : b) arr[i++] = x;
+}`,
+      cpp: `void bucketSort(vector<double>& arr) {
+    int n = arr.size();
+    if (n == 0) return;
+    vector<vector<double>> buckets(n);
+
+    double maxVal = *max_element(arr.begin(), arr.end());
+    double minVal = *min_element(arr.begin(), arr.end());
+
+    for (double x : arr) {
+        int idx = (x - minVal) / (maxVal - minVal + 1) * n;
+        buckets[idx].push_back(x);
+    }
+
+    for (auto& b : buckets) sort(b.begin(), b.end());
+
+    int i = 0;
+    for (auto& b : buckets)
+        for (double x : b) arr[i++] = x;
+}`,
+    },
+    codeLineMap: {
+      javascript: [2, 5, 6, 9, 14, 16],
+      python: [2, 5, 6, 9, 14, 16],
+      java: [2, 5, 8, 11, 14, 17],
+      cpp: [2, 5, 8, 11, 14, 17],
+    },
+    load: () => import("./bucketSort"),
+  },
 ];
 
 // Note: Individual algorithm exports removed to avoid naming conflicts

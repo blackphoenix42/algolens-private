@@ -62,7 +62,10 @@ const TOPIC_META: Record<string, { icon: string; color: string }> = {
   searching: { icon: "🔎", color: "indigo" },
   graph: { icon: "🕸️", color: "cyan" },
   trees: { icon: "🌲", color: "green" },
+  strings: { icon: "📝", color: "orange" },
+  graphs: { icon: "🕸️", color: "cyan" },
   dp: { icon: "🧩", color: "fuchsia" },
+  "linked-lists": { icon: "🔗", color: "teal" },
   geometry: { icon: "📐", color: "rose" },
   "number-theory": { icon: "🔢", color: "amber" },
 };

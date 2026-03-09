@@ -19,7 +19,11 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ---
 
-## CURRENT — v0.1.x (MVP hardening) ⟶ _Aug–Sep 2025_
+## COMPLETED — v0.1–v0.4 (Foundation through Graphs)
+
+All milestones through v0.4 have been achieved. See git history for details.
+
+## PREVIOUSLY — v0.1.x (MVP hardening) ⟶ _Aug–Sep 2025_ ✅
 
 **Goal:** Stabilize initial visualizer; baseline a11y/perf; publish docs.
 
@@ -59,7 +63,7 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ---
 
-## NEXT — v0.2.0 (Algorithms + UX polish) ⟶ _Target: Oct 2025_
+## PREVIOUSLY — v0.2.0 (Algorithms + UX polish) ⟶ _Oct 2025_ ✅
 
 **Goal:** Add core `O(n log n)` sorts and deepen learning affordances.
 
@@ -81,7 +85,7 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ---
 
-## v0.3.0 (Data structures + ArrayCanvas v2) ⟶ _Target: Nov–Dec 2025_
+## PREVIOUSLY — v0.3.0 (Data structures + ArrayCanvas v2) ⟶ _Nov–Dec 2025_ ✅
 
 **Goal:** Introduce DS visualizers and refactor canvas for diff rendering.
 
@@ -100,7 +104,7 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ---
 
-## v0.4.0 (Graphs intro + Export upgrades) ⟶ _Target: Q1 2026_
+## PREVIOUSLY — v0.4.0 (Graphs intro + Export upgrades) ⟶ _Q1 2026_ ✅
 
 **Goal:** First graph algorithms + richer exports.
 
@@ -118,7 +122,7 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ---
 
-## v0.5.0 (Educator features & i18n) ⟶ _Target: Q2 2026_
+## CURRENT — v0.5.0 (Educator features & i18n) ⟶ _Target: Q2 2026_
 
 **Goal:** Classroom/demo delight.
 
@@ -238,18 +242,18 @@ This roadmap is a living plan for AlgoLens. It now incorporates your full featur
 
 ## Milestone Table (updated)
 
-| Milestone | Target       | Key Items                                                                             |
-| --------- | ------------ | ------------------------------------------------------------------------------------- |
-| v0.1.x    | Aug–Sep 2025 | MVP sorting, themes, basic player/datasets, tooltips, autosave, table view, snapshots |
-| v0.2.0    | Oct 2025     | Merge/Quick/Heap, sync highlights, previews, GIF export, step‑into recursion          |
-| v0.3.0    | Nov–Dec 2025 | ArrayCanvas v2, Stack/Queue/BS, watch & state‑diff, conditional stops, KMP/Z          |
-| v0.4.0    | Q1 2026      | GraphCanvas, BFS/DFS/Topo, Dijkstra, SVG/MP4 export, graph import                     |
-| v0.5.0    | Q2 2026      | Presenter mode, quizzes & hints, annotations, i18n+RTL                                |
-| v0.6.0    | —            | Authoring (editor/DSL/WASM), plugins, RNG harness, linting                            |
-| v0.7.0    | —            | Sharing: permalinks, annotations threads, live‑share, embeds                          |
-| v0.8.0    | —            | Experimentation: side‑by‑side, batch mode, sweeps, curves, charts                     |
-| v0.9.0    | —            | Advanced algorithms (graphs/trees/strings/DP/geometry/NT/etc.)                        |
-| v1.0      | —            | Classroom suite, governance, compliance, full a11y                                    |
+| Milestone | Target       | Status  | Key Items                                                                     |
+| --------- | ------------ | ------- | ----------------------------------------------------------------------------- |
+| v0.1.x    | Aug-Sep 2025 | Done    | MVP sorting, themes, player/datasets, tooltips, autosave, table view          |
+| v0.2.0    | Oct 2025     | Done    | Merge/Quick/Heap, sync highlights, previews, GIF export                       |
+| v0.3.0    | Nov-Dec 2025 | Done    | BST ops, KMP/Rabin-Karp, DP (Knapsack/LIS/Edit Distance), Linked Lists        |
+| v0.4.0    | Q1 2026      | Done    | BFS/DFS/Topo/Dijkstra/Bellman-Ford/Kruskal, 32 algos, 8 categories, 151 tests |
+| v0.5.0    | Q2 2026      | Next    | Presenter mode, quizzes and hints, annotations, i18n+RTL                      |
+| v0.6.0    | TBD          | Planned | Authoring (editor/DSL/WASM), plugins, RNG harness, linting                    |
+| v0.7.0    | TBD          | Planned | Sharing: permalinks, annotations threads, live-share, embeds                  |
+| v0.8.0    | TBD          | Planned | Experimentation: side-by-side, batch mode, sweeps, curves, charts             |
+| v0.9.0    | TBD          | Planned | Advanced algorithms (graphs/trees/strings/DP/geometry/NT/etc.)                |
+| v1.0      | TBD          | Planned | Classroom suite, governance, compliance, full a11y                            |
 
 ---
 

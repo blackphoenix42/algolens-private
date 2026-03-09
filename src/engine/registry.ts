@@ -8,6 +8,12 @@ const lazyImports = {
     import("@/algorithms/searching/algos").then((m) => m.searchingAlgos),
   graphs: () => import("@/algorithms/graphs/algos").then((m) => m.graphAlgos),
   arrays: () => import("@/algorithms/arrays/algos").then((m) => m.arrayAlgos),
+  dp: () => import("@/algorithms/dp/algos").then((m) => m.dpAlgos),
+  "linked-lists": () =>
+    import("@/algorithms/linked-lists/algos").then((m) => m.linkedListAlgos),
+  trees: () => import("@/algorithms/trees/algos").then((m) => m.treesAlgos),
+  strings: () =>
+    import("@/algorithms/strings/algos").then((m) => m.stringsAlgos),
 };
 
 // Cache for loaded catalogs

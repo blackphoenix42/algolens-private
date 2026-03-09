@@ -44,11 +44,15 @@ React App (App shell, routing, theme, i18n)
 - `src/pages/`
   - **HomePage**: algorithm catalog with search, filters (type/complexity/data structure), and keyboard shortcuts.
   - **VisualizerPage**: wires panels + canvas + runner with mobile-responsive layout.
-- `src/algorithms/`
-  - **sorting/**: Bubble, Selection, Insertion, Merge, Quick sort generators.
-  - **searching/**: Linear, Binary search generators.
-  - **graphs/**: BFS, DFS generators.
-  - **arrays/**: Find Maximum, Reverse Array generators.
+- `src/algorithms/` — 32 algorithms across 8 categories:
+  - **sorting/**: Bubble, Selection, Insertion, Merge, Quick, Heap, Shell, Counting, Radix (LSD), Bucket.
+  - **searching/**: Linear, Binary, Interpolation, Ternary, Exponential.
+  - **graphs/**: BFS, DFS, Dijkstra, Bellman-Ford, Topological Sort (Kahn), Kruskal MST.
+  - **trees/**: BST Insert, BST Search.
+  - **strings/**: KMP, Rabin-Karp.
+  - **dp/**: 0/1 Knapsack, Longest Increasing Subsequence, Edit Distance.
+  - **linked-lists/**: Traversal, Reverse.
+  - **arrays/**: Find Maximum, Reverse Array.
   - Each algorithm exports a generator that yields `Frame` objects.
 - `src/components/canvas/`
   - **ArrayCanvas**: imperative canvas renderer with bars/dots/table views, zoom, pan, drag support.

@@ -42,7 +42,15 @@ export type CodeLineMap = Partial<
 export type AlgoMeta = {
   slug: string;
   title: string;
-  topic: "sorting" | "searching" | "graphs" | "arrays";
+  topic:
+    | "sorting"
+    | "searching"
+    | "graphs"
+    | "arrays"
+    | "trees"
+    | "strings"
+    | "dp"
+    | "linked-lists";
   summary: string;
   pseudocode: string[];
   complexity: {
