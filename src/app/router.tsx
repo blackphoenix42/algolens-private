@@ -1,4 +1,3 @@
-// import * as Sentry from "@sentry/react";
 import React, { useEffect } from "react";
 import {
   createBrowserRouter,
@@ -11,24 +10,7 @@ import {
 import HomePage from "@/pages/HomePage";
 import VisualizerPage from "@/pages/VisualizerPage";
 
-// import { LogCategory, logger, sessionTracker } from "@/services/monitoring";
 import { AppLayout } from "./AppLayout";
-
-// Lazy load pages to reduce initial bundle size (commented out to avoid loading screens)
-// const HomePage = React.lazy(() => import("@/pages/HomePage"));
-// const VisualizerPage = React.lazy(() => import("@/pages/VisualizerPage"));
-
-// Loading component for lazy-loaded routes (commented out since not using lazy loading)
-/*
-const RouteLoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-    <div className="text-center">
-      <div className="mx-auto mb-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
-      <p className="text-xs text-slate-500 dark:text-slate-500">Loading...</p>
-    </div>
-  </div>
-);
-*/
 
 /** Used ONLY as errorElement (has access to useRouteError) */
 function ErrorBoundary() {
@@ -48,14 +30,6 @@ function ErrorBoundary() {
         ? (err as { message: string }).message
         : null;
 
-  // Log the routing error
-  // logger.error(LogCategory.ROUTER, `Route error: ${status} - ${statusText}`, {
-  //   status,
-  //   statusText,
-  //   message: msg,
-  //   error: err,
-  //   url: window.location.href,
-  // });
   console.error(`Route error: ${status} - ${statusText}`, {
     status,
     statusText,
@@ -94,83 +68,22 @@ function ErrorBoundary() {
 /** Catch-all: load the static 404.html from public/ */
 function Static404() {
   useEffect(() => {
-    // Log 404 navigation
-    // logger.warn(LogCategory.ROUTER, "404 route accessed", {
-    //   url: window.location.href,
-    //   path: window.location.pathname,
-    //   search: window.location.search,
-    // });
-
-    // Respect Vite base path if you ever set one
+    // Respect Vite base path
     const href = `${import.meta.env.BASE_URL}404.html`;
-
-    // Optional breadcrumb in Sentry for "route not found"
-    // Sentry.addBreadcrumb({
-    //   category: "routing",
-    //   message: "redirecting to /404.html",
-    //   level: "info",
-    // });
-    // Optional signal (non-fatal)
-    // Sentry.captureMessage("route_not_found");
-
-    // logger.info(LogCategory.ROUTER, "Redirecting to static 404 page", { href });
-
-    // Hard navigate to the static file
     window.location.replace(href);
   }, []);
   return null;
 }
 
-// type WrapFn = (fn: typeof createBrowserRouter) => typeof createBrowserRouter;
-
-// Runtime type guard to check for the wrapper without using `any`
-// const hasWrap = (o: unknown): o is { wrapCreateBrowserRouterV6: WrapFn } =>
-//   typeof o === "object" &&
-//   o !== null &&
-//   typeof (o as Record<string, unknown>).wrapCreateBrowserRouterV6 ===
-//     "function";
-
-// export const createRouter: typeof createBrowserRouter = hasWrap(Sentry)
-//   ? Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
-//   : createBrowserRouter;
-
-// Use regular createBrowserRouter without Sentry wrapper
 export const createRouter: typeof createBrowserRouter = createBrowserRouter;
 
-// Configure base path for GitHub Pages
+// Configure base path for GitHub Pages — derived from import.meta.env.BASE_URL
+// which Vite sets from the `base` config (and so stays in sync with the build).
 const getBasename = () => {
-  // Check if running on GitHub Pages or in CI with GitHub Actions base path
-  if (typeof window !== "undefined") {
-    const { hostname, pathname } = window.location;
-
-    // Production GitHub Pages
-    if (
-      hostname === "blackphoenix42.github.io" &&
-      pathname.startsWith("/algolens-private")
-    ) {
-      return "/algolens-private";
-    }
-
-    // CI/testing environment with GitHub Actions base path
-    if (
-      (hostname === "127.0.0.1" || hostname === "localhost") &&
-      pathname.startsWith("/algolens-private")
-    ) {
-      return "/algolens-private";
-    }
-  }
-  return "/";
+  const base = import.meta.env.BASE_URL || "/";
+  // BASE_URL has a trailing slash (e.g. "/algolens-private/"); router wants no trailing slash
+  return base === "/" ? "/" : base.replace(/\/$/, "");
 };
-
-// Log router creation
-// logger.debug(LogCategory.ROUTER, "Creating application router", {
-//   sentryIntegration: hasWrap(Sentry),
-//   routes: [
-//     { path: "/", component: "HomePage" },
-//     { path: "/viz/:topic/:slug", component: "VisualizerPage" },
-//     { path: "*", component: "Static404" },
-//   ],
-// });
 
 const router = createRouter(
   [
@@ -198,20 +111,14 @@ const router = createRouter(
 );
 
 export default function AppRouter() {
-  // logger.info(LogCategory.ROUTER, "Rendering AppRouter");
-
-  // Log page views
+  // Listen for SPA navigations so future analytics hooks can attach here.
   useEffect(() => {
-    const handleLocationChange = () => {
-      // sessionTracker.logPageView(window.location.pathname);
-    };
-
-    // Log initial page view
-    handleLocationChange();
-
-    // Set up navigation listener
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
+
+    const handleLocationChange = () => {
+      /* hook point for analytics / page-view tracking */
+    };
 
     history.pushState = function (...args) {
       originalPushState.apply(history, args);

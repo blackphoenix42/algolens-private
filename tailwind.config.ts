@@ -256,19 +256,19 @@ export default {
           marginRight: "auto",
           paddingLeft: theme("spacing.4"),
           paddingRight: theme("spacing.4"),
-          "@screen sm": {
+          [`@media (min-width: ${theme("screens.sm")})`]: {
             maxWidth: theme("screens.sm"),
           },
-          "@screen md": {
+          [`@media (min-width: ${theme("screens.md")})`]: {
             maxWidth: theme("screens.md"),
           },
-          "@screen lg": {
+          [`@media (min-width: ${theme("screens.lg")})`]: {
             maxWidth: theme("screens.lg"),
           },
-          "@screen xl": {
+          [`@media (min-width: ${theme("screens.xl")})`]: {
             maxWidth: theme("screens.xl"),
           },
-          "@screen 2xl": {
+          [`@media (min-width: ${theme("screens.2xl")})`]: {
             maxWidth: theme("screens.2xl"),
           },
         },
@@ -276,11 +276,11 @@ export default {
         ".text-responsive": {
           fontSize: theme("fontSize.sm[0]"),
           lineHeight: theme("fontSize.sm[1].lineHeight"),
-          "@screen md": {
+          [`@media (min-width: ${theme("screens.md")})`]: {
             fontSize: theme("fontSize.base[0]"),
             lineHeight: theme("fontSize.base[1].lineHeight"),
           },
-          "@screen lg": {
+          [`@media (min-width: ${theme("screens.lg")})`]: {
             fontSize: theme("fontSize.lg[0]"),
             lineHeight: theme("fontSize.lg[1].lineHeight"),
           },

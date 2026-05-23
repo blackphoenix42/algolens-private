@@ -88,13 +88,6 @@ interface TooltipData {
   originalIndex: number;
 }
 
-interface TooltipData {
-  index: number;
-  value: number;
-  name: string;
-  originalIndex: number;
-}
-
 const EnhancedArrayVisualization = forwardRef<
   EnhancedArrayVisualizationHandle,
   EnhancedArrayVisualizationProps
@@ -135,6 +128,8 @@ const EnhancedArrayVisualization = forwardRef<
   const isDragActiveRef = useRef<boolean>(false);
   const dragStartTimeRef = useRef<number>(0);
   const lastMoveTimeRef = useRef<number>(0);
+  // Holds the latest active-drag teardown so unmount can fully clean up.
+  const dragCleanupRef = useRef<(() => void) | null>(null);
 
   // Zoom functionality
   const zoomAt = useCallback((factor: number) => {
@@ -180,29 +175,24 @@ const EnhancedArrayVisualization = forwardRef<
     });
   }, [gridEnabled, snapEnabled, panMode, dragOn, onViewChange]);
 
-  // Cleanup effect to ensure no lingering event listeners
+  // On unmount, invoke the latest registered drag teardown (if a drag is active)
+  // and reset transient drag state. The previous implementation called
+  // removeEventListener with throw-away inline functions, which never matched the
+  // listeners actually attached and therefore leaked handlers on unmount-mid-drag.
   useEffect(() => {
-    const cleanup = () => {
-      // Reset all drag-related refs
+    return () => {
+      try {
+        dragCleanupRef.current?.();
+      } catch (error) {
+        console.warn("Error during drag cleanup on unmount:", error);
+      }
+      dragCleanupRef.current = null;
       draggedIndexRef.current = null;
       currentDropTargetRef.current = null;
       isDragActiveRef.current = false;
       dragStartTimeRef.current = 0;
       lastMoveTimeRef.current = 0;
-
-      // Clean up any global event listeners
-      try {
-        const events = ["mousemove", "mouseup", "keydown"] as const;
-        events.forEach((event) => {
-          document.removeEventListener(event, () => {}, { capture: true });
-        });
-      } catch (error) {
-        console.warn("Error during event listener cleanup:", error);
-      }
     };
-
-    // Cleanup on unmount
-    return cleanup;
   }, []);
 
   // Drag and drop handlers
@@ -398,7 +388,15 @@ const EnhancedArrayVisualization = forwardRef<
         } catch (error) {
           console.warn("Error removing event listeners:", error);
         }
+
+        // Clear the unmount-safety pointer once we've torn down cleanly.
+        if (dragCleanupRef.current === eventHandlers.mouseup) {
+          dragCleanupRef.current = null;
+        }
       };
+
+      // Expose teardown so the unmount effect can run it if a drag is in flight.
+      dragCleanupRef.current = eventHandlers.mouseup;
 
       // Add global event listeners with capture phase for better fast drag handling
       try {
@@ -730,7 +728,7 @@ const EnhancedArrayVisualization = forwardRef<
 
                 return (
                   <tr
-                    key={index}
+                    key={`row-${index}`}
                     className={cn(
                       "transition-colors duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50",
                       highlight,

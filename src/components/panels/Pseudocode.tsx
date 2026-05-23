@@ -2,12 +2,12 @@ type Props = { lines: string[]; activeLine?: number };
 
 export default function Pseudocode({ lines, activeLine }: Props) {
   return (
-    <ol className="font-mono text-sm leading-6">
+    <ol className="font-mono text-sm leading-6" aria-label="Pseudocode">
       {lines.map((line, i) => {
         const isActive = activeLine && activeLine - 1 === i;
         return (
           <li
-            key={i}
+            key={`pc-${i}`}
             className={`rounded px-2 ${isActive ? "bg-yellow-100 ring-1 ring-yellow-300" : ""}`}
           >
             <span className="mr-2 text-gray-400 select-none">

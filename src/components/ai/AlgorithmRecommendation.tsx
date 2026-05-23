@@ -78,7 +78,7 @@ export function AlgorithmRecommendation({
           <div className="grid grid-cols-1 gap-1 text-xs">
             {quickProblems.map((problem, index) => (
               <button
-                key={index}
+                key={`qp-${index}-${problem.slice(0, 24)}`}
                 onClick={() => setProblemDescription(problem)}
                 className="rounded border border-amber-200/60 bg-white/60 p-2 text-left text-amber-800 transition-colors hover:bg-amber-100/80 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200 dark:hover:bg-amber-800/30"
               >
@@ -123,13 +123,19 @@ export function AlgorithmRecommendation({
                 </div>
               )}
               {dataCharacteristics.map((char, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div
+                  key={`char-${index}-${char}`}
+                  className="flex items-center gap-2"
+                >
                   <Zap className="h-3 w-3" />
                   <span>{char}</span>
                 </div>
               ))}
               {constraints.map((constraint, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div
+                  key={`con-${index}-${constraint}`}
+                  className="flex items-center gap-2"
+                >
                   <AlertCircle className="h-3 w-3" />
                   <span>{constraint}</span>
                 </div>
@@ -166,7 +172,7 @@ export function AlgorithmRecommendation({
                         {gpt.response.followUpQuestions.map(
                           (question, index) => (
                             <button
-                              key={index}
+                              key={`fq-${index}-${question.slice(0, 32)}`}
                               onClick={() => setProblemDescription(question)}
                               className="block w-full rounded border border-amber-200 bg-amber-50 p-2 text-left text-xs text-amber-700 hover:bg-amber-100 dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/40"
                             >

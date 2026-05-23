@@ -13,6 +13,21 @@ export type Highlights = {
   pivot?: number;
 };
 
+/**
+ * One entry in the algorithm's call stack at a given step.
+ * Algorithms that don't track recursion can omit `callStack` entirely.
+ */
+export type StackFrame = {
+  /** Function / phase name, e.g. "quickSort" or "partition". */
+  name: string;
+  /** 1-based pseudocode line currently executing inside this frame. */
+  pcLine?: number;
+  /** Arguments captured at the time this frame was pushed. */
+  args?: Record<string, unknown>;
+  /** Local variables visible at the current step in this frame. */
+  locals?: Record<string, unknown>;
+};
+
 export type Frame = {
   array?: number[];
   pcLine?: number; // 1-based
@@ -20,6 +35,10 @@ export type Frame = {
   counters?: Counters;
   message?: string;
   explain?: string; // human text about this step
+  /** Snapshot of variables/expressions the algorithm wants surfaced. */
+  watch?: Record<string, unknown>;
+  /** Top of stack is the last element. */
+  callStack?: StackFrame[];
 };
 
 export type Algorithm = (

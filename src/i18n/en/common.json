@@ -231,5 +231,38 @@
       "multiple": "Multiple Algorithms",
       "customizable": "Customizable Settings"
     }
+  },
+  "panels": {
+    "advantages": "Advantages",
+    "disadvantages": "Disadvantages",
+    "complexity": "Complexity",
+    "about": "About",
+    "code": "Code",
+    "pseudocode": "Pseudocode"
+  },
+  "debugger": {
+    "title": "Debugger",
+    "breakpoints": "Breakpoints",
+    "watch": "Watch",
+    "callStack": "Call Stack",
+    "addBreakpoint": "Add breakpoint",
+    "removeBreakpoint": "Remove breakpoint",
+    "clearAll": "Clear all",
+    "noBreakpoints": "No breakpoints set. Click a line in the pseudocode panel to add one.",
+    "noWatch": "No watch values. Authored algorithms can call emitter.emit({ watch: {...} }) to surface variables.",
+    "noCallStack": "This algorithm does not publish a call stack for the current step.",
+    "counterThreshold": "Pause when counter \u2265 N",
+    "linePlaceholder": "Pseudocode line number"
+  },
+  "authoring": {
+    "title": "Authoring Editor",
+    "sourceCode": "Source code",
+    "input": "Input (JSON)",
+    "run": "Run",
+    "ready": "Ready.",
+    "framesEmitted": "{{count}} frames in {{ms}}ms",
+    "frameEmitted": "1 frame in {{ms}}ms",
+    "parseError": "Input error: {{message}}",
+    "runtimeError": "Error: {{message}}"
   }
 }

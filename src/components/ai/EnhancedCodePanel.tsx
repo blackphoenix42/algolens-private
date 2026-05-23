@@ -252,7 +252,7 @@ export function EnhancedCodePanel({
                   const isActive = (activePcLine ?? -1) - 1 === i;
                   return (
                     <li
-                      key={i}
+                      key={`pc-${i}`}
                       className={`rounded px-2 py-1 ${
                         isActive
                           ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-300"
@@ -276,7 +276,7 @@ export function EnhancedCodePanel({
                     const isActive = codeLine === i + 1;
                     return (
                       <li
-                        key={i}
+                        key={`code-${i}`}
                         className={`rounded px-2 py-1 ${
                           isActive
                             ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-300"

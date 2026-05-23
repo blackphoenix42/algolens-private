@@ -407,7 +407,7 @@ export function KeyboardShortcutsPanel({
                     index: number
                   ) => (
                     <div
-                      key={index}
+                      key={`sc-${index}-${shortcut.key}`}
                       onClick={() => handleShortcutClick(shortcut.key)}
                       className={cn(
                         "group flex cursor-pointer items-center justify-between rounded-xl p-4 transition-all duration-200",

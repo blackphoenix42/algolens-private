@@ -13,7 +13,6 @@ import {
 import React, { useCallback, useEffect } from "react";
 
 import { useI18n } from "@/i18n";
-// import { LogCategory, logger } from "@/services/monitoring";
 import { cn } from "@/utils";
 
 // Speed marker configuration

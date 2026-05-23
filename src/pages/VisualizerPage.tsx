@@ -2,50 +2,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// import { AIChatPanel } from "@/components/ai/AIChatPanel";
 import ArrayCanvas, {
   ArrayCanvasHandle,
 } from "@/components/canvas/Array/ArrayCanvas";
 import CanvasToolbar from "@/components/canvas/Array/CanvasToolbar";
-// import EnhancedArrayVisualization, {
-//   EnhancedArrayVisualizationHandle,
-// } from "@/components/canvas/Array/EnhancedArrayVisualization";
 import ArrayViewPanel from "@/components/controls/ArrayViewPanel";
 import DatasetPanel from "@/components/controls/DatasetPanel";
 import Transport from "@/components/controls/Transport";
-// import DebugPanel from "@/components/debug/DebugPanel";
-// import { usePerformanceMonitor } from "@/components/debug/PerformanceMonitor";
 import AboutPanel from "@/components/panels/AboutPanel";
 import CodePanel from "@/components/panels/CodePanel";
 import CollapsibleExportPanel from "@/components/panels/CollapsibleExportPanel";
 import ComplexityExplorer from "@/components/panels/ComplexityExplorer";
-// import { KeyboardShortcutsButton } from "@/components/panels/KeyboardShortcutsPanel";
+import DebuggerPanel from "@/components/panels/DebuggerPanel";
 import HomeButton from "@/components/ui/HomeButton";
-// import { LanguageSwitcher, useI18n } from "@/i18n";
-// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import { ChevronDownIcon } from "@/components/ui/Icons";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import MobilePortraitWarning from "@/components/ui/MobilePortraitWarning";
-// import ThemeToggle from "@/components/ui/ThemeToggle";
-// import { ENABLE_AI_UI } from "@/config/featureFlags";
 import { findAlgo } from "@/engine/registry";
 import { useRunner } from "@/engine/runner";
 import * as url from "@/engine/urlState";
 import { useMobileOrientation } from "@/hooks/useOrientation";
+import type { Frame } from "@/types";
 import type { AlgoMeta } from "@/types/algorithms";
 import { cn, makeRandomArray } from "@/utils";
-
-interface BaseFrame {
-  array?: number[];
-  highlights?: {
-    compared?: [number, number];
-    swapped?: [number, number];
-    pivot?: number;
-    indices?: number[];
-  };
-  pcLine?: number;
-  explain?: string;
-}
 
 // Constants for the visualizer
 const VISUALIZER_CONSTANTS = {
@@ -146,22 +125,29 @@ export default function VisualizerPage() {
     loadMeta();
   }, [topic, slug]);
 
-  const params = useMemo(() => {
-    const urlParams = url.read();
-    return urlParams;
-  }, []);
+  // Read URL params once on mount; values feed initial state seeds only.
+  const params = useRef(url.read()).current;
 
-  const initialN = Number(
-    params.get("n") ?? VISUALIZER_CONSTANTS.DEFAULT_ARRAY_SIZE
+  const initialN = url.getNumber(
+    params,
+    "n",
+    VISUALIZER_CONSTANTS.DEFAULT_ARRAY_SIZE,
+    { min: 1, max: 1024, integer: true }
   );
-  const initialSeed = Number(
-    params.get("seed") ?? VISUALIZER_CONSTANTS.DEFAULT_SEED
+  const initialSeed = url.getNumber(
+    params,
+    "seed",
+    VISUALIZER_CONSTANTS.DEFAULT_SEED,
+    { integer: true }
   );
-  const initialSpeed = Number(
-    params.get("speed") ?? VISUALIZER_CONSTANTS.DEFAULT_SPEED
+  const initialSpeed = url.getNumber(
+    params,
+    "speed",
+    VISUALIZER_CONSTANTS.DEFAULT_SPEED,
+    { min: 0.1, max: 16 }
   );
 
-  const [frames, setFrames] = useState<BaseFrame[]>([]);
+  const [frames, setFrames] = useState<Frame[]>([]);
   const [input, setInput] = useState<number[]>(() => {
     // For searching algorithms, we need a sorted array for binary search
     let array = makeRandomArray(
@@ -289,9 +275,9 @@ export default function VisualizerPage() {
         const preparedInput = algorithmInput ?? input;
 
         const it = run(preparedInput, { seed: initialSeed });
-        const all: BaseFrame[] = [];
+        const all: Frame[] = [];
         for (let f = it.next(); !f.done; f = it.next())
-          all.push(f.value as BaseFrame);
+          all.push(f.value as Frame);
         if (mounted) setFrames(all);
       } catch (error) {
         console.error("Algorithm execution error:", error);
@@ -311,9 +297,83 @@ export default function VisualizerPage() {
   }, [meta, input, initialSeed, searchTarget, algorithmInput]);
 
   const total = frames.length;
-  const runner = useRunner(total, initialSpeed);
 
-  const frame = (frames[runner.idx] as BaseFrame) ?? {};
+  // --- Debugger state (breakpoints) -------------------------------------
+  const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
+  const [counterBreakpoints, setCounterBreakpoints] = useState<
+    Record<string, number>
+  >({});
+
+  const toggleBreakpoint = useCallback((pcLine: number) => {
+    setBreakpoints((prev) => {
+      const next = new Set(prev);
+      if (next.has(pcLine)) next.delete(pcLine);
+      else next.add(pcLine);
+      return next;
+    });
+  }, []);
+
+  const clearBreakpoints = useCallback(() => {
+    setBreakpoints(new Set());
+    setCounterBreakpoints({});
+  }, []);
+
+  const setCounterBreakpoint = useCallback(
+    (name: string, threshold: number) => {
+      setCounterBreakpoints((prev) => ({ ...prev, [name]: threshold }));
+    },
+    []
+  );
+
+  const removeCounterBreakpoint = useCallback((name: string) => {
+    setCounterBreakpoints((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  }, []);
+
+  // Reset breakpoints when switching algorithm so stale line numbers don't
+  // accidentally trigger in a different pseudocode listing.
+  useEffect(() => {
+    setBreakpoints(new Set());
+    setCounterBreakpoints({});
+  }, [meta?.slug]);
+
+  // Refs so the shouldBreak callback always reads the latest data without
+  // re-creating the runner's interval on every keystroke.
+  const framesRef = useRef<Frame[]>(frames);
+  const breakpointsRef = useRef(breakpoints);
+  const counterBreakpointsRef = useRef(counterBreakpoints);
+  useEffect(() => {
+    framesRef.current = frames;
+  }, [frames]);
+  useEffect(() => {
+    breakpointsRef.current = breakpoints;
+  }, [breakpoints]);
+  useEffect(() => {
+    counterBreakpointsRef.current = counterBreakpoints;
+  }, [counterBreakpoints]);
+
+  const shouldBreak = useCallback((frameIdx: number) => {
+    const f = framesRef.current[frameIdx];
+    if (!f) return false;
+    if (f.pcLine !== undefined && breakpointsRef.current.has(f.pcLine))
+      return true;
+    if (f.counters) {
+      for (const [name, threshold] of Object.entries(
+        counterBreakpointsRef.current
+      )) {
+        const current = Number(f.counters[name] ?? 0);
+        if (current >= threshold) return true;
+      }
+    }
+    return false;
+  }, []);
+
+  const runner = useRunner(total, initialSpeed, { shouldBreak });
+
+  const frame = (frames[runner.idx] as Frame) ?? {};
 
   // Optimized event handlers with useCallback
   const handleDatasetChange = useCallback(
@@ -684,7 +744,7 @@ export default function VisualizerPage() {
             className={cn(
               "flex min-h-0 flex-col",
               isMobile
-                ? "order-1 min-h-[50vh] flex-shrink-0" // On mobile, minimum height but allow growth
+                ? "order-1 min-h-[50vh] shrink-0" // On mobile, minimum height but allow growth
                 : ""
             )}
           >
@@ -825,7 +885,7 @@ export default function VisualizerPage() {
 
           {/* Mobile: Transport controls below canvas */}
           {isMobile && (
-            <div className="order-2 flex-shrink-0 pt-2">
+            <div className="order-2 shrink-0 pt-2">
               <div className="card relative min-w-0 text-sm">
                 {/* Header */}
                 <div className="mb-2 flex items-center justify-between">
@@ -875,7 +935,7 @@ export default function VisualizerPage() {
 
           {/* Mobile: Dataset and other controls */}
           {isMobile && (
-            <div className="order-3 flex flex-shrink-0 flex-col gap-2">
+            <div className="order-3 flex shrink-0 flex-col gap-2">
               <DatasetPanel
                 value={input}
                 onChange={handleDatasetChange}
@@ -954,7 +1014,7 @@ export default function VisualizerPage() {
             className={cn(
               "flex min-h-0 flex-col gap-3",
               isMobile
-                ? "order-4 flex-shrink-0 gap-2" // On mobile, show last, natural height
+                ? "order-4 shrink-0 gap-2" // On mobile, show last, natural height
                 : "overflow-hidden"
             )}
           >
@@ -973,6 +1033,8 @@ export default function VisualizerPage() {
                   explain={frame.explain}
                   fillHeight={false}
                   isMobile={isMobile}
+                  breakpoints={breakpoints}
+                  onToggleBreakpoint={toggleBreakpoint}
                 />
               )}
             </div>
@@ -985,6 +1047,19 @@ export default function VisualizerPage() {
                   : "min-h-0 flex-1 overflow-auto"
               )}
             >
+              {meta && (
+                <DebuggerPanel
+                  frame={frame}
+                  pseudocodeLineCount={meta.pseudocode.length}
+                  breakpoints={breakpoints}
+                  onToggleBreakpoint={toggleBreakpoint}
+                  onClearBreakpoints={clearBreakpoints}
+                  counterBreakpoints={counterBreakpoints}
+                  onSetCounterBreakpoint={setCounterBreakpoint}
+                  onRemoveCounterBreakpoint={removeCounterBreakpoint}
+                  isMobile={isMobile}
+                />
+              )}
               {meta && <AboutPanel meta={meta} isMobile={isMobile} />}
               {/* Hide export panel on mobile */}
               {!isMobile && (
@@ -996,7 +1071,7 @@ export default function VisualizerPage() {
                   showPlane={showPlane}
                   showLabels={showLabels}
                   framesProvider={() =>
-                    (frames as BaseFrame[]).map((f: BaseFrame) => ({
+                    (frames as Frame[]).map((f: Frame) => ({
                       array: f.array ?? input,
                       highlights: f.highlights,
                       view,

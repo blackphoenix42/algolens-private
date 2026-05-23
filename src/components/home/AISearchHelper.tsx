@@ -95,7 +95,7 @@ export function AISearchHelper({ className }: AISearchHelperProps) {
                   </p>
                   {suggestedQuestions.slice(0, 3).map((question, index) => (
                     <button
-                      key={index}
+                      key={`sq-${index}-${question.slice(0, 24)}`}
                       onClick={() => setMessage(question)}
                       className="block w-full rounded bg-gray-50 p-2 text-left text-xs transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
                     >
@@ -107,7 +107,7 @@ export function AISearchHelper({ className }: AISearchHelperProps) {
             ) : (
               conversationHistory.map((msg, index) => (
                 <div
-                  key={index}
+                  key={`msg-${index}-${msg.role}`}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div

@@ -1,24 +1,49 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// import { LogCategory, logger } from "@/services/monitoring";
 import { clamp } from "@/utils";
 
-export function useRunner(total: number, initialSpeed = 2) {
+/**
+ * Optional debugger hooks for the runner.
+ *
+ * `shouldBreak` is consulted on every auto-advance while playing. If it
+ * returns true, playback pauses on that frame. Manual stepping / seeking
+ * bypasses breakpoints, mirroring how IDE debuggers work.
+ */
+export interface RunnerDebuggerOptions {
+  shouldBreak?: (frameIdx: number) => boolean;
+}
+
+export function useRunner(
+  total: number,
+  initialSpeed = 2,
+  options: RunnerDebuggerOptions = {}
+) {
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [speed, setSpeed] = useState(initialSpeed); // steps / second
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Initialize runner with logging disabled
+  // Mirror idx in a ref so the interval tick can read the latest value
+  // synchronously. React 19 runs setState updaters lazily during render,
+  // so we can't rely on closure variables set from inside an updater being
+  // visible to code that runs immediately after setIdx returns.
+  const idxRef = useRef(idx);
   useEffect(() => {
-    // logger.debug(LogCategory.RUNNER, "Runner initialized", {
-    //   total,
-    //   initialSpeed,
-    //   timestamp: new Date().toISOString(),
-    // });
-  }, [total, initialSpeed]);
+    idxRef.current = idx;
+  }, [idx]);
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Track the last index where a breakpoint fired so resuming from that frame
+  // doesn't immediately re-pause on it.
+  const breakAtRef = useRef<number | null>(null);
+  // Keep the latest shouldBreak in a ref so the interval callback always sees
+  // the current breakpoint set without restarting the timer on every change.
+  const shouldBreakRef = useRef<RunnerDebuggerOptions["shouldBreak"]>(
+    options.shouldBreak
+  );
+  useEffect(() => {
+    shouldBreakRef.current = options.shouldBreak;
+  }, [options.shouldBreak]);
 
   const pauseInternal = useCallback(() => {
     if (intervalRef.current) {
@@ -35,43 +60,37 @@ export function useRunner(total: number, initialSpeed = 2) {
   const play = useCallback(() => {
     if (intervalRef.current) return;
 
-    // logger.time(`animation-loop`, LogCategory.ANIMATION);
-
     intervalRef.current = setInterval(() => {
-      setIdx((prevIdx) => {
-        let newIdx = prevIdx + direction;
+      const prevIdx = idxRef.current;
+      let newIdx = prevIdx + direction;
+      let shouldPause = false;
 
-        // Logging disabled
-        // if (process.env.NODE_ENV === "development") {
-        //   logger.trace(LogCategory.ANIMATION, "Animation step", {
-        //     prevIdx,
-        //     newIdx,
-        //     direction,
-        //     speed,
-        //     timestamp: performance.now(),
-        //   });
-        // }
-
-        // Check boundaries
-        if (newIdx >= total || newIdx < 0) {
-          // logger.debug(LogCategory.ANIMATION, "Animation reached boundary", {
-          //   prevIdx,
-          //   attemptedIdx: newIdx,
-          //   total,
-          //   direction,
-          //   action: "clamping",
-          // });
-
-          newIdx = clamp(newIdx, 0, total - 1);
-
-          // Auto-pause when reaching boundaries
-          setTimeout(() => {
-            setPlaying(false);
-          }, 0);
+      // Check boundaries
+      if (newIdx >= total || newIdx < 0) {
+        newIdx = clamp(newIdx, 0, total - 1);
+        shouldPause = true;
+      } else {
+        // Breakpoint check (only while auto-playing; skip the frame we just
+        // resumed from so the user can step past it).
+        const sb = shouldBreakRef.current;
+        if (sb && breakAtRef.current !== newIdx && sb(newIdx)) {
+          breakAtRef.current = newIdx;
+          shouldPause = true;
         }
+      }
 
-        return newIdx;
-      });
+      idxRef.current = newIdx;
+      setIdx(newIdx);
+
+      if (shouldPause) {
+        // Stop the interval immediately so no further ticks fire before
+        // React re-renders and the play/pause useEffect cleans up.
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        setPlaying(false);
+      }
     }, 1000 / speed);
   }, [direction, speed, total]);
 
@@ -88,88 +107,57 @@ export function useRunner(total: number, initialSpeed = 2) {
 
   const setIndex = (newIdx: number) => {
     const clampedIdx = clamp(newIdx, 0, total - 1);
-    // logger.debug(LogCategory.RUNNER, "Manual index change", {
-    //   requestedIdx: newIdx,
-    //   actualIdx: clampedIdx,
-    //   total,
-    // });
+    breakAtRef.current = null;
+    idxRef.current = clampedIdx;
     setIdx(clampedIdx);
   };
 
   const togglePlay = () => {
-    // logger.debug(LogCategory.RUNNER, "Play state change", {
-    //   from: playing,
-    //   to: !playing,
-    //   idx,
-    // });
     setPlaying(!playing);
   };
 
   const toggleDirection = () => {
     const newDirection = direction === 1 ? -1 : 1;
-    // logger.debug(LogCategory.RUNNER, "Direction change", {
-    //   from: direction,
-    //   to: newDirection,
-    //   idx,
-    // });
     setDirection(newDirection as 1 | -1);
   };
 
   const setSpeedValue = (newSpeed: number) => {
     const clampedSpeed = clamp(newSpeed, 0.1, 10);
-    // logger.debug(LogCategory.RUNNER, "Speed change", {
-    //   from: speed,
-    //   to: clampedSpeed,
-    //   requested: newSpeed,
-    // });
     setSpeed(clampedSpeed);
   };
 
   const reset = () => {
-    // logger.debug(LogCategory.RUNNER, "Runner reset", {
-    //   previousIdx: idx,
-    //   wasPlaying: playing,
-    // });
+    breakAtRef.current = null;
+    idxRef.current = 0;
     setIdx(0);
     setPlaying(false);
     setDirection(1);
   };
 
   const stepForward = () => {
-    const newIdx = clamp(idx + 1, 0, total - 1);
-    // logger.trace(LogCategory.RUNNER, "Step forward", {
-    //   from: idx,
-    //   to: newIdx,
-    //   total,
-    // });
+    const newIdx = clamp(idxRef.current + 1, 0, total - 1);
+    breakAtRef.current = null;
+    idxRef.current = newIdx;
     setIdx(newIdx);
   };
 
   const stepBackward = () => {
-    const newIdx = clamp(idx - 1, 0, total - 1);
-    // logger.trace(LogCategory.RUNNER, "Step backward", {
-    //   from: idx,
-    //   to: newIdx,
-    //   total,
-    // });
+    const newIdx = clamp(idxRef.current - 1, 0, total - 1);
+    breakAtRef.current = null;
+    idxRef.current = newIdx;
     setIdx(newIdx);
   };
 
   const goToStart = () => {
-    // logger.debug(LogCategory.RUNNER, "Go to start", {
-    //   from: idx,
-    //   to: 0,
-    // });
+    breakAtRef.current = null;
+    idxRef.current = 0;
     setIdx(0);
   };
 
   const goToEnd = () => {
     const endIdx = total - 1;
-    // logger.debug(LogCategory.RUNNER, "Go to end", {
-    //   from: idx,
-    //   to: endIdx,
-    //   total,
-    // });
+    breakAtRef.current = null;
+    idxRef.current = endIdx;
     setIdx(endIdx);
   };
 

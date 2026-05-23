@@ -2,7 +2,6 @@
 // Debug panel disabled to eliminate localStorage usage
 
 // import { useEffect, useMemo, useRef, useState } from "react";
-// import { LogCategory, logger, LogLevel } from "@/services/monitoring";
 
 interface DebugPanelProps {
   isOpen: boolean;

@@ -580,7 +580,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
 
                     return (
                       <div
-                        key={i}
+                        key={`bar-${i}`}
                         className="absolute"
                         style={{ left, width: BAR_W }}
                       >
@@ -689,7 +689,10 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                       </thead>
                       <tbody>
                         {renderArray.map((v, i) => (
-                          <tr key={i} style={{ background: rowBgFor(i) }}>
+                          <tr
+                            key={`row-${i}`}
+                            style={{ background: rowBgFor(i) }}
+                          >
                             <td
                               className="border px-3 py-1"
                               style={{ borderColor: canvasBorder }}
@@ -761,7 +764,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                   {ticks.map((t, k) => {
                     const y = yFor(t);
                     return (
-                      <g key={k}>
+                      <g key={`ytick-${k}-${t}`}>
                         <line
                           x1={yAxisX - 6}
                           y1={y}
@@ -788,7 +791,7 @@ export default forwardRef<ArrayCanvasHandle, Props>(function ArrayCanvas(
                   {renderArray.map((_, i) => {
                     const cx = colCenter(i);
                     return (
-                      <g key={i}>
+                      <g key={`xtick-${i}`}>
                         <line
                           x1={cx}
                           y1={xAxisY - 4}

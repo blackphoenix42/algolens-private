@@ -56,10 +56,13 @@ function TinyBars({
   const hs = [0, 1, 2, 3, 4, 5].map((i) => rand(i));
 
   return (
-    <div className="absolute inset-0 flex items-end justify-center gap-1.5 p-8 transition-all duration-500">
+    <div
+      className="absolute inset-0 flex items-end justify-center gap-1.5 p-8 transition-all duration-500"
+      aria-hidden="true"
+    >
       {hs.map((t, i) => (
         <div
-          key={i}
+          key={`bar-${i}`}
           className={cn(
             "shadow-soft relative transform rounded-t-md transition-all duration-500 hover:scale-110",
             "bg-white/90 dark:bg-white/20"
@@ -221,10 +224,13 @@ function AlgoCard({
         />
 
         {/* Floating particles effect - better visibility in dark mode */}
-        <div className="pointer-events-none absolute inset-0">
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
+        >
           {[...Array(3)].map((_, i) => (
             <div
-              key={i}
+              key={`particle-${i}`}
               className={cn(
                 "absolute h-1 w-1 rounded-full",
                 "bg-white/30 dark:bg-white/50",

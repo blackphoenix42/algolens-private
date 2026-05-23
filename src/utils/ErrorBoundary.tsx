@@ -28,9 +28,6 @@ export class AppErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("App Error:", error, errorInfo);
-
-    // TODO: Report to monitoring service when available
-    // logger.error(LogCategory.GENERAL, error.message, { error, errorInfo });
   }
 
   private handleRefresh = () => {

@@ -127,7 +127,7 @@ export function AIChatPanel({
             ) : (
               conversationHistory.map((msg, index) => (
                 <div
-                  key={index}
+                  key={`msg-${index}-${msg.role}`}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div

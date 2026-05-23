@@ -22,7 +22,6 @@ import LoadingScreen from "@/components/ui/LoadingScreen";
 import { loadAllTopics } from "@/engine/registry";
 import { usePreferences } from "@/hooks/usePreferences";
 // import { LanguageSwitcher, useI18n } from "@/i18n";
-// import { LogCategory, logger, useComponentLogger } from "@/services/monitoring";
 import type { AlgoMeta } from "@/types/algorithms";
 import {
   cn,

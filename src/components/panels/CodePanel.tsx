@@ -27,6 +27,8 @@ export default function CodePanel({
   fillHeight = true,
   onTabChange,
   isMobile = false,
+  breakpoints,
+  onToggleBreakpoint,
 }: {
   meta: AlgoMeta;
   activePcLine?: number;
@@ -34,6 +36,10 @@ export default function CodePanel({
   fillHeight?: boolean;
   onTabChange?: (tab: "pseudocode" | "code") => void;
   isMobile?: boolean;
+  /** Set of 1-based pseudocode line numbers with active breakpoints. */
+  breakpoints?: Set<number>;
+  /** Called when the user clicks a pseudocode line to toggle a breakpoint. */
+  onToggleBreakpoint?: (pcLine: number) => void;
 }) {
   const [tab, setTab] = useState<"pseudocode" | "code">("pseudocode");
   const [lang, setLang] = useState<Lang>("cpp");
@@ -132,19 +138,55 @@ export default function CodePanel({
             >
               <ol className="p-2 font-mono text-sm leading-6">
                 {meta.pseudocode.map((line: string, i: number) => {
+                  const lineNumber = i + 1;
                   const isActive = (activePcLine ?? -1) - 1 === i;
+                  const hasBreakpoint = breakpoints?.has(lineNumber) ?? false;
+                  const clickable = !!onToggleBreakpoint;
                   return (
                     <li
-                      key={i}
+                      key={`pc-${i}`}
                       className={`mb-1 rounded px-2 transition-colors ${
                         isActive
                           ? "bg-yellow-100 ring-1 ring-yellow-300 dark:bg-yellow-900/30 dark:ring-yellow-700"
                           : "hover:bg-slate-100 dark:hover:bg-slate-800/70"
-                      }`}
+                      } ${clickable ? "cursor-pointer" : ""}`}
+                      onClick={
+                        clickable
+                          ? () => onToggleBreakpoint?.(lineNumber)
+                          : undefined
+                      }
+                      onKeyDown={
+                        clickable
+                          ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                onToggleBreakpoint?.(lineNumber);
+                              }
+                            }
+                          : undefined
+                      }
+                      role={clickable ? "button" : undefined}
+                      tabIndex={clickable ? 0 : undefined}
+                      aria-pressed={clickable ? hasBreakpoint : undefined}
+                      title={
+                        clickable
+                          ? hasBreakpoint
+                            ? `Remove breakpoint on line ${lineNumber}`
+                            : `Set breakpoint on line ${lineNumber}`
+                          : undefined
+                      }
                     >
-                      <div>
+                      <div className="flex items-start">
+                        <span
+                          className={`mr-1 inline-block w-3 select-none ${
+                            hasBreakpoint ? "text-red-500" : "text-transparent"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {hasBreakpoint ? "\u25CF" : "\u00A0"}
+                        </span>
                         <span className="mr-2 text-gray-400 select-none dark:text-gray-500">
-                          {String(i + 1).padStart(2, "0")}
+                          {String(lineNumber).padStart(2, "0")}
                         </span>
                         <span className="text-slate-900 dark:text-slate-200">
                           {line}
@@ -189,7 +231,7 @@ export default function CodePanel({
 
               {lines.map((l, i) => (
                 <div
-                  key={i}
+                  key={`code-${i}`}
                   className={`code-row ${
                     codeLine === i + 1 ? "active" : ""
                   } text-slate-900 dark:text-slate-200`}

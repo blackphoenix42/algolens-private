@@ -142,9 +142,14 @@ export default function AboutPanel({
               <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {t("panels.advantages", { defaultValue: "Advantages" })}
               </div>
-              <ul className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100">
+              <ul
+                className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100"
+                aria-label={t("panels.advantages", {
+                  defaultValue: "Advantages",
+                })}
+              >
                 {meta.pros.map((p: string, i: number) => (
-                  <li key={i}>{p}</li>
+                  <li key={`pro-${i}-${p}`}>{p}</li>
                 ))}
               </ul>
             </div>
@@ -155,9 +160,14 @@ export default function AboutPanel({
               <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {t("panels.disadvantages", { defaultValue: "Disadvantages" })}
               </div>
-              <ul className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100">
+              <ul
+                className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100"
+                aria-label={t("panels.disadvantages", {
+                  defaultValue: "Disadvantages",
+                })}
+              >
                 {meta.cons.map((p: string, i: number) => (
-                  <li key={i}>{p}</li>
+                  <li key={`con-${i}-${p}`}>{p}</li>
                 ))}
               </ul>
             </div>
@@ -247,9 +257,12 @@ function AboutPanelContent({ meta }: { meta: AlgoMeta }) {
           <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
             Advantages
           </div>
-          <ul className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100">
+          <ul
+            className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100"
+            aria-label="Advantages"
+          >
             {meta.pros.map((p: string, i: number) => (
-              <li key={i}>{p}</li>
+              <li key={`pro-${i}-${p}`}>{p}</li>
             ))}
           </ul>
         </div>
@@ -260,9 +273,12 @@ function AboutPanelContent({ meta }: { meta: AlgoMeta }) {
           <div className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
             Disadvantages
           </div>
-          <ul className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100">
+          <ul
+            className="list-inside list-disc space-y-1 text-slate-800 dark:text-slate-100"
+            aria-label="Disadvantages"
+          >
             {meta.cons.map((p: string, i: number) => (
-              <li key={i}>{p}</li>
+              <li key={`con-${i}-${p}`}>{p}</li>
             ))}
           </ul>
         </div>

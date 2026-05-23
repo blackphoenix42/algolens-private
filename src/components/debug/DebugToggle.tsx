@@ -1,7 +1,6 @@
 // src/components/debug/DebugToggle.tsx
 import { useEffect, useState } from "react";
 
-// import { LogCategory, logger } from "@/services/monitoring";
 import DebugPanel from "./DebugPanel";
 
 export default function DebugToggle() {

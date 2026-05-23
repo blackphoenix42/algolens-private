@@ -48,8 +48,9 @@ i18n
       escapeValue: false, // React already escapes values
     },
 
-    // Debug only in development
-    debug: import.meta.env.DEV,
+    // Debug only in development — and never inside the Vitest runner, where it
+    // floods stdout with the i18next init payload on every test file.
+    debug: import.meta.env.DEV && !import.meta.env.VITEST,
 
     // Return empty string for missing keys in production
     returnEmptyString: !import.meta.env.DEV,

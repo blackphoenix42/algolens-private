@@ -1,17 +1,9 @@
 // vite.config.ts
-// import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
-
-// const isCI = process.env.CI === "true";
-// const hasSentry =
-//   !!process.env.SENTRY_AUTH_TOKEN &&
-//   !!process.env.SENTRY_ORG &&
-//   !!process.env.SENTRY_PROJECT;
-// const enableSentry = isCI && hasSentry;
 
 // GitHub Pages configuration
 const isGitHubPages =
@@ -25,24 +17,6 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // enableSentry &&
-    //   sentryVitePlugin({
-    //     org: process.env.SENTRY_ORG,
-    //     project: process.env.SENTRY_PROJECT,
-    //     authToken: process.env.SENTRY_AUTH_TOKEN,
-    //     telemetry: false,
-    //     release: {
-    //       name:
-    //         process.env.SENTRY_RELEASE ||
-    //         process.env.GITHUB_SHA ||
-    //         process.env.VERCEL_GIT_COMMIT_SHA ||
-    //         "dev",
-    //       setCommits: { auto: true },
-    //     },
-    //     sourcemaps: {
-    //       assets: "./dist/**",
-    //     },
-    //   }),
     // Bundle analyzer - only generate in CI or when ANALYZE=true
     (process.env.CI === "true" || process.env.ANALYZE === "true") &&
       visualizer({
@@ -71,12 +45,10 @@ export default defineConfig({
   },
 
   build: {
-    // Only generate sourcemaps if we'll upload them
-    // sourcemap: enableSentry,
     sourcemap: false,
-    // Increased limit to accommodate our consolidated bundle strategy
-    // This prevents warnings for our intentionally large vendor bundle
-    chunkSizeWarningLimit: 2000,
+    // Warn earlier than the default 500KB so we notice regressions; the vendor
+    // chunk currently sits around ~1.2MB and we want pressure to keep it bounded.
+    chunkSizeWarningLimit: 800,
     // Enable compression at build time
     minify: "esbuild",
     target: ["es2020", "chrome80", "safari14", "firefox78", "edge88"],
@@ -125,9 +97,7 @@ export default defineConfig({
       "util",
       "buffer",
     ],
-    exclude: [
-      // "@sentry/vite-plugin" // Commented out Sentry plugin
-    ],
+    exclude: [],
     // Force dependency pre-bundling to avoid temporal dead zone issues
     force: true,
   },

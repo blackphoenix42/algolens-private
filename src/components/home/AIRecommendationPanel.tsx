@@ -95,7 +95,7 @@ export function AIRecommendationPanel({
           <div className="flex flex-wrap gap-2">
             {quickPrompts.map((prompt, index) => (
               <button
-                key={index}
+                key={`qp-${index}-${prompt.slice(0, 24)}`}
                 onClick={() => setUserInput(prompt)}
                 className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs transition-colors hover:border-blue-300 hover:bg-blue-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-blue-900/20"
               >
@@ -131,7 +131,7 @@ export function AIRecommendationPanel({
                       <div className="flex flex-wrap gap-2">
                         {gpt.response.suggestions.map((suggestion, index) => (
                           <button
-                            key={index}
+                            key={`sug-${index}-${suggestion}`}
                             onClick={() => onAlgorithmSelect?.(suggestion)}
                             className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
                           >
