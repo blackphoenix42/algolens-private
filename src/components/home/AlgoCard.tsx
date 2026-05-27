@@ -23,16 +23,16 @@ function DifficultyPill({ v }: { v?: AlgoItem["difficulty"] }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
         "shadow-soft backdrop-blur-sm",
-        "border border-white/20 dark:border-white/10",
-        "bg-white/10 dark:bg-black/20",
+        "border border-slate-200/70 dark:border-white/10",
+        "bg-white/80 dark:bg-black/30",
         "hover:shadow-medium transition-all duration-300 hover:scale-105",
-        "hover:bg-white/20 dark:hover:bg-black/30",
+        "hover:bg-white dark:hover:bg-black/40",
         styles
       )}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-90" />
       {label}
     </span>
   );

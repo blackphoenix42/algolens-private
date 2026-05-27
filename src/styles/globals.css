@@ -280,9 +280,51 @@ h6 {
 
 /* Enhanced focus styles */
 *:focus-visible {
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   outline: 2px solid #6366f1;
   outline-offset: 2px;
+  transition: outline-offset 0.15s var(--smooth-easing);
+}
+
+/* Friendlier focus for interactive cards/buttons */
+[role="button"]:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 18%);
+}
+
+/* Custom scrollbars — subtle and theme-aware */
+* {
+  scrollbar-color: rgb(148 163 184 / 50%) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-clip: padding-box;
+  background-color: rgb(148 163 184 / 45%);
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(99 102 241 / 65%);
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgb(71 85 105 / 55%);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(129 140 248 / 70%);
 }
 
 /* Hide scrollbars in the canvas unless truly overflowing */

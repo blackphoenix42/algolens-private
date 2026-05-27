@@ -1173,18 +1173,23 @@ export default function HomePage() {
           "transition-all duration-300"
         )}
       >
-        <div className="mx-auto max-w-7xl px-4 pt-0 pb-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 pt-3 pb-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3">
             {/* Left Section - Brand & Navigation */}
             <div className="flex items-center gap-4 lg:gap-6">
               {/* Logo/Brand */}
               <div className="group mr-2 flex items-center gap-3">
-                <div className="text-2xl transition-transform duration-300 group-hover:scale-110 md:text-3xl">
+                <div className="text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 md:text-3xl">
                   🔬
                 </div>
-                <h1 className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-xl font-black text-transparent md:text-2xl">
-                  AlgoLens
-                </h1>
+                <div className="flex flex-col leading-none">
+                  <h1 className="from-primary-600 to-secondary-600 bg-gradient-to-r bg-clip-text text-xl font-black tracking-tight text-transparent md:text-2xl">
+                    AlgoLens
+                  </h1>
+                  <span className="mt-0.5 hidden text-[10px] font-semibold tracking-[0.18em] text-slate-500 uppercase sm:block dark:text-slate-400">
+                    Visualize · Learn · Master
+                  </span>
+                </div>
               </div>
 
               {/* Navigation Controls */}
@@ -1246,6 +1251,35 @@ export default function HomePage() {
 
             {/* Right Section - Status & Controls */}
             <div className="flex items-center gap-2 md:gap-3">
+              {/* Catalog stats pill */}
+              <div
+                className="hidden items-center gap-3 rounded-full border border-slate-200/70 bg-white/60 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm sm:flex dark:border-slate-700/60 dark:bg-slate-900/40 dark:text-slate-300"
+                aria-label={`${stats.algorithms} algorithms across ${stats.categories} categories`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="bg-primary-500 inline-block h-1.5 w-1.5 animate-pulse rounded-full"
+                    aria-hidden="true"
+                  />
+                  <span className="tabular-nums">
+                    <strong className="text-slate-900 dark:text-slate-100">
+                      {stats.algorithms}
+                    </strong>{" "}
+                    algorithms
+                  </span>
+                </span>
+                <span
+                  className="h-3 w-px bg-slate-300/70 dark:bg-slate-600/60"
+                  aria-hidden="true"
+                />
+                <span className="tabular-nums">
+                  <strong className="text-slate-900 dark:text-slate-100">
+                    {stats.categories}
+                  </strong>{" "}
+                  categories
+                </span>
+              </div>
+
               {/* Action Controls */}
               <div className="flex items-center gap-2">
                 {/* Mini Search Input */}
@@ -1620,8 +1654,47 @@ export default function HomePage() {
                         </h3>
                         <div className="from-primary-500 to-secondary-500 mt-1 h-0.5 w-0 bg-gradient-to-r transition-all duration-500 group-hover:w-24"></div>
                       </div>
-                      <div className="liquid-glass-card px-4 py-2 text-sm font-bold text-slate-700 shadow-sm dark:text-slate-300">
-                        {rows.length} algorithms
+                      <div className="liquid-glass-card flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm dark:text-slate-300">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{
+                            backgroundColor: `var(--tw-gradient-stops, currentColor)`,
+                            background: `linear-gradient(135deg, ${
+                              {
+                                emerald: "#10b981",
+                                violet: "#8b5cf6",
+                                sky: "#0ea5e9",
+                                indigo: "#6366f1",
+                                cyan: "#06b6d4",
+                                green: "#22c55e",
+                                orange: "#f97316",
+                                fuchsia: "#d946ef",
+                                teal: "#14b8a6",
+                                rose: "#f43f5e",
+                                amber: "#f59e0b",
+                              }[TOPIC_META[topic]?.color ?? ""] ?? "#6366f1"
+                            }, ${
+                              {
+                                emerald: "#34d399",
+                                violet: "#a78bfa",
+                                sky: "#38bdf8",
+                                indigo: "#818cf8",
+                                cyan: "#22d3ee",
+                                green: "#4ade80",
+                                orange: "#fb923c",
+                                fuchsia: "#e879f9",
+                                teal: "#2dd4bf",
+                                rose: "#fb7185",
+                                amber: "#fbbf24",
+                              }[TOPIC_META[topic]?.color ?? ""] ?? "#a5b4fc"
+                            })`,
+                          }}
+                          aria-hidden="true"
+                        />
+                        <span className="tabular-nums">{rows.length}</span>
+                        <span className="font-medium text-slate-500 dark:text-slate-400">
+                          {rows.length === 1 ? "algorithm" : "algorithms"}
+                        </span>
                       </div>
                     </div>
 
@@ -1687,17 +1760,20 @@ export default function HomePage() {
                   interactive visualizations and hands-on learning.
                 </p>
 
-                {/* Social/Contact Links */}
-                <div className="mt-6 flex items-center justify-center gap-4 md:justify-start">
-                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                {/* Decorative accents */}
+                <div
+                  className="mt-6 flex items-center justify-center gap-4 md:justify-start"
+                  aria-hidden="true"
+                >
+                  <span className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm dark:bg-slate-800/70">
                     <span className="text-blue-500">🌐</span>
-                  </div>
-                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                  </span>
+                  <span className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm dark:bg-slate-800/70">
                     <span className="text-purple-500">📧</span>
-                  </div>
-                  <div className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white dark:bg-slate-800/70 dark:hover:bg-slate-700/70">
+                  </span>
+                  <span className="rounded-lg bg-white/70 p-2 shadow-sm backdrop-blur-sm dark:bg-slate-800/70">
                     <span className="text-green-500">💬</span>
-                  </div>
+                  </span>
                 </div>
               </div>
 
