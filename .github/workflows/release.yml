@@ -29,7 +29,7 @@ jobs:
 
       - name: Create or Publish Release
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           publish: npm run release:publish --if-present || npm publish --provenance --access public
         env:
